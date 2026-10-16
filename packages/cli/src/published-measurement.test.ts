@@ -70,6 +70,109 @@ const result = {
 };
 
 describe('portable published measurement projection', () => {
+  it('preserves sanitized PostgreSQL runtime provenance and leaves absent or invalid fields unknown', () => {
+    const runtime = {
+      mode: 'template-copy',
+      baseImage: image,
+      templateSourceHash: hash,
+      schemaHash: hash,
+      fsync: 'on',
+    };
+    const published = publishMeasurement(
+      { ...measurement, manifest: { ...measurement.manifest, postgresRuntime: runtime } },
+      result,
+    );
+    expect(published.images.postgresRuntime).toEqual(runtime);
+    const absent = publishMeasurement(measurement, result);
+    expect(absent.images.postgresRuntime).toEqual({
+      mode: null,
+      baseImage: null,
+      templateSourceHash: null,
+      schemaHash: null,
+      fsync: null,
+    });
+    const malformed = publishMeasurement(
+      {
+        ...measurement,
+        manifest: {
+          ...measurement.manifest,
+          postgresRuntime: {
+            mode: 'C:\\private\\mode',
+            baseImage: 'postgres:latest',
+            templateSourceHash: 'private-host-path',
+            schemaHash: '../../secret',
+            fsync: 'disabled',
+            credential: 'private-password',
+          },
+        },
+      },
+      result,
+    );
+    expect(malformed.images.postgresRuntime).toEqual(absent.images.postgresRuntime);
+    expect(JSON.stringify(malformed)).not.toContain('private');
+    expect(
+      publishMeasurement(
+        {
+          ...measurement,
+          manifest: {
+            ...measurement.manifest,
+            postgresRuntime: { mode: 'initdb', baseImage: image, fsync: 'off' },
+          },
+        },
+        result,
+      ).images.postgresRuntime,
+    ).toMatchObject({ mode: 'initdb', fsync: 'off' });
+  });
+
+  it('preserves explicit sampling modes and does not infer a mode for older measurements', () => {
+    const unsampled = publishMeasurement(
+      {
+        ...measurement,
+        resourceSampling: {
+          enabled: false,
+          mode: 'off',
+          intervalMs: null,
+          commandTimeoutMs: null,
+          containerCountSamples: 0,
+          cpuSamples: 0,
+          memorySamples: 0,
+          peakActiveLabeledContainers: null,
+          peakAggregateCpuPercent: null,
+          peakAggregateMemoryBytes: null,
+          samples: [],
+          errors: [],
+        },
+      },
+      result,
+    );
+    expect(unsampled.resources).toEqual({
+      enabled: false,
+      mode: 'off',
+      intervalMs: null,
+      commandTimeoutMs: null,
+      containerCountSamples: 0,
+      cpuSamples: 0,
+      memorySamples: 0,
+      peakActiveLabeledContainers: null,
+      peakAggregateCpuPercent: null,
+      peakAggregateMemoryBytes: null,
+      sampleCount: 0,
+      samplerErrorCount: 0,
+    });
+    const sampled = publishMeasurement(
+      {
+        ...measurement,
+        resourceSampling: { ...measurement.resourceSampling, enabled: true, mode: 'on' },
+      },
+      result,
+    );
+    expect(sampled.resources).toMatchObject({ enabled: true, mode: 'on' });
+    expect(publishMeasurement(measurement, result).resources).toMatchObject({
+      enabled: null,
+      mode: null,
+    });
+  });
+
   it('publishes engine capacity and independent observer coverage while preserving unavailable baseline fields', () => {
     const observed = publishMeasurement(
       {

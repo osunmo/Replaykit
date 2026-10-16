@@ -37,6 +37,19 @@ const ManifestSchema = z.object({
   plannerImage: imageId,
   appImages: variantImages,
   sourceHashes: z.object({ buggy: hash, reference: hash, alternate: hash, decoy: hash }),
+  postgresRuntime: z
+    .object({
+      mode: z.enum(['initdb', 'template-copy']),
+      baseImage: imageId,
+      templateSourceHash: hash.optional(),
+      schemaHash: hash.optional(),
+      fsync: z.enum(['on', 'off']),
+    })
+    .refine((runtime) => runtime.mode !== 'initdb' || runtime.fsync === 'on', {
+      message: 'The stock PostgreSQL image requires fsync on; fsync off needs template-copy mode',
+      path: ['fsync'],
+    })
+    .optional(),
   builtAt: z.string(),
 });
 export type SandboxManifest = z.infer<typeof ManifestSchema>;
@@ -282,6 +295,8 @@ export async function runSandbox(
       `POSTGRES_PASSWORD=${databasePassword}`,
       '-e',
       'POSTGRES_DB=replaykit',
+      '-e',
+      `REPLAYKIT_PG_FSYNC=${manifest.postgresRuntime?.fsync ?? 'on'}`,
       manifest.postgresImage,
     ]);
     profiler.begin('postgresReadiness');

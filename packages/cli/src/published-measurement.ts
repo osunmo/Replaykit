@@ -90,6 +90,7 @@ export function publishMeasurement(measurement: unknown, result: unknown, pipeli
   const host = object(measured.host);
   const dockerCapacity = object(measured.dockerEngineCapacity);
   const manifest = object(measured.manifest);
+  const postgresRuntime = object(manifest.postgresRuntime);
   const appImages = object(manifest.appImages);
   const sourceHashes = object(manifest.sourceHashes);
   const stages = object(measured.stages);
@@ -143,6 +144,13 @@ export function publishMeasurement(measurement: unknown, result: unknown, pipeli
     images: {
       nodeImage: match(manifest.nodeImage, imagePattern),
       postgresImage: match(manifest.postgresImage, imagePattern),
+      postgresRuntime: {
+        mode: enumeration(postgresRuntime.mode, ['initdb', 'template-copy']),
+        baseImage: match(postgresRuntime.baseImage, imagePattern),
+        templateSourceHash: match(postgresRuntime.templateSourceHash, hashPattern),
+        schemaHash: match(postgresRuntime.schemaHash, hashPattern),
+        fsync: enumeration(postgresRuntime.fsync, ['on', 'off']),
+      },
       candidateImage: match(manifest.candidateImage, imagePattern),
       plannerImage: match(manifest.plannerImage, imagePattern),
       appImages: Object.fromEntries(
@@ -194,6 +202,8 @@ export function publishMeasurement(measurement: unknown, result: unknown, pipeli
             maxActiveExecutions: count(flow.maxActiveExecutions),
           },
     resources: {
+      enabled: boolean(resources.enabled),
+      mode: enumeration(resources.mode, ['on', 'off']),
       containerCountSamples: count(resources.containerCountSamples),
       cpuSamples: count(resources.cpuSamples),
       memorySamples: count(resources.memorySamples),

@@ -28,8 +28,13 @@ jobs:
       - run: pnpm test:sdk
       - run: pnpm db:up
       - run: pnpm test:integration
+      - run: pnpm db:down
       - run: pnpm build
       - run: pnpm sandbox:build
+      - run: pnpm benchmark smoke
+      - run: pnpm test:security
+      - run: pnpm sandbox:build --postgres-mode template-copy
+      - run: pnpm exec tsx scripts/postgres-snapshot-check.ts
       - run: pnpm benchmark smoke
       - run: pnpm test:security
       - if: always()

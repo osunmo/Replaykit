@@ -1,5 +1,7 @@
 # R1 performance hardening — measured local results
 
+This report records the first worker-pool milestone. The later PostgreSQL template experiment, sequential baseline, sampler-off run and concurrency-6 check are documented in [POSTGRES_PERFORMANCE.md](POSTGRES_PERFORMANCE.md). The portable JSON now includes both sets of observations.
+
 Measured on 2026-10-16 using Windows/WSL2, Node 22.23.3 and Docker Engine 29.8.1. The measured Docker engine exposes 12 logical CPUs and 8,234,680,320 bytes of memory. All five runs used identical immutable images and candidate SHA-256 `16fea9fa5391aa587ee3145d9d091a79bf89295db85b2b7ec117c5cb00424102`.
 
 Portable machine-readable observations: [r1-performance.json](measurements/r1-performance.json). Raw evidence remains locally under ignored runs directories identified in that file.

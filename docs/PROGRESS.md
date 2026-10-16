@@ -1,5 +1,69 @@
 # Progress
 
+## 2026-10-16 — PostgreSQL and measurement follow-up
+
+The PostgreSQL template experiment reduced observed database startup/readiness cost but did not establish a full-smoke speedup at default concurrency three. Two sampled, fsync-on runs per mode averaged **109.359 seconds with initdb** and **121.653 seconds with template copying**. Fresh initdb remains the default; template copying is opt-in through `pnpm sandbox:build --postgres-mode template-copy`. Concurrency remains three and fsync remains on. [POSTGRES_PERFORMANCE.md](POSTGRES_PERFORMANCE.md) records all nine runs, exclusive stage means, sampling/resource limits and comparison caveats; [the portable JSON](measurements/r1-performance.json) retains individual observations and all judge gates.
+
+### Implemented and checked
+
+- Added an empty, credential-free PostgreSQL template build using the same compiled schema as the application. Each opt-in execution copies the stopped seed into its own private tmpfs and installs a new password before TCP startup. No running database, writable volume or mutable application state is shared.
+- Added explicit `--postgres-mode initdb|template-copy` build selection, defaulting to initdb. Template identity, base image, schema hash, template-source hash and fsync setting are recorded in the saved environment and sanitized published measurements.
+- Rejected the `initdb`/`fsync=off` manifest combination after review found that the stock PostgreSQL entrypoint ignores the custom fsync environment variable. This prevents an artifact from claiming a configuration that was not applied. The five focused manifest tests went from one expected failure to all passing; all measured initdb runs already used fsync on.
+- Added `--sampling on|off` to the measurement wrapper. Off mode removes periodic Docker observer commands while retaining stage profiling, the wall timer and all smoke/judge checks. Unavailable peaks remain null and sample counts are zero; one capacity query runs before timing.
+- Confirmed cleanup already uses ownership-checked `docker rm -f` and the pool already refills immediately. The user's execution timeline showed a replacement at 37.42 seconds before its two peers finished; 14 refills took 0.35–5.34 milliseconds. No batch-to-pool or graceful-to-forced-cleanup change was needed or credited.
+- Retained every strict verification gate and identical candidate bytes. All nine experiment runs shared application, candidate and planner images and private variant hashes; the PostgreSQL runtime image intentionally differs between modes. Later rebuild validation is kept separate from these performance comparisons.
+
+### Measured findings
+
+| Configuration                                |               Full smoke seconds | Observation                                              |
+| -------------------------------------------- | -------------------------------: | -------------------------------------------------------- |
+| Initdb, concurrency 1, sampled, fsync on     |                          282.578 | Actual sequential 17-execution baseline; one run         |
+| Template, concurrency 1, sampled, fsync on   |                          180.946 | One run; host/warm-up effects not isolated               |
+| Initdb, concurrency 3, sampled, fsync on     | 88.423 and 130.295; mean 109.359 | Existing default retained                                |
+| Template, concurrency 3, sampled, fsync on   | 143.961 and 99.345; mean 121.653 | No established full-smoke improvement                    |
+| Template, concurrency 6, sampled, fsync on   |                          102.065 | One run; mean execution duration 29.723 s; 18 containers |
+| Template, concurrency 3, unsampled, fsync on |                           97.046 | One run; cannot isolate observer overhead                |
+| Template, concurrency 3, sampled, fsync off  |                          101.601 | One run; no established advantage over fsync on          |
+
+At concurrency three, combined PostgreSQL startup/readiness averaged 3.232 seconds with initdb and 1.943 seconds with the template across 34 executions per mode. Other measured stages became slower and template mean full-smoke time was 11.2% higher. The ranges overlap and timing varied substantially. No causal or statistically significant overall speedup is claimed. Concurrency six reached sampled CPU of 701.68% and memory of 827 MiB; observations do not establish the source of contention or a stable optimum. A sequential unsampled run and initdb at concurrency six were not measured in this set.
+
+All nine full smokes passed with VERIFIED, 10/10 fresh buggy failures, 3/3 passes for each valid fix, duplicate-charge decoy rejection, all remaining judge gates, wrong-frame rejection and missing-body abstention. None had an execution failure, artifact error or missing execution profile. The observer recorded 53 errors: 16 missing-container/object messages and 37 EOF messages, with no observer command timeout. The EOF cause was not established; observer errors remain separate from judge evidence. The template snapshot probe passed all 15 recorded checks, including credential separation, private writes, unchanged seed, fresh replacement state, rejected bootstrap inputs and cleanup.
+
+### Follow-up validation record
+
+| Check                                               | Observed result                                                                                                                       |
+| --------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------- |
+| Focused option and publication tests                | PASS; expected failures observed before implementation                                                                                |
+| `pnpm test`                                         | PASS; 163 tests in 23 files, including final manifest guards                                                                          |
+| Nine measured full R1 smokes                        | PASS; all strict gates and negative controls                                                                                          |
+| `pnpm exec tsx scripts/postgres-snapshot-check.ts`  | PASS; 15 recorded live checks                                                                                                         |
+| `pnpm test:sdk`                                     | PASS; 6 tests                                                                                                                         |
+| `pnpm test:integration`, followed by `pnpm db:down` | PASS; 14 real PostgreSQL tests; development database stopped                                                                          |
+| `pnpm typecheck`, `pnpm lint`, `pnpm build`         | PASS; full lint preceded the manifest guard and focused lint covered its changed files                                                |
+| `pnpm sandbox:build --postgres-mode template-copy`  | PASS                                                                                                                                  |
+| Final template snapshot-probe rerun                 | PASS; all 15 checks                                                                                                                   |
+| Final template smoke                                | PASS; VERIFIED and both negative controls                                                                                             |
+| Final template security                             | PASS; all four live probe groups                                                                                                      |
+| `pnpm sandbox:build` with no mode option            | PASS; fresh initdb remains the default                                                                                                |
+| Current tracked-artifact audit                      | PASS; among environment files, only `.env.example` is tracked; raw runs, scratch/build/dependency files and generated fixture ignored |
+| Final default smoke                                 | PASS; VERIFIED and both negative controls; initdb and fsync on                                                                        |
+| Portable published measurement audit                | PASS; 17 records; follow-up gates/hashes, relative paths and credential exclusion checked                                             |
+| Final default security                              | PASS; all four live probe groups                                                                                                      |
+| Final Docker cleanup audit                          | PASS; no owned execution containers/networks or development Compose containers remain                                                 |
+| Remote CI                                           | Not run                                                                                                                               |
+
+Final `pnpm format:check` and `git diff --check` passed.
+
+The final template snapshot probe passed under runtime image `sha256:292b1eb41c09197472d73713d5beafc4dfd31ace74b4655b92947a679e58c6d8`; its local proof is `runs/585529b2-3d30-4d5d-9b10-0e25d7583376/postgres-snapshot.json`. The final template full smoke, `8b35767f-e8fe-49ad-991a-f4b5a95ff5f8`, returned VERIFIED with both negative controls passing in 172.025 seconds. These rebuilt-image runs are functional validation and are excluded from the nine-run performance comparison above.
+
+The final template smoke had all 11 boolean judge gates true, 10/10 buggy failures, 3/3 successes for each valid fix, no artifact errors and no missing profiles. Its eight sampler errors remain observer diagnostics. All four template security probe groups passed; local proof is `runs/857a78ac-84c1-46b2-bb14-efff50e42f63/security.json`.
+
+The final default smoke, `ebcab169-c1ac-4611-abd0-90f58c5a985a`, returned VERIFIED with both negative controls passing in 205.716 seconds using initdb and fsync on. Its six sampler errors are separate from execution evidence. Independent audit confirmed all 11 current follow-up runs (nine comparisons and two final validations) retained every boolean judge gate, 10/10 buggy failures, 3/3 successes for each valid fix, one rejected decoy, identical candidate hashes, zero artifact errors and complete profiles. The published JSON contains 17 observations: five historical runs, the user's local run, nine experiment runs and two final validations. These groups are preserved separately rather than pooled into one performance mean.
+
+All four default-mode security probe groups passed; local proof is `runs/599bef0d-9d07-4c98-a219-e23cf336c13d/security.json`. The final cleanup audit found no containers or networks labeled `replaykit.run` and no development Compose containers. The saved sandbox manifest was confirmed to select initdb with fsync on.
+
+The CI definition now builds and checks both default initdb and opt-in template modes, including smoke/security checks and the template probe. The workflow stops the development database before smoke checks, but the remote workflow has not run. Raw executions, local credentials and scratch data remain ignored; published records use relative paths and allowlisted fields. The source archive is refreshed only after final validation. No D2, plugin, dashboard or additional benchmark case was added. This follow-up stops at the tested R1 pipeline; any future performance change needs repeatable measurements before changing defaults.
+
 ## 2026-10-16 — R1 performance hardening
 
 The optimized R1 pipeline uses a bounded worker pool with configurable concurrency 1–10, default 3. The strict matrix now requires 10 fresh buggy failures, three reference passes, three alternate passes, and a decoy failure. Every execution retains independent PostgreSQL state, application and candidate containers, an internal Docker network, resource limits and trusted evidence collection. A single pinned image manifest and identical candidate bytes are used throughout each matrix. No verification gate was removed; duplicate execution IDs are additionally rejected. No D2, Cursor integration, dashboard or additional benchmark case was implemented.

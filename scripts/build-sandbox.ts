@@ -12,7 +12,8 @@ import {
   writeFile,
 } from 'node:fs/promises';
 import { dirname, isAbsolute, join, relative, resolve, sep } from 'node:path';
-import { fileURLToPath } from 'node:url';
+import { fileURLToPath, pathToFileURL } from 'node:url';
+import { parseSandboxBuildOptions } from '../packages/cli/src/sandbox-build-options.js';
 
 const NODE_IMAGE = 'node:22-bookworm-slim';
 const POSTGRES_IMAGE = 'postgres:17-alpine';
@@ -138,15 +139,21 @@ async function buildImage(context: string, tag: string): Promise<string> {
 }
 
 /** Only copies named runtime inputs into newly created contexts; never builds the checkout root. */
-export async function buildSandbox(root: string): Promise<void> {
+export async function buildSandbox(
+  root: string,
+  options: ReturnType<typeof parseSandboxBuildOptions> = { postgresMode: 'initdb' },
+): Promise<void> {
   root = await realpath(resolve(root));
   // Fail before Docker access if the compiled application or any required input is absent.
   const inputs = [
     'dist/apps/checkout-api/src/bootstrap.js',
+    'dist/apps/checkout-api/src/database.js',
     'package.json',
     'pnpm-lock.yaml',
     'pnpm-workspace.yaml',
     'docker/replay-fixture.mjs',
+    'docker/postgres-template.sh',
+    'docker/postgres-entrypoint.sh',
     'dist/packages/contracts/src/index.js',
     'dist/packages/planner/src/index.js',
     ...VARIANTS.map((variant) => `dist/benchmark/private/R1/${variant}.js`),
@@ -219,11 +226,74 @@ export async function buildSandbox(root: string): Promise<void> {
   );
   const plannerHash = await hashTree(plannerContext);
 
+  const postgresContext = join(contexts, 'postgres');
+  await mkdir(postgresContext);
+  // Use the exact compiled schema copied into the app image, even if source edits
+  // have not been rebuilt. Do not mix a newer host source with older app bytecode.
+  const { schemaStatements }: { schemaStatements?: unknown } = await import(
+    pathToFileURL(join(appContext, 'dist/apps/checkout-api/src/database.js')).href
+  );
+  if (
+    !Array.isArray(schemaStatements) ||
+    !schemaStatements.length ||
+    !schemaStatements.every((statement: unknown) => typeof statement === 'string')
+  )
+    throw new Error('Compiled application schema is unavailable; run pnpm build');
+  const schemaSql = `BEGIN;\n${schemaStatements.join(';\n')};\nCOMMIT;\n`;
+  const schemaHash = createHash('sha256').update(schemaSql).digest('hex');
+  await writeFile(join(postgresContext, 'schema.sql'), schemaSql);
+  for (const script of ['postgres-template.sh', 'postgres-entrypoint.sh']) {
+    const source = await allowedSource(root, `docker/${script}`);
+    await writeFile(
+      join(postgresContext, script),
+      (await readFile(source, 'utf8')).replace(/\r\n/g, '\n'),
+    );
+  }
+  const templateSourceHash = await hashTree(postgresContext);
+
   console.log('Pulling sandbox base images (build phase requires network access).');
   await docker(['pull', NODE_IMAGE], true);
   await docker(['pull', POSTGRES_IMAGE], true);
   const nodeImage = await imageId(NODE_IMAGE);
-  const postgresImage = await imageId(POSTGRES_IMAGE);
+  const postgresBaseImage = await imageId(POSTGRES_IMAGE);
+  const postgresDigests: unknown = JSON.parse(
+    await docker(['image', 'inspect', POSTGRES_IMAGE, '--format', '{{json .RepoDigests}}']),
+  );
+  const postgresDigest = Array.isArray(postgresDigests)
+    ? postgresDigests.find(
+        (value: unknown) =>
+          typeof value === 'string' &&
+          /^(?:docker\.io\/library\/)?postgres@sha256:[0-9a-f]{64}$/.test(value),
+      )
+    : undefined;
+  if (!postgresDigest)
+    throw new Error('Pulled PostgreSQL image has no immutable repository digest');
+  await writeFile(
+    join(postgresContext, 'Dockerfile'),
+    [
+      `FROM ${postgresDigest}`,
+      'COPY --chown=70:70 schema.sql /opt/replaykit/schema.sql',
+      'COPY --chmod=755 postgres-template.sh /usr/local/bin/replaykit-postgres-template.sh',
+      'COPY --chmod=755 postgres-entrypoint.sh /usr/local/bin/replaykit-postgres-entrypoint.sh',
+      'RUN mkdir -p /opt/replaykit-template && chown 70:70 /opt/replaykit-template',
+      'USER 70:70',
+      'RUN /usr/local/bin/replaykit-postgres-template.sh',
+      'ENV PGDATA=/var/lib/postgresql/data REPLAYKIT_PG_FSYNC=on',
+      `LABEL org.replaykit.role="postgres-template" org.replaykit.template-sha256="${templateSourceHash}" org.replaykit.schema-sha256="${schemaHash}"`,
+      'ENTRYPOINT ["/usr/local/bin/replaykit-postgres-entrypoint.sh"]',
+      'CMD []',
+      '',
+    ].join('\n'),
+  );
+  if (options.postgresMode === 'template-copy')
+    console.log('Building an empty, credential-free PostgreSQL template.');
+  const postgresImage =
+    options.postgresMode === 'template-copy'
+      ? await buildImage(
+          postgresContext,
+          `replaykit-postgres:${templateSourceHash.slice(0, 20)}-${postgresBaseImage.slice(-12)}`,
+        )
+      : postgresBaseImage;
   const digests: unknown = JSON.parse(
     await docker(['image', 'inspect', NODE_IMAGE, '--format', '{{json .RepoDigests}}']),
   );
@@ -313,6 +383,13 @@ export async function buildSandbox(root: string): Promise<void> {
     plannerImage,
     appImages,
     sourceHashes,
+    postgresRuntime: {
+      mode: options.postgresMode,
+      baseImage: postgresBaseImage,
+      ...(options.postgresMode === 'template-copy' ? { templateSourceHash } : {}),
+      schemaHash,
+      fsync: 'on',
+    },
     builtAt: new Date().toISOString(),
   };
   const temporaryManifest = join(contexts, 'manifest.json');
@@ -325,8 +402,10 @@ export async function buildSandbox(root: string): Promise<void> {
 
 const entrypoint = process.argv[1];
 if (entrypoint && resolve(entrypoint) === fileURLToPath(import.meta.url)) {
-  buildSandbox(process.cwd()).catch((error: unknown) => {
-    console.error(error instanceof Error ? error.message : 'Sandbox image build failed');
-    process.exitCode = 1;
-  });
+  buildSandbox(process.cwd(), parseSandboxBuildOptions(process.argv.slice(2))).catch(
+    (error: unknown) => {
+      console.error(error instanceof Error ? error.message : 'Sandbox image build failed');
+      process.exitCode = 1;
+    },
+  );
 }

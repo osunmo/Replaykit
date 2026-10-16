@@ -2,6 +2,7 @@ import { spawn } from 'node:child_process';
 import { readFile, readdir, writeFile } from 'node:fs/promises';
 import os from 'node:os';
 import path from 'node:path';
+import { parseMeasurementOptions } from '../packages/cli/src/measurement-options.js';
 import {
   aggregateProfiles,
   loadMeasuredEnvironment,
@@ -11,18 +12,7 @@ import {
 } from '../packages/cli/src/measurement.js';
 import { newOutput, smoke } from '../packages/cli/src/workflow.js';
 
-const args = process.argv.slice(2);
-function option(name: string, fallback?: string) {
-  const index = args.indexOf(name);
-  if (index < 0) return fallback;
-  const value = args[index + 1];
-  if (!value || value.startsWith('--')) throw new Error(`Missing ${name}`);
-  return value;
-}
-const label = option('--label', 'measurement')!;
-const concurrency = Number(option('--concurrency', '3'));
-if (!Number.isInteger(concurrency) || concurrency < 1 || concurrency > 10)
-  throw new Error('Concurrency must be an integer from 1 to 10');
+const { label, concurrency, sampling } = parseMeasurementOptions(process.argv.slice(2));
 const root = process.cwd();
 const output = await newOutput(root);
 const abort = new AbortController();
@@ -117,6 +107,7 @@ try {
 const startedAt = new Date().toISOString();
 const started = performance.now();
 const sampler = (async () => {
+  if (sampling === 'off') return;
   while (!abort.signal.aborted) {
     const sampleStart = performance.now();
     try {
@@ -222,13 +213,17 @@ const measurement = {
   manifest,
   stages: aggregateProfiles(profiles, capture, matrix),
   resourceSampling: {
-    intervalMs: 5000,
-    commandTimeoutMs: 8000,
+    enabled: sampling === 'on',
+    mode: sampling,
+    intervalMs: sampling === 'on' ? 5000 : null,
+    commandTimeoutMs: sampling === 'on' ? 8000 : null,
     ...summarizeResourceSamples(samples),
     samples,
     errors: samplerErrors,
     limitations:
-      'Samples include all running replaykit.run-labeled containers, can miss short-lived peaks, and observer commands add overhead. CPU/memory peaks use complete valid stats samples only; null means unavailable, with valid sample counts provided. CPU percent sums across cores; no sampler result establishes a judge gate.',
+      sampling === 'on'
+        ? 'Samples include all running replaykit.run-labeled containers, can miss short-lived peaks, and observer commands add overhead. CPU/memory peaks use complete valid stats samples only; null means unavailable, with valid sample counts provided. CPU percent sums across cores; no sampler result establishes a judge gate.'
+        : 'Periodic Docker resource sampling is disabled; resource peaks are unavailable and sample counts are zero. The Docker capacity query runs once before the wall timer. Execution-stage profiling, the full smoke pipeline, and all judge gates remain enabled.',
   },
   artifactErrors,
 };
@@ -237,6 +232,7 @@ process.stdout.write(
   JSON.stringify(
     {
       label,
+      sampling,
       wallMs: pipelineWallMs,
       summary,
       failure,
