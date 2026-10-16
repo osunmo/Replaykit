@@ -6,3 +6,4 @@ work/
 coverage/
 .superpowers/
 *.log
+!benchmark/results/**/*.log
