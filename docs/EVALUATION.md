@@ -8,10 +8,10 @@ The current evaluator establishes an R1 reproduction from trusted execution obse
 | ------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | Buggy failure       | Exactly ten fresh buggy executions complete with nonzero candidate exit, at least two validated payment requests, more than one real charge and an observed application failure. |
 | Failure identity    | Every buggy exception type and normalized application frame match the captured incident.                                                                                         |
-| Reference fix       | Same test exits zero after at least two requests; trusted ledger contains exactly one charge and no domain failure.                                                              |
-| Alternate valid fix | Same requirements as the reference, against the independently implemented alternate policy.                                                                                      |
+| Reference fix       | Exactly three fresh executions: same test exits zero after at least two requests, trusted ledger contains exactly one charge and no domain failure in each.                      |
+| Alternate valid fix | Exactly three executions with the same requirements against the independently implemented alternate policy.                                                                      |
 | Decoy rejection     | Candidate exits nonzero after at least two requests and the trusted ledger contains more than one charge, even if the application suppresses the exception.                      |
-| Fresh state         | Every execution starts with both ledger tables empty in its own database container.                                                                                              |
+| Fresh state         | Every execution has a distinct ID and starts with both ledger tables empty in its own database container.                                                                        |
 | Isolation/offline   | Candidate settings pass Docker inspection, its network is `none`, and the app/database network is internal.                                                                      |
 | Same candidate      | Candidate SHA-256 matches the proposed test across every execution.                                                                                                              |
 | Reviewability       | Nonempty candidate is at most sixty lines, at most 32 KiB and passes the supported static policy.                                                                                |
@@ -37,7 +37,7 @@ Building downloads dependencies/base images and records immutable local image ID
 1. Executes synthetic traffic against a fresh buggy app/database and captures an actual duplicate incident.
 2. Normalizes and redacts that evidence, then passes visible normalized JSON to the deterministic planner container through stdin. The planner has the public buggy app snapshot and no private variants or host mounts.
 3. Saves the generated test and its incident hash.
-4. Executes ten fresh buggy runs, then reference, alternate and decoy. An infrastructure error stops the matrix from receiving a verified result.
+4. Queues ten fresh buggy runs, three reference fixes, three alternate fixes and one decoy in a bounded pool (default 3, configurable 1–10). Work refills an available slot without a batch barrier. An infrastructure error stops new dispatch, drains active executions and prevents verification.
 5. Evaluates a changed application frame against the collected matrix and checks that verification is rejected.
 6. Removes request evidence for a minimal-tier input and checks explicit missing-body abstention.
 
@@ -66,6 +66,10 @@ Error paths can produce `error.json` or per-execution application/PostgreSQL err
 
 ## Development checks and interpretation
 
-`pnpm test` exercises contracts, telemetry, planning, scheduler and judge policy/evaluation logic. `pnpm exec vitest run --config vitest.integration.config.ts` checks the real checkout matrix against the local Compose PostgreSQL service. These support component correctness but are not substitutes for a run's strict Docker evidence.
+`pnpm test` exercises contracts, telemetry, planning, scheduler, worker/broker draining, publication and judge policy/evaluation logic. `pnpm test:integration` loads ignored local credentials and checks the real checkout matrix against Compose PostgreSQL. It also seeds duplicate rows and proves that both valid fixes retain the shared duplicate-charge invariant. These support component correctness but are not substitutes for a run's strict Docker evidence.
 
-The reported execution duration is a sum of execution durations; concurrent buggy batches mean it is not necessarily wall-clock CLI latency. Model tokens are unavailable because the planner is deterministic and uses no model. Report raw R1 counts with the exact environment and artifacts. The full twenty-case denominators, fixed development/held-out split and three-trial baseline comparisons remain unimplemented.
+The `durationMs` verdict field remains a sum of execution durations for compatibility; it is not wall-clock CLI latency. `pipeline.json` records verification/matrix wall time, configured concurrency, peak active executions and execution start/finish offsets. `smoke-profile.json` includes capture and negative checks. Each execution's `profile.json` records exclusive monotonic stage intervals, including failed stages and cleanup.
+
+`pnpm benchmark:measure --label local-concurrency3 --concurrency 3` adds an independently bounded resource observer and saves `measurement.json`. It separates capture from matrix stage totals, reports missing profiles, pins reported images to saved run evidence and represents unavailable resource samples as null. Sampler errors do not establish or weaken judge gates. CPU/memory samples can miss peaks and observer commands add overhead. See [PERFORMANCE.md](PERFORMANCE.md) for actual measurements and limitations. Raw artifacts remain local and ignored; the allowlisted publishing command in the README emits relative references and omits host paths, credentials and raw inspection data.
+
+Model tokens are unavailable because the planner is deterministic and uses no model. Report raw R1 counts with the exact environment and artifacts. The full twenty-case denominators, fixed development/held-out split and three-trial baseline comparisons remain unimplemented.

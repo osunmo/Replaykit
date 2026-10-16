@@ -23,7 +23,7 @@ The trusted runner inspects the created candidate container and rejects missing 
 
 The app and PostgreSQL use a separate per-run internal network with no published ports. The candidate communicates through bounded stdout request messages and stdin responses. The supervisor permits only `pay` with the exact captured payment fields and `charges` for the captured order. IDs are unique and limited to twenty commands. The internal app-side client supports only fixed localhost routes with strict input schemas, a five-second timeout and redirects disabled. Candidates cannot provide shell fragments, URLs, paths, headers or database statements.
 
-Docker commands use argument arrays with `shell: false`. Candidate runtime is capped at thirty seconds and each output channel at 64 KiB. General Docker commands also have deadlines and bounded capture. Failure or cleanup errors produce execution `ERROR` evidence, not a successful reproduction.
+Docker commands use argument arrays with `shell: false`. Candidate execution has a thirty-second deadline and each output channel is bounded to 64 KiB. On failure, the broker stops queued dispatch and drains any in-flight command (with its existing ten-second Docker deadline) before resource cleanup. Cleanup itself has bounded Docker commands. Failure or cleanup errors produce execution `ERROR` evidence, not a successful reproduction.
 
 Static TypeScript inspection rejects unsupported imports, direct throws, loops and named dangerous globals, and enforces the reviewability bounds. It complements container isolation and the variant matrix. Static syntax checks are not a JavaScript capability-security proof.
 
@@ -33,7 +33,9 @@ Planning also executes in a separate network-disabled, unprivileged, read-only c
 
 ## Evidence integrity
 
-The supervisor queries PostgreSQL directly after execution and obtains failure identity from application logs, outside the candidate filesystem. Before running a candidate it checks that both ledger tables are empty. It records the candidate hash, variant source hash and image identifiers, then requires the identical candidate across all variants.
+The supervisor queries PostgreSQL directly after execution and obtains failure identity from application logs, outside the candidate filesystem. Before running a candidate it checks that both ledger tables are empty. It records the candidate hash, variant source hash and image identifiers, then requires the identical candidate across all variants. The bounded pool defaults to three executions; every worker creates its own PostgreSQL/app/candidate containers and internal network. The matrix requires ten buggy runs, three independent reference successes, three alternate successes and a failing decoy; reused execution IDs are rejected. The image manifest is pinned for the matrix.
+
+Sandbox passwords are randomly generated per execution. Local development credentials are generated in an ignored `.env`; tracked examples contain placeholders. Raw Docker inspections and execution artifacts are ignored local files. Published measurements use a fixed allowlist of numerical observations, gates, image/hash identifiers and relative paths. Historic local commits still contain the earlier synthetic defaults and raw archived reports; no history rewrite or remote publication was performed.
 
 The decoy check catches symptom suppression: a candidate must still fail while the real ledger contains duplicate charges, even when the app emits no domain error. Failure identity includes the actual exception type and normalized application frame, so a matching exception name from another path cannot satisfy the gate.
 

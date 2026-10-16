@@ -1,0 +1,2815 @@
+{
+  "schemaVersion": 1,
+  "scope": "R1 local performance measurements; this artifact does not assert CI success.",
+  "timingNotes": "Wall time is elapsed smoke time. Per-stage and execution sums overlap under concurrency. Resource sampling can miss short-lived peaks and includes any other replaykit.run-labeled containers.",
+  "comparisonNotes": "No speedup is inferred automatically. Compare identical image IDs, candidate hash, repeat counts, and measurement conditions before attributing a runtime change to concurrency.",
+  "records": [
+    {
+      "schemaVersion": 1,
+      "runId": "cc8b5d05-52df-466f-a046-aed1546a6090",
+      "label": "baseline-batch2",
+      "startedAt": "2026-10-16T20:05:49.273Z",
+      "wallMs": 281938.6507,
+      "concurrencyRequested": 2,
+      "sources": {
+        "measurement": "runs/cc8b5d05-52df-466f-a046-aed1546a6090/measurement.json",
+        "result": "runs/cc8b5d05-52df-466f-a046-aed1546a6090/result.json"
+      },
+      "machine": {
+        "platform": "win32",
+        "architecture": "x64",
+        "node": "v22.23.3",
+        "logicalCpus": 12,
+        "totalMemoryBytes": 16995729408
+      },
+      "dockerEngineCapacity": {
+        "cpuCount": null,
+        "totalMemoryBytes": null
+      },
+      "images": {
+        "nodeImage": "sha256:c3de60bf2f9dd0ac6370e6117950ff62d6e339527e7472301c9c78a017978392",
+        "postgresImage": "sha256:b0f9560a2de083e2cc7382e75f808c7381a32852a7ec49117deedb300e552b24",
+        "candidateImage": "sha256:0c35c9e7ad3b553c35b03361d4a2700529637b7fb7a5dfbf88e1268a31b87f55",
+        "plannerImage": "sha256:121d1bd73f7a1609362942a40d80ecb702fa72e47ec674788672a72f914f40e6",
+        "appImages": {
+          "buggy": "sha256:9be237516d80e283ddfb4d2530a70a947c6deb24ae6957ab8b4203a7e17e537d",
+          "reference": "sha256:9df5fee2abbc46eb13910b74b789d2752db39ea4135f676970a816a3b9513f6a",
+          "alternate": "sha256:1504ba6b325580f214150d99552633520e455938769a5e28dd77b69de5e51805",
+          "decoy": "sha256:cf51d75968ebd58234b7e274ffd9de08c709e017ab9a1684a4bb501e908c86d9"
+        },
+        "sourceHashes": {
+          "buggy": "6b1c4be39b43148ce483af1818d0b51374296692c347df4ddfe51f3d13060b30",
+          "reference": "59d0cf2a4dacfdcf9e80110c1f2b1285992e6161e6a1420f87424dade1b94fe6",
+          "alternate": "c91367e6ff1e0e07ccbe413bb05ac8e17d0a8a798a5bd9f69fb9d37d562bf121",
+          "decoy": "3c4b4129f02d98b83fefc511e76fb8e12d913bf3bcb5233cdbc441bc092a1fdb"
+        }
+      },
+      "stages": {
+        "capture": {
+          "executionCount": 1,
+          "wallMs": {
+            "count": 1,
+            "sumMs": 35749.3708,
+            "meanMs": 35749.3708,
+            "maxMs": 35749.3708
+          },
+          "stages": {
+            "preparation": {
+              "count": 1,
+              "sumMs": 71.44730000000027,
+              "meanMs": 71.44730000000027,
+              "maxMs": 71.44730000000027
+            },
+            "networkCreation": {
+              "count": 1,
+              "sumMs": 911.2118,
+              "meanMs": 911.2118,
+              "maxMs": 911.2118
+            },
+            "postgresStartup": {
+              "count": 1,
+              "sumMs": 1988.1216999999997,
+              "meanMs": 1988.1216999999997,
+              "maxMs": 1988.1216999999997
+            },
+            "postgresReadiness": {
+              "count": 1,
+              "sumMs": 8539.062100000001,
+              "meanMs": 8539.062100000001,
+              "maxMs": 8539.062100000001
+            },
+            "applicationStartup": {
+              "count": 1,
+              "sumMs": 2279.9406999999974,
+              "meanMs": 2279.9406999999974,
+              "maxMs": 2279.9406999999974
+            },
+            "applicationReadiness": {
+              "count": 1,
+              "sumMs": 7816.744300000002,
+              "meanMs": 7816.744300000002,
+              "maxMs": 7816.744300000002
+            },
+            "candidatePreparation": {
+              "count": 1,
+              "sumMs": 2008.3534,
+              "meanMs": 2008.3534,
+              "maxMs": 2008.3534
+            },
+            "candidateExecution": {
+              "count": 1,
+              "sumMs": 5031.430400000001,
+              "meanMs": 5031.430400000001,
+              "maxMs": 5031.430400000001
+            },
+            "evidenceCollection": {
+              "count": 1,
+              "sumMs": 2129.236299999997,
+              "meanMs": 2129.236299999997,
+              "maxMs": 2129.236299999997
+            },
+            "cleanup": {
+              "count": 1,
+              "sumMs": 4973.457600000002,
+              "meanMs": 4973.457600000002,
+              "maxMs": 4973.457600000002
+            }
+          }
+        },
+        "matrix": {
+          "executionCount": 13,
+          "wallMs": {
+            "count": 13,
+            "sumMs": 391855.89089999994,
+            "meanMs": 30142.760838461534,
+            "maxMs": 39940.28169999999
+          },
+          "stages": {
+            "preparation": {
+              "count": 13,
+              "sumMs": 560.0614000000351,
+              "meanMs": 43.08164615384885,
+              "maxMs": 106.03520000000572
+            },
+            "networkCreation": {
+              "count": 13,
+              "sumMs": 11867.820599999977,
+              "meanMs": 912.9092769230751,
+              "maxMs": 1044.0573000000004
+            },
+            "postgresStartup": {
+              "count": 13,
+              "sumMs": 24643.68589999999,
+              "meanMs": 1895.6681461538453,
+              "maxMs": 3012.8577000000078
+            },
+            "postgresReadiness": {
+              "count": 13,
+              "sumMs": 59194.610700000005,
+              "meanMs": 4553.431592307693,
+              "maxMs": 5231.082199999997
+            },
+            "applicationStartup": {
+              "count": 13,
+              "sumMs": 21802.924599999984,
+              "meanMs": 1677.148046153845,
+              "maxMs": 2061.6831999999995
+            },
+            "applicationReadiness": {
+              "count": 13,
+              "sumMs": 51820.39069999995,
+              "meanMs": 3986.1838999999964,
+              "maxMs": 5301.977799999993
+            },
+            "candidatePreparation": {
+              "count": 13,
+              "sumMs": 25130.19290000004,
+              "meanMs": 1933.0917615384644,
+              "maxMs": 2351.467000000004
+            },
+            "candidateExecution": {
+              "count": 13,
+              "sumMs": 82800.09809999999,
+              "meanMs": 6369.238315384615,
+              "maxMs": 9045.7166
+            },
+            "evidenceCollection": {
+              "count": 13,
+              "sumMs": 43104.201399999954,
+              "meanMs": 3315.7077999999965,
+              "maxMs": 9131.342600000004
+            },
+            "cleanup": {
+              "count": 13,
+              "sumMs": 70931.81730000008,
+              "meanMs": 5456.293638461545,
+              "maxMs": 7293.140199999994
+            }
+          }
+        },
+        "byVariant": {
+          "buggy": {
+            "executionCount": 10,
+            "wallMs": {
+              "count": 10,
+              "sumMs": 310776.6724,
+              "meanMs": 31077.66724,
+              "maxMs": 39940.28169999999
+            },
+            "stages": {
+              "preparation": {
+                "count": 10,
+                "sumMs": 514.7049000000115,
+                "meanMs": 51.470490000001156,
+                "maxMs": 106.03520000000572
+              },
+              "networkCreation": {
+                "count": 10,
+                "sumMs": 9306.477899999998,
+                "meanMs": 930.6477899999998,
+                "maxMs": 1044.0573000000004
+              },
+              "postgresStartup": {
+                "count": 10,
+                "sumMs": 20144.701699999983,
+                "meanMs": 2014.4701699999982,
+                "maxMs": 3012.8577000000078
+              },
+              "postgresReadiness": {
+                "count": 10,
+                "sumMs": 45737.98830000001,
+                "meanMs": 4573.7988300000015,
+                "maxMs": 5231.082199999997
+              },
+              "applicationStartup": {
+                "count": 10,
+                "sumMs": 17380.665200000003,
+                "meanMs": 1738.0665200000003,
+                "maxMs": 2061.6831999999995
+              },
+              "applicationReadiness": {
+                "count": 10,
+                "sumMs": 41390.34369999996,
+                "meanMs": 4139.034369999996,
+                "maxMs": 5301.977799999993
+              },
+              "candidatePreparation": {
+                "count": 10,
+                "sumMs": 20095.74870000004,
+                "meanMs": 2009.574870000004,
+                "maxMs": 2351.467000000004
+              },
+              "candidateExecution": {
+                "count": 10,
+                "sumMs": 64839.67329999998,
+                "meanMs": 6483.967329999998,
+                "maxMs": 9045.7166
+              },
+              "evidenceCollection": {
+                "count": 10,
+                "sumMs": 35973.768799999954,
+                "meanMs": 3597.3768799999953,
+                "maxMs": 9131.342600000004
+              },
+              "cleanup": {
+                "count": 10,
+                "sumMs": 55392.52770000006,
+                "meanMs": 5539.2527700000055,
+                "maxMs": 7293.140199999994
+              }
+            }
+          },
+          "reference": {
+            "executionCount": 1,
+            "wallMs": {
+              "count": 1,
+              "sumMs": 26480.2402,
+              "meanMs": 26480.2402,
+              "maxMs": 26480.2402
+            },
+            "stages": {
+              "preparation": {
+                "count": 1,
+                "sumMs": 17.483700000011595,
+                "meanMs": 17.483700000011595,
+                "maxMs": 17.483700000011595
+              },
+              "networkCreation": {
+                "count": 1,
+                "sumMs": 875.2195999999822,
+                "meanMs": 875.2195999999822,
+                "maxMs": 875.2195999999822
+              },
+              "postgresStartup": {
+                "count": 1,
+                "sumMs": 1721.2853000000177,
+                "meanMs": 1721.2853000000177,
+                "maxMs": 1721.2853000000177
+              },
+              "postgresReadiness": {
+                "count": 1,
+                "sumMs": 4307.517299999978,
+                "meanMs": 4307.517299999978,
+                "maxMs": 4307.517299999978
+              },
+              "applicationStartup": {
+                "count": 1,
+                "sumMs": 1302.9410999999964,
+                "meanMs": 1302.9410999999964,
+                "maxMs": 1302.9410999999964
+              },
+              "applicationReadiness": {
+                "count": 1,
+                "sumMs": 2958.3868000000075,
+                "meanMs": 2958.3868000000075,
+                "maxMs": 2958.3868000000075
+              },
+              "candidatePreparation": {
+                "count": 1,
+                "sumMs": 1669.2820000000065,
+                "meanMs": 1669.2820000000065,
+                "maxMs": 1669.2820000000065
+              },
+              "candidateExecution": {
+                "count": 1,
+                "sumMs": 6842.7351999999955,
+                "meanMs": 6842.7351999999955,
+                "maxMs": 6842.7351999999955
+              },
+              "evidenceCollection": {
+                "count": 1,
+                "sumMs": 2084.7062999999907,
+                "meanMs": 2084.7062999999907,
+                "maxMs": 2084.7062999999907
+              },
+              "cleanup": {
+                "count": 1,
+                "sumMs": 4700.6731000000145,
+                "meanMs": 4700.6731000000145,
+                "maxMs": 4700.6731000000145
+              }
+            }
+          },
+          "alternate": {
+            "executionCount": 1,
+            "wallMs": {
+              "count": 1,
+              "sumMs": 27387.954499999993,
+              "meanMs": 27387.954499999993,
+              "maxMs": 27387.954499999993
+            },
+            "stages": {
+              "preparation": {
+                "count": 1,
+                "sumMs": 16.82289999999921,
+                "meanMs": 16.82289999999921,
+                "maxMs": 16.82289999999921
+              },
+              "networkCreation": {
+                "count": 1,
+                "sumMs": 854.6423000000068,
+                "meanMs": 854.6423000000068,
+                "maxMs": 854.6423000000068
+              },
+              "postgresStartup": {
+                "count": 1,
+                "sumMs": 1557.3990999999805,
+                "meanMs": 1557.3990999999805,
+                "maxMs": 1557.3990999999805
+              },
+              "postgresReadiness": {
+                "count": 1,
+                "sumMs": 5216.8086000000185,
+                "meanMs": 5216.8086000000185,
+                "maxMs": 5216.8086000000185
+              },
+              "applicationStartup": {
+                "count": 1,
+                "sumMs": 1634.1761999999871,
+                "meanMs": 1634.1761999999871,
+                "maxMs": 1634.1761999999871
+              },
+              "applicationReadiness": {
+                "count": 1,
+                "sumMs": 3814.1919000000053,
+                "meanMs": 3814.1919000000053,
+                "maxMs": 3814.1919000000053
+              },
+              "candidatePreparation": {
+                "count": 1,
+                "sumMs": 1590.771299999993,
+                "meanMs": 1590.771299999993,
+                "maxMs": 1590.771299999993
+              },
+              "candidateExecution": {
+                "count": 1,
+                "sumMs": 5702.412299999996,
+                "meanMs": 5702.412299999996,
+                "maxMs": 5702.412299999996
+              },
+              "evidenceCollection": {
+                "count": 1,
+                "sumMs": 2579.367100000003,
+                "meanMs": 2579.367100000003,
+                "maxMs": 2579.367100000003
+              },
+              "cleanup": {
+                "count": 1,
+                "sumMs": 4421.3606000000145,
+                "meanMs": 4421.3606000000145,
+                "maxMs": 4421.3606000000145
+              }
+            }
+          },
+          "decoy": {
+            "executionCount": 1,
+            "wallMs": {
+              "count": 1,
+              "sumMs": 27211.023799999995,
+              "meanMs": 27211.023799999995,
+              "maxMs": 27211.023799999995
+            },
+            "stages": {
+              "preparation": {
+                "count": 1,
+                "sumMs": 11.049900000012713,
+                "meanMs": 11.049900000012713,
+                "maxMs": 11.049900000012713
+              },
+              "networkCreation": {
+                "count": 1,
+                "sumMs": 831.4807999999903,
+                "meanMs": 831.4807999999903,
+                "maxMs": 831.4807999999903
+              },
+              "postgresStartup": {
+                "count": 1,
+                "sumMs": 1220.299800000008,
+                "meanMs": 1220.299800000008,
+                "maxMs": 1220.299800000008
+              },
+              "postgresReadiness": {
+                "count": 1,
+                "sumMs": 3932.2964999999967,
+                "meanMs": 3932.2964999999967,
+                "maxMs": 3932.2964999999967
+              },
+              "applicationStartup": {
+                "count": 1,
+                "sumMs": 1485.1420999999973,
+                "meanMs": 1485.1420999999973,
+                "maxMs": 1485.1420999999973
+              },
+              "applicationReadiness": {
+                "count": 1,
+                "sumMs": 3657.4682999999786,
+                "meanMs": 3657.4682999999786,
+                "maxMs": 3657.4682999999786
+              },
+              "candidatePreparation": {
+                "count": 1,
+                "sumMs": 1774.3908999999985,
+                "meanMs": 1774.3908999999985,
+                "maxMs": 1774.3908999999985
+              },
+              "candidateExecution": {
+                "count": 1,
+                "sumMs": 5415.277300000016,
+                "meanMs": 5415.277300000016,
+                "maxMs": 5415.277300000016
+              },
+              "evidenceCollection": {
+                "count": 1,
+                "sumMs": 2466.3592000000062,
+                "meanMs": 2466.3592000000062,
+                "maxMs": 2466.3592000000062
+              },
+              "cleanup": {
+                "count": 1,
+                "sumMs": 6417.255899999989,
+                "meanMs": 6417.255899999989,
+                "maxMs": 6417.255899999989
+              }
+            }
+          }
+        },
+        "unclassified": {
+          "executionCount": 0,
+          "wallMs": {
+            "count": 0,
+            "sumMs": 0,
+            "meanMs": null,
+            "maxMs": null
+          },
+          "stages": {}
+        },
+        "missingProfileCount": 0
+      },
+      "judge": {
+        "status": "VERIFIED",
+        "checks": {
+          "buggyFails": true,
+          "sameFailureIdentity": true,
+          "referenceFixPasses": true,
+          "alternateFixPasses": true,
+          "decoyFixStillFails": true,
+          "offlineExecution": true,
+          "isolatedExecution": true,
+          "freshState": true,
+          "noSleepBasedTiming": true,
+          "reviewableTest": true,
+          "sameCandidate": true,
+          "deterministicRuns": 10,
+          "deterministicFailures": 10
+        },
+        "referenceFixAttempts": 1,
+        "referenceFixSuccesses": null,
+        "alternateFixAttempts": 1,
+        "alternateFixSuccesses": null,
+        "decoyAttempts": 1,
+        "candidateHash": "16fea9fa5391aa587ee3145d9d091a79bf89295db85b2b7ec117c5cb00424102",
+        "incidentHash": "b8acbe4611ae45e312502d8ad76aee4324e252a421cbab67f265681d12090cc9"
+      },
+      "smoke": {
+        "status": "PASS",
+        "wrongFrameRejected": true,
+        "missingBodyAbstained": true
+      },
+      "pipeline": null,
+      "resources": {
+        "containerCountSamples": null,
+        "cpuSamples": null,
+        "memorySamples": null,
+        "peakActiveLabeledContainers": 6,
+        "peakAggregateCpuPercent": 206.22,
+        "peakAggregateMemoryBytes": 312926535.68000007,
+        "sampleCount": 56,
+        "samplerErrorCount": 6,
+        "intervalMs": 5000,
+        "commandTimeoutMs": 8000
+      },
+      "artifactErrorCount": 0,
+      "measurementFailed": false
+    },
+    {
+      "schemaVersion": 1,
+      "runId": "65e83f3a-69ab-473d-a88d-58c9fe066fbe",
+      "label": "strengthened-concurrency2",
+      "startedAt": "2026-10-16T20:15:43.255Z",
+      "wallMs": 112897.1087,
+      "concurrencyRequested": 2,
+      "sources": {
+        "measurement": "runs/65e83f3a-69ab-473d-a88d-58c9fe066fbe/measurement.json",
+        "result": "runs/65e83f3a-69ab-473d-a88d-58c9fe066fbe/result.json",
+        "pipeline": "runs/65e83f3a-69ab-473d-a88d-58c9fe066fbe/pipeline.json"
+      },
+      "machine": {
+        "platform": "win32",
+        "architecture": "x64",
+        "node": "v22.23.3",
+        "logicalCpus": 12,
+        "totalMemoryBytes": 16995729408
+      },
+      "dockerEngineCapacity": {
+        "cpuCount": 12,
+        "totalMemoryBytes": 8234680320
+      },
+      "images": {
+        "nodeImage": "sha256:c3de60bf2f9dd0ac6370e6117950ff62d6e339527e7472301c9c78a017978392",
+        "postgresImage": "sha256:b0f9560a2de083e2cc7382e75f808c7381a32852a7ec49117deedb300e552b24",
+        "candidateImage": "sha256:0c35c9e7ad3b553c35b03361d4a2700529637b7fb7a5dfbf88e1268a31b87f55",
+        "plannerImage": "sha256:121d1bd73f7a1609362942a40d80ecb702fa72e47ec674788672a72f914f40e6",
+        "appImages": {
+          "buggy": "sha256:9be237516d80e283ddfb4d2530a70a947c6deb24ae6957ab8b4203a7e17e537d",
+          "reference": "sha256:9df5fee2abbc46eb13910b74b789d2752db39ea4135f676970a816a3b9513f6a",
+          "alternate": "sha256:1504ba6b325580f214150d99552633520e455938769a5e28dd77b69de5e51805",
+          "decoy": "sha256:cf51d75968ebd58234b7e274ffd9de08c709e017ab9a1684a4bb501e908c86d9"
+        },
+        "sourceHashes": {
+          "buggy": "6b1c4be39b43148ce483af1818d0b51374296692c347df4ddfe51f3d13060b30",
+          "reference": "59d0cf2a4dacfdcf9e80110c1f2b1285992e6161e6a1420f87424dade1b94fe6",
+          "alternate": "c91367e6ff1e0e07ccbe413bb05ac8e17d0a8a798a5bd9f69fb9d37d562bf121",
+          "decoy": "3c4b4129f02d98b83fefc511e76fb8e12d913bf3bcb5233cdbc441bc092a1fdb"
+        }
+      },
+      "stages": {
+        "capture": {
+          "executionCount": 1,
+          "wallMs": {
+            "count": 1,
+            "sumMs": 10183.350600000002,
+            "meanMs": 10183.350600000002,
+            "maxMs": 10183.350600000002
+          },
+          "stages": {
+            "preparation": {
+              "count": 1,
+              "sumMs": 22.021899999999732,
+              "meanMs": 22.021899999999732,
+              "maxMs": 22.021899999999732
+            },
+            "networkCreation": {
+              "count": 1,
+              "sumMs": 448.8278,
+              "meanMs": 448.8278,
+              "maxMs": 448.8278
+            },
+            "postgresStartup": {
+              "count": 1,
+              "sumMs": 700.8605000000002,
+              "meanMs": 700.8605000000002,
+              "maxMs": 700.8605000000002
+            },
+            "postgresReadiness": {
+              "count": 1,
+              "sumMs": 1146.8096,
+              "meanMs": 1146.8096,
+              "maxMs": 1146.8096
+            },
+            "applicationStartup": {
+              "count": 1,
+              "sumMs": 580.3212999999996,
+              "meanMs": 580.3212999999996,
+              "maxMs": 580.3212999999996
+            },
+            "applicationReadiness": {
+              "count": 1,
+              "sumMs": 1280.9088000000002,
+              "meanMs": 1280.9088000000002,
+              "maxMs": 1280.9088000000002
+            },
+            "candidatePreparation": {
+              "count": 1,
+              "sumMs": 861.7664999999997,
+              "meanMs": 861.7664999999997,
+              "maxMs": 861.7664999999997
+            },
+            "candidateExecution": {
+              "count": 1,
+              "sumMs": 1491.371500000001,
+              "meanMs": 1491.371500000001,
+              "maxMs": 1491.371500000001
+            },
+            "evidenceCollection": {
+              "count": 1,
+              "sumMs": 1109.000399999999,
+              "meanMs": 1109.000399999999,
+              "maxMs": 1109.000399999999
+            },
+            "cleanup": {
+              "count": 1,
+              "sumMs": 2529.5849,
+              "meanMs": 2529.5849,
+              "maxMs": 2529.5849
+            },
+            "artifactWrite": {
+              "count": 1,
+              "sumMs": 11.840900000001056,
+              "meanMs": 11.840900000001056,
+              "maxMs": 11.840900000001056
+            }
+          }
+        },
+        "matrix": {
+          "executionCount": 17,
+          "wallMs": {
+            "count": 17,
+            "sumMs": 188249.4867,
+            "meanMs": 11073.499217647059,
+            "maxMs": 11660.369399999996
+          },
+          "stages": {
+            "preparation": {
+              "count": 17,
+              "sumMs": 141.67719999999827,
+              "meanMs": 8.333952941176369,
+              "maxMs": 39.26769999999851
+            },
+            "networkCreation": {
+              "count": 17,
+              "sumMs": 8543.660700000015,
+              "meanMs": 502.5682764705891,
+              "maxMs": 582.4312000000064
+            },
+            "postgresStartup": {
+              "count": 17,
+              "sumMs": 11632.664999999983,
+              "meanMs": 684.2744117647048,
+              "maxMs": 772.7063999999955
+            },
+            "postgresReadiness": {
+              "count": 17,
+              "sumMs": 24803.237300000008,
+              "meanMs": 1459.01395882353,
+              "maxMs": 1811.697400000001
+            },
+            "applicationStartup": {
+              "count": 17,
+              "sumMs": 10970.001199999999,
+              "meanMs": 645.2941882352941,
+              "maxMs": 738.2883000000002
+            },
+            "applicationReadiness": {
+              "count": 17,
+              "sumMs": 20022.961599999988,
+              "meanMs": 1177.8212705882345,
+              "maxMs": 1356.715599999996
+            },
+            "candidatePreparation": {
+              "count": 17,
+              "sumMs": 14824.366199999997,
+              "meanMs": 872.0215411764704,
+              "maxMs": 988.5733999999939
+            },
+            "candidateExecution": {
+              "count": 17,
+              "sumMs": 35948.662800000006,
+              "meanMs": 2114.6272235294123,
+              "maxMs": 2302.4489999999932
+            },
+            "evidenceCollection": {
+              "count": 17,
+              "sumMs": 17692.862,
+              "meanMs": 1040.7565882352942,
+              "maxMs": 1117.6290000000008
+            },
+            "cleanup": {
+              "count": 17,
+              "sumMs": 43623.18270000002,
+              "meanMs": 2566.0695705882363,
+              "maxMs": 2753.6856000000043
+            },
+            "artifactWrite": {
+              "count": 17,
+              "sumMs": 46.16829999998663,
+              "meanMs": 2.71578235294039,
+              "maxMs": 4.232300000003306
+            }
+          }
+        },
+        "byVariant": {
+          "buggy": {
+            "executionCount": 10,
+            "wallMs": {
+              "count": 10,
+              "sumMs": 112124.58679999999,
+              "meanMs": 11212.45868,
+              "maxMs": 11660.369399999996
+            },
+            "stages": {
+              "preparation": {
+                "count": 10,
+                "sumMs": 97.52599999999074,
+                "meanMs": 9.752599999999074,
+                "maxMs": 39.26769999999851
+              },
+              "networkCreation": {
+                "count": 10,
+                "sumMs": 4953.399800000021,
+                "meanMs": 495.33998000000213,
+                "maxMs": 582.4312000000064
+              },
+              "postgresStartup": {
+                "count": 10,
+                "sumMs": 7111.741899999997,
+                "meanMs": 711.1741899999997,
+                "maxMs": 772.7063999999955
+              },
+              "postgresReadiness": {
+                "count": 10,
+                "sumMs": 14914.474300000002,
+                "meanMs": 1491.4474300000002,
+                "maxMs": 1811.697400000001
+              },
+              "applicationStartup": {
+                "count": 10,
+                "sumMs": 6545.866099999999,
+                "meanMs": 654.58661,
+                "maxMs": 738.2883000000002
+              },
+              "applicationReadiness": {
+                "count": 10,
+                "sumMs": 11695.140699999996,
+                "meanMs": 1169.5140699999997,
+                "maxMs": 1356.715599999996
+              },
+              "candidatePreparation": {
+                "count": 10,
+                "sumMs": 8764.754699999998,
+                "meanMs": 876.4754699999997,
+                "maxMs": 948.7020000000011
+              },
+              "candidateExecution": {
+                "count": 10,
+                "sumMs": 21309.87680000001,
+                "meanMs": 2130.987680000001,
+                "maxMs": 2281.1070000000036
+              },
+              "evidenceCollection": {
+                "count": 10,
+                "sumMs": 10591.640399999997,
+                "meanMs": 1059.1640399999997,
+                "maxMs": 1117.6290000000008
+              },
+              "cleanup": {
+                "count": 10,
+                "sumMs": 26113.550699999993,
+                "meanMs": 2611.355069999999,
+                "maxMs": 2753.6856000000043
+              },
+              "artifactWrite": {
+                "count": 10,
+                "sumMs": 26.584700000003068,
+                "meanMs": 2.6584700000003068,
+                "maxMs": 3.304500000005646
+              }
+            }
+          },
+          "reference": {
+            "executionCount": 3,
+            "wallMs": {
+              "count": 3,
+              "sumMs": 32644.3119,
+              "meanMs": 10881.4373,
+              "maxMs": 11169.839300000007
+            },
+            "stages": {
+              "preparation": {
+                "count": 3,
+                "sumMs": 19.90899999999965,
+                "meanMs": 6.636333333333217,
+                "maxMs": 10.375299999999697
+              },
+              "networkCreation": {
+                "count": 3,
+                "sumMs": 1541.0668000000005,
+                "meanMs": 513.6889333333335,
+                "maxMs": 556.1296999999904
+              },
+              "postgresStartup": {
+                "count": 3,
+                "sumMs": 1913.9198000000033,
+                "meanMs": 637.9732666666678,
+                "maxMs": 697.7119999999995
+              },
+              "postgresReadiness": {
+                "count": 3,
+                "sumMs": 4179.131399999984,
+                "meanMs": 1393.0437999999947,
+                "maxMs": 1628.5657999999967
+              },
+              "applicationStartup": {
+                "count": 3,
+                "sumMs": 1800.5210999999981,
+                "meanMs": 600.1736999999994,
+                "maxMs": 612.9991000000009
+              },
+              "applicationReadiness": {
+                "count": 3,
+                "sumMs": 3694.0320000000065,
+                "meanMs": 1231.344000000002,
+                "maxMs": 1339.9299000000028
+              },
+              "candidatePreparation": {
+                "count": 3,
+                "sumMs": 2578.5659999999916,
+                "meanMs": 859.5219999999972,
+                "maxMs": 869.927199999991
+              },
+              "candidateExecution": {
+                "count": 3,
+                "sumMs": 6369.099499999997,
+                "meanMs": 2123.0331666666657,
+                "maxMs": 2302.4489999999932
+              },
+              "evidenceCollection": {
+                "count": 3,
+                "sumMs": 3119.57650000001,
+                "meanMs": 1039.8588333333366,
+                "maxMs": 1045.7179000000033
+              },
+              "cleanup": {
+                "count": 3,
+                "sumMs": 7420.929800000013,
+                "meanMs": 2473.643266666671,
+                "maxMs": 2537.8727999999974
+              },
+              "artifactWrite": {
+                "count": 3,
+                "sumMs": 7.5552999999781605,
+                "meanMs": 2.5184333333260533,
+                "maxMs": 2.9089999999996508
+              }
+            }
+          },
+          "alternate": {
+            "executionCount": 3,
+            "wallMs": {
+              "count": 3,
+              "sumMs": 32590.482500000013,
+              "meanMs": 10863.494166666671,
+              "maxMs": 11072.5432
+            },
+            "stages": {
+              "preparation": {
+                "count": 3,
+                "sumMs": 19.80329999999958,
+                "meanMs": 6.60109999999986,
+                "maxMs": 7.422399999995832
+              },
+              "networkCreation": {
+                "count": 3,
+                "sumMs": 1616.3456000000006,
+                "meanMs": 538.7818666666668,
+                "maxMs": 576.8989000000001
+              },
+              "postgresStartup": {
+                "count": 3,
+                "sumMs": 1979.9466999999859,
+                "meanMs": 659.9822333333286,
+                "maxMs": 682.045299999998
+              },
+              "postgresReadiness": {
+                "count": 3,
+                "sumMs": 4103.703900000022,
+                "meanMs": 1367.9013000000075,
+                "maxMs": 1608.3358000000007
+              },
+              "applicationStartup": {
+                "count": 3,
+                "sumMs": 2001.5144999999902,
+                "meanMs": 667.1714999999967,
+                "maxMs": 689.3585999999923
+              },
+              "applicationReadiness": {
+                "count": 3,
+                "sumMs": 3420.9468999999954,
+                "meanMs": 1140.3156333333318,
+                "maxMs": 1285.104800000001
+              },
+              "candidatePreparation": {
+                "count": 3,
+                "sumMs": 2642.373200000002,
+                "meanMs": 880.7910666666672,
+                "maxMs": 988.5733999999939
+              },
+              "candidateExecution": {
+                "count": 3,
+                "sumMs": 6194.078200000004,
+                "meanMs": 2064.6927333333347,
+                "maxMs": 2075.547200000001
+              },
+              "evidenceCollection": {
+                "count": 3,
+                "sumMs": 2967.4016999999876,
+                "meanMs": 989.1338999999958,
+                "maxMs": 1017.6269000000029
+              },
+              "cleanup": {
+                "count": 3,
+                "sumMs": 7636.567100000015,
+                "meanMs": 2545.5223666666716,
+                "maxMs": 2672.848600000012
+              },
+              "artifactWrite": {
+                "count": 3,
+                "sumMs": 7.7960000000020955,
+                "meanMs": 2.598666666667365,
+                "maxMs": 3.3245000000024447
+              }
+            }
+          },
+          "decoy": {
+            "executionCount": 1,
+            "wallMs": {
+              "count": 1,
+              "sumMs": 10890.105500000005,
+              "meanMs": 10890.105500000005,
+              "maxMs": 10890.105500000005
+            },
+            "stages": {
+              "preparation": {
+                "count": 1,
+                "sumMs": 4.438900000008289,
+                "meanMs": 4.438900000008289,
+                "maxMs": 4.438900000008289
+              },
+              "networkCreation": {
+                "count": 1,
+                "sumMs": 432.8484999999928,
+                "meanMs": 432.8484999999928,
+                "maxMs": 432.8484999999928
+              },
+              "postgresStartup": {
+                "count": 1,
+                "sumMs": 627.0565999999963,
+                "meanMs": 627.0565999999963,
+                "maxMs": 627.0565999999963
+              },
+              "postgresReadiness": {
+                "count": 1,
+                "sumMs": 1605.9277000000002,
+                "meanMs": 1605.9277000000002,
+                "maxMs": 1605.9277000000002
+              },
+              "applicationStartup": {
+                "count": 1,
+                "sumMs": 622.0995000000112,
+                "meanMs": 622.0995000000112,
+                "maxMs": 622.0995000000112
+              },
+              "applicationReadiness": {
+                "count": 1,
+                "sumMs": 1212.8419999999896,
+                "meanMs": 1212.8419999999896,
+                "maxMs": 1212.8419999999896
+              },
+              "candidatePreparation": {
+                "count": 1,
+                "sumMs": 838.6723000000056,
+                "meanMs": 838.6723000000056,
+                "maxMs": 838.6723000000056
+              },
+              "candidateExecution": {
+                "count": 1,
+                "sumMs": 2075.6082999999926,
+                "meanMs": 2075.6082999999926,
+                "maxMs": 2075.6082999999926
+              },
+              "evidenceCollection": {
+                "count": 1,
+                "sumMs": 1014.2434000000067,
+                "meanMs": 1014.2434000000067,
+                "maxMs": 1014.2434000000067
+              },
+              "cleanup": {
+                "count": 1,
+                "sumMs": 2452.1350999999995,
+                "meanMs": 2452.1350999999995,
+                "maxMs": 2452.1350999999995
+              },
+              "artifactWrite": {
+                "count": 1,
+                "sumMs": 4.232300000003306,
+                "meanMs": 4.232300000003306,
+                "maxMs": 4.232300000003306
+              }
+            }
+          }
+        },
+        "unclassified": {
+          "executionCount": 0,
+          "wallMs": {
+            "count": 0,
+            "sumMs": 0,
+            "meanMs": null,
+            "maxMs": null
+          },
+          "stages": {}
+        },
+        "missingProfileCount": 0
+      },
+      "judge": {
+        "status": "VERIFIED",
+        "checks": {
+          "buggyFails": true,
+          "sameFailureIdentity": true,
+          "referenceFixPasses": true,
+          "alternateFixPasses": true,
+          "decoyFixStillFails": true,
+          "offlineExecution": true,
+          "isolatedExecution": true,
+          "freshState": true,
+          "noSleepBasedTiming": true,
+          "reviewableTest": true,
+          "sameCandidate": true,
+          "deterministicRuns": 10,
+          "deterministicFailures": 10
+        },
+        "referenceFixAttempts": 3,
+        "referenceFixSuccesses": 3,
+        "alternateFixAttempts": 3,
+        "alternateFixSuccesses": 3,
+        "decoyAttempts": 1,
+        "candidateHash": "16fea9fa5391aa587ee3145d9d091a79bf89295db85b2b7ec117c5cb00424102",
+        "incidentHash": "4bef71cf5f916be84040d503a4d98cc71cb333a32507b906d466f15627e5aa6b"
+      },
+      "smoke": {
+        "status": "PASS",
+        "wrongFrameRejected": true,
+        "missingBodyAbstained": true
+      },
+      "pipeline": {
+        "concurrency": 2,
+        "fixRepetitions": 3,
+        "wallMs": 100644.05720000001,
+        "matrixWallMs": 99518.1464,
+        "maxActiveExecutions": 2
+      },
+      "resources": {
+        "containerCountSamples": 23,
+        "cpuSamples": 12,
+        "memorySamples": 12,
+        "peakActiveLabeledContainers": 6,
+        "peakAggregateCpuPercent": 89.09,
+        "peakAggregateMemoryBytes": 246646046.72000003,
+        "sampleCount": 23,
+        "samplerErrorCount": 6,
+        "intervalMs": 5000,
+        "commandTimeoutMs": 8000
+      },
+      "artifactErrorCount": 0,
+      "measurementFailed": false
+    },
+    {
+      "schemaVersion": 1,
+      "runId": "ef540aa6-7b44-466f-ac64-0c9df39fc63c",
+      "label": "optimized-concurrency3",
+      "startedAt": "2026-10-16T20:17:38.146Z",
+      "wallMs": 92864.4811,
+      "concurrencyRequested": 3,
+      "sources": {
+        "measurement": "runs/ef540aa6-7b44-466f-ac64-0c9df39fc63c/measurement.json",
+        "result": "runs/ef540aa6-7b44-466f-ac64-0c9df39fc63c/result.json",
+        "pipeline": "runs/ef540aa6-7b44-466f-ac64-0c9df39fc63c/pipeline.json"
+      },
+      "machine": {
+        "platform": "win32",
+        "architecture": "x64",
+        "node": "v22.23.3",
+        "logicalCpus": 12,
+        "totalMemoryBytes": 16995729408
+      },
+      "dockerEngineCapacity": {
+        "cpuCount": 12,
+        "totalMemoryBytes": 8234680320
+      },
+      "images": {
+        "nodeImage": "sha256:c3de60bf2f9dd0ac6370e6117950ff62d6e339527e7472301c9c78a017978392",
+        "postgresImage": "sha256:b0f9560a2de083e2cc7382e75f808c7381a32852a7ec49117deedb300e552b24",
+        "candidateImage": "sha256:0c35c9e7ad3b553c35b03361d4a2700529637b7fb7a5dfbf88e1268a31b87f55",
+        "plannerImage": "sha256:121d1bd73f7a1609362942a40d80ecb702fa72e47ec674788672a72f914f40e6",
+        "appImages": {
+          "buggy": "sha256:9be237516d80e283ddfb4d2530a70a947c6deb24ae6957ab8b4203a7e17e537d",
+          "reference": "sha256:9df5fee2abbc46eb13910b74b789d2752db39ea4135f676970a816a3b9513f6a",
+          "alternate": "sha256:1504ba6b325580f214150d99552633520e455938769a5e28dd77b69de5e51805",
+          "decoy": "sha256:cf51d75968ebd58234b7e274ffd9de08c709e017ab9a1684a4bb501e908c86d9"
+        },
+        "sourceHashes": {
+          "buggy": "6b1c4be39b43148ce483af1818d0b51374296692c347df4ddfe51f3d13060b30",
+          "reference": "59d0cf2a4dacfdcf9e80110c1f2b1285992e6161e6a1420f87424dade1b94fe6",
+          "alternate": "c91367e6ff1e0e07ccbe413bb05ac8e17d0a8a798a5bd9f69fb9d37d562bf121",
+          "decoy": "3c4b4129f02d98b83fefc511e76fb8e12d913bf3bcb5233cdbc441bc092a1fdb"
+        }
+      },
+      "stages": {
+        "capture": {
+          "executionCount": 1,
+          "wallMs": {
+            "count": 1,
+            "sumMs": 10538.705100000001,
+            "meanMs": 10538.705100000001,
+            "maxMs": 10538.705100000001
+          },
+          "stages": {
+            "preparation": {
+              "count": 1,
+              "sumMs": 14.413800000000037,
+              "meanMs": 14.413800000000037,
+              "maxMs": 14.413800000000037
+            },
+            "networkCreation": {
+              "count": 1,
+              "sumMs": 448.2446,
+              "meanMs": 448.2446,
+              "maxMs": 448.2446
+            },
+            "postgresStartup": {
+              "count": 1,
+              "sumMs": 697.8928000000001,
+              "meanMs": 697.8928000000001,
+              "maxMs": 697.8928000000001
+            },
+            "postgresReadiness": {
+              "count": 1,
+              "sumMs": 1566.0683999999997,
+              "meanMs": 1566.0683999999997,
+              "maxMs": 1566.0683999999997
+            },
+            "applicationStartup": {
+              "count": 1,
+              "sumMs": 595.4843000000001,
+              "meanMs": 595.4843000000001,
+              "maxMs": 595.4843000000001
+            },
+            "applicationReadiness": {
+              "count": 1,
+              "sumMs": 1110.1821,
+              "meanMs": 1110.1821,
+              "maxMs": 1110.1821
+            },
+            "candidatePreparation": {
+              "count": 1,
+              "sumMs": 883.1098000000002,
+              "meanMs": 883.1098000000002,
+              "maxMs": 883.1098000000002
+            },
+            "candidateExecution": {
+              "count": 1,
+              "sumMs": 1569.3257999999996,
+              "meanMs": 1569.3257999999996,
+              "maxMs": 1569.3257999999996
+            },
+            "evidenceCollection": {
+              "count": 1,
+              "sumMs": 1099.9251000000004,
+              "meanMs": 1099.9251000000004,
+              "maxMs": 1099.9251000000004
+            },
+            "cleanup": {
+              "count": 1,
+              "sumMs": 2542.4977,
+              "meanMs": 2542.4977,
+              "maxMs": 2542.4977
+            },
+            "artifactWrite": {
+              "count": 1,
+              "sumMs": 11.532000000001062,
+              "meanMs": 11.532000000001062,
+              "maxMs": 11.532000000001062
+            }
+          }
+        },
+        "matrix": {
+          "executionCount": 17,
+          "wallMs": {
+            "count": 17,
+            "sumMs": 224038.6981,
+            "meanMs": 13178.746947058824,
+            "maxMs": 14824.992599999998
+          },
+          "stages": {
+            "preparation": {
+              "count": 17,
+              "sumMs": 239.56609999998545,
+              "meanMs": 14.092123529410909,
+              "maxMs": 77.26459999999861
+            },
+            "networkCreation": {
+              "count": 17,
+              "sumMs": 9049.315900000007,
+              "meanMs": 532.3127000000004,
+              "maxMs": 696.202400000002
+            },
+            "postgresStartup": {
+              "count": 17,
+              "sumMs": 13877.320100000012,
+              "meanMs": 816.3129470588242,
+              "maxMs": 1249.3266999999978
+            },
+            "postgresReadiness": {
+              "count": 17,
+              "sumMs": 32691.320899999984,
+              "meanMs": 1923.0188764705872,
+              "maxMs": 2721.1380999999965
+            },
+            "applicationStartup": {
+              "count": 17,
+              "sumMs": 14613.000000000015,
+              "meanMs": 859.5882352941185,
+              "maxMs": 1247.3890000000029
+            },
+            "applicationReadiness": {
+              "count": 17,
+              "sumMs": 25143.137699999996,
+              "meanMs": 1479.0080999999998,
+              "maxMs": 1687.0100999999995
+            },
+            "candidatePreparation": {
+              "count": 17,
+              "sumMs": 16030.559399999995,
+              "meanMs": 942.9740823529409,
+              "maxMs": 1133.3640000000014
+            },
+            "candidateExecution": {
+              "count": 17,
+              "sumMs": 45054.54210000002,
+              "meanMs": 2650.267182352942,
+              "maxMs": 3477.9793000000063
+            },
+            "evidenceCollection": {
+              "count": 17,
+              "sumMs": 19056.53899999997,
+              "meanMs": 1120.9728823529395,
+              "maxMs": 1281.964399999997
+            },
+            "cleanup": {
+              "count": 17,
+              "sumMs": 48234.58590000003,
+              "meanMs": 2837.3285823529427,
+              "maxMs": 3121.9363999999987
+            },
+            "artifactWrite": {
+              "count": 17,
+              "sumMs": 48.76649999998699,
+              "meanMs": 2.868617647058058,
+              "maxMs": 4.4517999999952735
+            }
+          }
+        },
+        "byVariant": {
+          "buggy": {
+            "executionCount": 10,
+            "wallMs": {
+              "count": 10,
+              "sumMs": 127240.473,
+              "meanMs": 12724.0473,
+              "maxMs": 14530.492899999997
+            },
+            "stages": {
+              "preparation": {
+                "count": 10,
+                "sumMs": 189.79669999999533,
+                "meanMs": 18.979669999999533,
+                "maxMs": 77.26459999999861
+              },
+              "networkCreation": {
+                "count": 10,
+                "sumMs": 5459.577600000002,
+                "meanMs": 545.9577600000002,
+                "maxMs": 696.202400000002
+              },
+              "postgresStartup": {
+                "count": 10,
+                "sumMs": 7378.898399999998,
+                "meanMs": 737.8898399999998,
+                "maxMs": 909.0516999999963
+              },
+              "postgresReadiness": {
+                "count": 10,
+                "sumMs": 17969.185300000005,
+                "meanMs": 1796.9185300000004,
+                "maxMs": 2507.751900000003
+              },
+              "applicationStartup": {
+                "count": 10,
+                "sumMs": 8939.6685,
+                "meanMs": 893.96685,
+                "maxMs": 1247.3890000000029
+              },
+              "applicationReadiness": {
+                "count": 10,
+                "sumMs": 14489.042699999995,
+                "meanMs": 1448.9042699999995,
+                "maxMs": 1662.3143999999993
+              },
+              "candidatePreparation": {
+                "count": 10,
+                "sumMs": 9053.22040000001,
+                "meanMs": 905.3220400000009,
+                "maxMs": 984.2411000000029
+              },
+              "candidateExecution": {
+                "count": 10,
+                "sumMs": 24210.047799999997,
+                "meanMs": 2421.0047799999998,
+                "maxMs": 2923.7514999999985
+              },
+              "evidenceCollection": {
+                "count": 10,
+                "sumMs": 10707.235399999994,
+                "meanMs": 1070.7235399999995,
+                "maxMs": 1215.564999999995
+              },
+              "cleanup": {
+                "count": 10,
+                "sumMs": 28813.257000000005,
+                "meanMs": 2881.3257000000003,
+                "maxMs": 3121.9363999999987
+              },
+              "artifactWrite": {
+                "count": 10,
+                "sumMs": 30.5099999999984,
+                "meanMs": 3.05099999999984,
+                "maxMs": 4.4517999999952735
+              }
+            }
+          },
+          "reference": {
+            "executionCount": 3,
+            "wallMs": {
+              "count": 3,
+              "sumMs": 42998.1715,
+              "meanMs": 14332.723833333332,
+              "maxMs": 14824.992599999998
+            },
+            "stages": {
+              "preparation": {
+                "count": 3,
+                "sumMs": 17.950299999996787,
+                "meanMs": 5.983433333332262,
+                "maxMs": 9.24500000000262
+              },
+              "networkCreation": {
+                "count": 3,
+                "sumMs": 1416.6981000000014,
+                "meanMs": 472.2327000000005,
+                "maxMs": 509.9277000000002
+              },
+              "postgresStartup": {
+                "count": 3,
+                "sumMs": 3052.6979000000065,
+                "meanMs": 1017.5659666666688,
+                "maxMs": 1249.3266999999978
+              },
+              "postgresReadiness": {
+                "count": 3,
+                "sumMs": 6789.963599999988,
+                "meanMs": 2263.321199999996,
+                "maxMs": 2721.1380999999965
+              },
+              "applicationStartup": {
+                "count": 3,
+                "sumMs": 2582.3273000000045,
+                "meanMs": 860.7757666666681,
+                "maxMs": 950.6731
+              },
+              "applicationReadiness": {
+                "count": 3,
+                "sumMs": 4850.857700000008,
+                "meanMs": 1616.9525666666693,
+                "maxMs": 1687.0100999999995
+              },
+              "candidatePreparation": {
+                "count": 3,
+                "sumMs": 2943.9893999999986,
+                "meanMs": 981.3297999999995,
+                "maxMs": 1013.515800000001
+              },
+              "candidateExecution": {
+                "count": 3,
+                "sumMs": 9331.361600000004,
+                "meanMs": 3110.453866666668,
+                "maxMs": 3477.9793000000063
+              },
+              "evidenceCollection": {
+                "count": 3,
+                "sumMs": 3676.1914999999935,
+                "meanMs": 1225.3971666666646,
+                "maxMs": 1237.716499999995
+              },
+              "cleanup": {
+                "count": 3,
+                "sumMs": 8328.800600000002,
+                "meanMs": 2776.2668666666673,
+                "maxMs": 2843.327400000002
+              },
+              "artifactWrite": {
+                "count": 3,
+                "sumMs": 7.329599999997299,
+                "meanMs": 2.4431999999991,
+                "maxMs": 2.842000000004191
+              }
+            }
+          },
+          "alternate": {
+            "executionCount": 3,
+            "wallMs": {
+              "count": 3,
+              "sumMs": 40763.957200000004,
+              "meanMs": 13587.985733333335,
+              "maxMs": 13903.585200000001
+            },
+            "stages": {
+              "preparation": {
+                "count": 3,
+                "sumMs": 22.892399999996996,
+                "meanMs": 7.630799999998999,
+                "maxMs": 8.400200000003679
+              },
+              "networkCreation": {
+                "count": 3,
+                "sumMs": 1690.912400000001,
+                "meanMs": 563.637466666667,
+                "maxMs": 669.4529999999941
+              },
+              "postgresStartup": {
+                "count": 3,
+                "sumMs": 2653.260300000009,
+                "meanMs": 884.420100000003,
+                "maxMs": 969.4731000000029
+              },
+              "postgresReadiness": {
+                "count": 3,
+                "sumMs": 5729.381799999988,
+                "meanMs": 1909.7939333333295,
+                "maxMs": 2259.119299999991
+              },
+              "applicationStartup": {
+                "count": 3,
+                "sumMs": 2375.6061000000045,
+                "meanMs": 791.8687000000015,
+                "maxMs": 857.088499999998
+              },
+              "applicationReadiness": {
+                "count": 3,
+                "sumMs": 4223.266499999998,
+                "meanMs": 1407.7554999999993,
+                "maxMs": 1495.0581000000093
+              },
+              "candidatePreparation": {
+                "count": 3,
+                "sumMs": 3136.378199999992,
+                "meanMs": 1045.4593999999972,
+                "maxMs": 1133.3640000000014
+              },
+              "candidateExecution": {
+                "count": 3,
+                "sumMs": 9000.270500000013,
+                "meanMs": 3000.090166666671,
+                "maxMs": 3248.1417999999976
+              },
+              "evidenceCollection": {
+                "count": 3,
+                "sumMs": 3591.199499999988,
+                "meanMs": 1197.066499999996,
+                "maxMs": 1281.964399999997
+              },
+              "cleanup": {
+                "count": 3,
+                "sumMs": 8332.832400000014,
+                "meanMs": 2777.6108000000045,
+                "maxMs": 2926.3943
+              },
+              "artifactWrite": {
+                "count": 3,
+                "sumMs": 7.951599999985774,
+                "meanMs": 2.650533333328591,
+                "maxMs": 3.194199999998091
+              }
+            }
+          },
+          "decoy": {
+            "executionCount": 1,
+            "wallMs": {
+              "count": 1,
+              "sumMs": 13036.09640000001,
+              "meanMs": 13036.09640000001,
+              "maxMs": 13036.09640000001
+            },
+            "stages": {
+              "preparation": {
+                "count": 1,
+                "sumMs": 8.926699999996345,
+                "meanMs": 8.926699999996345,
+                "maxMs": 8.926699999996345
+              },
+              "networkCreation": {
+                "count": 1,
+                "sumMs": 482.127800000002,
+                "meanMs": 482.127800000002,
+                "maxMs": 482.127800000002
+              },
+              "postgresStartup": {
+                "count": 1,
+                "sumMs": 792.463499999998,
+                "meanMs": 792.463499999998,
+                "maxMs": 792.463499999998
+              },
+              "postgresReadiness": {
+                "count": 1,
+                "sumMs": 2202.790200000003,
+                "meanMs": 2202.790200000003,
+                "maxMs": 2202.790200000003
+              },
+              "applicationStartup": {
+                "count": 1,
+                "sumMs": 715.3981000000058,
+                "meanMs": 715.3981000000058,
+                "maxMs": 715.3981000000058
+              },
+              "applicationReadiness": {
+                "count": 1,
+                "sumMs": 1579.9707999999955,
+                "meanMs": 1579.9707999999955,
+                "maxMs": 1579.9707999999955
+              },
+              "candidatePreparation": {
+                "count": 1,
+                "sumMs": 896.9713999999949,
+                "meanMs": 896.9713999999949,
+                "maxMs": 896.9713999999949
+              },
+              "candidateExecution": {
+                "count": 1,
+                "sumMs": 2512.862200000003,
+                "meanMs": 2512.862200000003,
+                "maxMs": 2512.862200000003
+              },
+              "evidenceCollection": {
+                "count": 1,
+                "sumMs": 1081.912599999996,
+                "meanMs": 1081.912599999996,
+                "maxMs": 1081.912599999996
+              },
+              "cleanup": {
+                "count": 1,
+                "sumMs": 2759.695900000006,
+                "meanMs": 2759.695900000006,
+                "maxMs": 2759.695900000006
+              },
+              "artifactWrite": {
+                "count": 1,
+                "sumMs": 2.975300000005518,
+                "meanMs": 2.975300000005518,
+                "maxMs": 2.975300000005518
+              }
+            }
+          }
+        },
+        "unclassified": {
+          "executionCount": 0,
+          "wallMs": {
+            "count": 0,
+            "sumMs": 0,
+            "meanMs": null,
+            "maxMs": null
+          },
+          "stages": {}
+        },
+        "missingProfileCount": 0
+      },
+      "judge": {
+        "status": "VERIFIED",
+        "checks": {
+          "buggyFails": true,
+          "sameFailureIdentity": true,
+          "referenceFixPasses": true,
+          "alternateFixPasses": true,
+          "decoyFixStillFails": true,
+          "offlineExecution": true,
+          "isolatedExecution": true,
+          "freshState": true,
+          "noSleepBasedTiming": true,
+          "reviewableTest": true,
+          "sameCandidate": true,
+          "deterministicRuns": 10,
+          "deterministicFailures": 10
+        },
+        "referenceFixAttempts": 3,
+        "referenceFixSuccesses": 3,
+        "alternateFixAttempts": 3,
+        "alternateFixSuccesses": 3,
+        "decoyAttempts": 1,
+        "candidateHash": "16fea9fa5391aa587ee3145d9d091a79bf89295db85b2b7ec117c5cb00424102",
+        "incidentHash": "737ec3794b274b380c5825b81e47c1b5ebabd469e828b412af745e686084ea45"
+      },
+      "smoke": {
+        "status": "PASS",
+        "wrongFrameRejected": true,
+        "missingBodyAbstained": true
+      },
+      "pipeline": {
+        "concurrency": 3,
+        "fixRepetitions": 3,
+        "wallMs": 80100.11989999999,
+        "matrixWallMs": 79037.2987,
+        "maxActiveExecutions": 3
+      },
+      "resources": {
+        "containerCountSamples": 19,
+        "cpuSamples": 10,
+        "memorySamples": 10,
+        "peakActiveLabeledContainers": 9,
+        "peakAggregateCpuPercent": 181.12,
+        "peakAggregateMemoryBytes": 388287692.79999995,
+        "sampleCount": 19,
+        "samplerErrorCount": 4,
+        "intervalMs": 5000,
+        "commandTimeoutMs": 8000
+      },
+      "artifactErrorCount": 0,
+      "measurementFailed": false
+    },
+    {
+      "schemaVersion": 1,
+      "runId": "7d7a8213-cc5c-423e-aeed-13a0fae3658c",
+      "label": "optimized-concurrency3-repeat",
+      "startedAt": "2026-10-16T20:19:56.762Z",
+      "wallMs": 117852.6389,
+      "concurrencyRequested": 3,
+      "sources": {
+        "measurement": "runs/7d7a8213-cc5c-423e-aeed-13a0fae3658c/measurement.json",
+        "result": "runs/7d7a8213-cc5c-423e-aeed-13a0fae3658c/result.json",
+        "pipeline": "runs/7d7a8213-cc5c-423e-aeed-13a0fae3658c/pipeline.json"
+      },
+      "machine": {
+        "platform": "win32",
+        "architecture": "x64",
+        "node": "v22.23.3",
+        "logicalCpus": 12,
+        "totalMemoryBytes": 16995729408
+      },
+      "dockerEngineCapacity": {
+        "cpuCount": 12,
+        "totalMemoryBytes": 8234680320
+      },
+      "images": {
+        "nodeImage": "sha256:c3de60bf2f9dd0ac6370e6117950ff62d6e339527e7472301c9c78a017978392",
+        "postgresImage": "sha256:b0f9560a2de083e2cc7382e75f808c7381a32852a7ec49117deedb300e552b24",
+        "candidateImage": "sha256:0c35c9e7ad3b553c35b03361d4a2700529637b7fb7a5dfbf88e1268a31b87f55",
+        "plannerImage": "sha256:121d1bd73f7a1609362942a40d80ecb702fa72e47ec674788672a72f914f40e6",
+        "appImages": {
+          "buggy": "sha256:9be237516d80e283ddfb4d2530a70a947c6deb24ae6957ab8b4203a7e17e537d",
+          "reference": "sha256:9df5fee2abbc46eb13910b74b789d2752db39ea4135f676970a816a3b9513f6a",
+          "alternate": "sha256:1504ba6b325580f214150d99552633520e455938769a5e28dd77b69de5e51805",
+          "decoy": "sha256:cf51d75968ebd58234b7e274ffd9de08c709e017ab9a1684a4bb501e908c86d9"
+        },
+        "sourceHashes": {
+          "buggy": "6b1c4be39b43148ce483af1818d0b51374296692c347df4ddfe51f3d13060b30",
+          "reference": "59d0cf2a4dacfdcf9e80110c1f2b1285992e6161e6a1420f87424dade1b94fe6",
+          "alternate": "c91367e6ff1e0e07ccbe413bb05ac8e17d0a8a798a5bd9f69fb9d37d562bf121",
+          "decoy": "3c4b4129f02d98b83fefc511e76fb8e12d913bf3bcb5233cdbc441bc092a1fdb"
+        }
+      },
+      "stages": {
+        "capture": {
+          "executionCount": 1,
+          "wallMs": {
+            "count": 1,
+            "sumMs": 10632.426500000001,
+            "meanMs": 10632.426500000001,
+            "maxMs": 10632.426500000001
+          },
+          "stages": {
+            "preparation": {
+              "count": 1,
+              "sumMs": 10.85810000000015,
+              "meanMs": 10.85810000000015,
+              "maxMs": 10.85810000000015
+            },
+            "networkCreation": {
+              "count": 1,
+              "sumMs": 450.53340000000003,
+              "meanMs": 450.53340000000003,
+              "maxMs": 450.53340000000003
+            },
+            "postgresStartup": {
+              "count": 1,
+              "sumMs": 674.0157999999997,
+              "meanMs": 674.0157999999997,
+              "maxMs": 674.0157999999997
+            },
+            "postgresReadiness": {
+              "count": 1,
+              "sumMs": 1550.5523000000003,
+              "meanMs": 1550.5523000000003,
+              "maxMs": 1550.5523000000003
+            },
+            "applicationStartup": {
+              "count": 1,
+              "sumMs": 623.4141,
+              "meanMs": 623.4141,
+              "maxMs": 623.4141
+            },
+            "applicationReadiness": {
+              "count": 1,
+              "sumMs": 1120.8779999999997,
+              "meanMs": 1120.8779999999997,
+              "maxMs": 1120.8779999999997
+            },
+            "candidatePreparation": {
+              "count": 1,
+              "sumMs": 946.4961000000003,
+              "meanMs": 946.4961000000003,
+              "maxMs": 946.4961000000003
+            },
+            "candidateExecution": {
+              "count": 1,
+              "sumMs": 1614.4829000000009,
+              "meanMs": 1614.4829000000009,
+              "maxMs": 1614.4829000000009
+            },
+            "evidenceCollection": {
+              "count": 1,
+              "sumMs": 1092.2645999999986,
+              "meanMs": 1092.2645999999986,
+              "maxMs": 1092.2645999999986
+            },
+            "cleanup": {
+              "count": 1,
+              "sumMs": 2540.2757,
+              "meanMs": 2540.2757,
+              "maxMs": 2540.2757
+            },
+            "artifactWrite": {
+              "count": 1,
+              "sumMs": 8.635700000000725,
+              "meanMs": 8.635700000000725,
+              "maxMs": 8.635700000000725
+            }
+          }
+        },
+        "matrix": {
+          "executionCount": 17,
+          "wallMs": {
+            "count": 17,
+            "sumMs": 291512.6248,
+            "meanMs": 17147.801458823527,
+            "maxMs": 21856.4798
+          },
+          "stages": {
+            "preparation": {
+              "count": 17,
+              "sumMs": 196.66609999998946,
+              "meanMs": 11.56859411764644,
+              "maxMs": 55.428499999999985
+            },
+            "networkCreation": {
+              "count": 17,
+              "sumMs": 10313.166600000011,
+              "meanMs": 606.6568588235301,
+              "maxMs": 848.158500000005
+            },
+            "postgresStartup": {
+              "count": 17,
+              "sumMs": 17800.18249999998,
+              "meanMs": 1047.0695588235283,
+              "maxMs": 1361.258999999991
+            },
+            "postgresReadiness": {
+              "count": 17,
+              "sumMs": 43346.87410000001,
+              "meanMs": 2549.8161235294124,
+              "maxMs": 4470.479700000011
+            },
+            "applicationStartup": {
+              "count": 17,
+              "sumMs": 16828.09290000001,
+              "meanMs": 989.8878176470595,
+              "maxMs": 1196.2278000000006
+            },
+            "applicationReadiness": {
+              "count": 17,
+              "sumMs": 33477.730899999995,
+              "meanMs": 1969.2782882352938,
+              "maxMs": 2563.3454000000056
+            },
+            "candidatePreparation": {
+              "count": 17,
+              "sumMs": 20294.531199999983,
+              "meanMs": 1193.7959529411755,
+              "maxMs": 1583.3803000000044
+            },
+            "candidateExecution": {
+              "count": 17,
+              "sumMs": 65374.285600000025,
+              "meanMs": 3845.5462117647076,
+              "maxMs": 6669.311999999991
+            },
+            "evidenceCollection": {
+              "count": 17,
+              "sumMs": 24178.46339999999,
+              "meanMs": 1422.262552941176,
+              "maxMs": 2209.964399999997
+            },
+            "cleanup": {
+              "count": 17,
+              "sumMs": 59653.671900000016,
+              "meanMs": 3509.0395235294127,
+              "maxMs": 4134.6965000000055
+            },
+            "artifactWrite": {
+              "count": 17,
+              "sumMs": 48.85160000000542,
+              "meanMs": 2.8736235294120833,
+              "maxMs": 4.502200000002631
+            }
+          }
+        },
+        "byVariant": {
+          "buggy": {
+            "executionCount": 10,
+            "wallMs": {
+              "count": 10,
+              "sumMs": 154496.30469999998,
+              "meanMs": 15449.630469999998,
+              "maxMs": 17446.285499999998
+            },
+            "stages": {
+              "preparation": {
+                "count": 10,
+                "sumMs": 148.78479999998854,
+                "meanMs": 14.878479999998854,
+                "maxMs": 55.428499999999985
+              },
+              "networkCreation": {
+                "count": 10,
+                "sumMs": 5703.991500000004,
+                "meanMs": 570.3991500000004,
+                "maxMs": 716.9916000000012
+              },
+              "postgresStartup": {
+                "count": 10,
+                "sumMs": 9675.225499999999,
+                "meanMs": 967.5225499999999,
+                "maxMs": 1314.2479000000021
+              },
+              "postgresReadiness": {
+                "count": 10,
+                "sumMs": 22279.63900000001,
+                "meanMs": 2227.963900000001,
+                "maxMs": 2725.625500000002
+              },
+              "applicationStartup": {
+                "count": 10,
+                "sumMs": 9605.7342,
+                "meanMs": 960.57342,
+                "maxMs": 1171.3727
+              },
+              "applicationReadiness": {
+                "count": 10,
+                "sumMs": 18052.626200000002,
+                "meanMs": 1805.2626200000002,
+                "maxMs": 2250.0065999999933
+              },
+              "candidatePreparation": {
+                "count": 10,
+                "sumMs": 10451.507799999992,
+                "meanMs": 1045.1507799999993,
+                "maxMs": 1175.339399999997
+              },
+              "candidateExecution": {
+                "count": 10,
+                "sumMs": 31010.039900000007,
+                "meanMs": 3101.0039900000006,
+                "maxMs": 3839.550999999992
+              },
+              "evidenceCollection": {
+                "count": 10,
+                "sumMs": 12775.308899999985,
+                "meanMs": 1277.5308899999986,
+                "maxMs": 1380.8413
+              },
+              "cleanup": {
+                "count": 10,
+                "sumMs": 34761.95870000002,
+                "meanMs": 3476.195870000002,
+                "maxMs": 3968.6178
+              },
+              "artifactWrite": {
+                "count": 10,
+                "sumMs": 31.392699999993056,
+                "meanMs": 3.1392699999993057,
+                "maxMs": 4.502200000002631
+              }
+            }
+          },
+          "reference": {
+            "executionCount": 3,
+            "wallMs": {
+              "count": 3,
+              "sumMs": 56434.023900000015,
+              "meanMs": 18811.341300000004,
+              "maxMs": 21571.8784
+            },
+            "stages": {
+              "preparation": {
+                "count": 3,
+                "sumMs": 19.590900000002875,
+                "meanMs": 6.530300000000959,
+                "maxMs": 8.199700000004668
+              },
+              "networkCreation": {
+                "count": 3,
+                "sumMs": 1869.7007000000012,
+                "meanMs": 623.2335666666671,
+                "maxMs": 848.158500000005
+              },
+              "postgresStartup": {
+                "count": 3,
+                "sumMs": 3326.082999999984,
+                "meanMs": 1108.6943333333281,
+                "maxMs": 1247.4937999999966
+              },
+              "postgresReadiness": {
+                "count": 3,
+                "sumMs": 7729.018000000004,
+                "meanMs": 2576.3393333333347,
+                "maxMs": 2689.547200000001
+              },
+              "applicationStartup": {
+                "count": 3,
+                "sumMs": 3277.4035000000003,
+                "meanMs": 1092.4678333333334,
+                "maxMs": 1196.2278000000006
+              },
+              "applicationReadiness": {
+                "count": 3,
+                "sumMs": 7022.882500000007,
+                "meanMs": 2340.960833333336,
+                "maxMs": 2563.3454000000056
+              },
+              "candidatePreparation": {
+                "count": 3,
+                "sumMs": 3871.1677999999956,
+                "meanMs": 1290.3892666666652,
+                "maxMs": 1437.6532000000007
+              },
+              "candidateExecution": {
+                "count": 3,
+                "sumMs": 13392.469100000017,
+                "meanMs": 4464.1563666666725,
+                "maxMs": 6072.764500000005
+              },
+              "evidenceCollection": {
+                "count": 3,
+                "sumMs": 4891.017499999987,
+                "meanMs": 1630.3391666666623,
+                "maxMs": 2209.964399999997
+              },
+              "cleanup": {
+                "count": 3,
+                "sumMs": 11026.271500000003,
+                "meanMs": 3675.423833333334,
+                "maxMs": 3979.9986999999965
+              },
+              "artifactWrite": {
+                "count": 3,
+                "sumMs": 8.414300000004005,
+                "meanMs": 2.8047666666680016,
+                "maxMs": 3.755799999998999
+              }
+            }
+          },
+          "alternate": {
+            "executionCount": 3,
+            "wallMs": {
+              "count": 3,
+              "sumMs": 62482.96180000002,
+              "meanMs": 20827.65393333334,
+              "maxMs": 21856.4798
+            },
+            "stages": {
+              "preparation": {
+                "count": 3,
+                "sumMs": 22.114500000010594,
+                "meanMs": 7.371500000003532,
+                "maxMs": 8.221799999999348
+              },
+              "networkCreation": {
+                "count": 3,
+                "sumMs": 2159.768599999996,
+                "meanMs": 719.9228666666653,
+                "maxMs": 803.245299999995
+              },
+              "postgresStartup": {
+                "count": 3,
+                "sumMs": 3437.6150000000052,
+                "meanMs": 1145.8716666666685,
+                "maxMs": 1220.0513999999966
+              },
+              "postgresReadiness": {
+                "count": 3,
+                "sumMs": 9800.996799999994,
+                "meanMs": 3266.998933333331,
+                "maxMs": 4470.479700000011
+              },
+              "applicationStartup": {
+                "count": 3,
+                "sumMs": 3079.647800000006,
+                "meanMs": 1026.5492666666687,
+                "maxMs": 1180.8931000000011
+              },
+              "applicationReadiness": {
+                "count": 3,
+                "sumMs": 6367.103099999993,
+                "meanMs": 2122.3676999999975,
+                "maxMs": 2502.652000000002
+              },
+              "candidatePreparation": {
+                "count": 3,
+                "sumMs": 4545.0144,
+                "meanMs": 1515.0048,
+                "maxMs": 1583.3803000000044
+              },
+              "candidateExecution": {
+                "count": 3,
+                "sumMs": 17025.460699999996,
+                "meanMs": 5675.153566666665,
+                "maxMs": 6669.311999999991
+              },
+              "evidenceCollection": {
+                "count": 3,
+                "sumMs": 4958.254600000015,
+                "meanMs": 1652.7515333333383,
+                "maxMs": 1829.796000000002
+              },
+              "cleanup": {
+                "count": 3,
+                "sumMs": 11079.857999999993,
+                "meanMs": 3693.285999999998,
+                "maxMs": 4134.6965000000055
+              },
+              "artifactWrite": {
+                "count": 3,
+                "sumMs": 7.122500000012224,
+                "meanMs": 2.374166666670741,
+                "maxMs": 2.894799999994575
+              }
+            }
+          },
+          "decoy": {
+            "executionCount": 1,
+            "wallMs": {
+              "count": 1,
+              "sumMs": 18099.334399999992,
+              "meanMs": 18099.334399999992,
+              "maxMs": 18099.334399999992
+            },
+            "stages": {
+              "preparation": {
+                "count": 1,
+                "sumMs": 6.17589999998745,
+                "meanMs": 6.17589999998745,
+                "maxMs": 6.17589999998745
+              },
+              "networkCreation": {
+                "count": 1,
+                "sumMs": 579.7058000000106,
+                "meanMs": 579.7058000000106,
+                "maxMs": 579.7058000000106
+              },
+              "postgresStartup": {
+                "count": 1,
+                "sumMs": 1361.258999999991,
+                "meanMs": 1361.258999999991,
+                "maxMs": 1361.258999999991
+              },
+              "postgresReadiness": {
+                "count": 1,
+                "sumMs": 3537.220300000001,
+                "meanMs": 3537.220300000001,
+                "maxMs": 3537.220300000001
+              },
+              "applicationStartup": {
+                "count": 1,
+                "sumMs": 865.3074000000051,
+                "meanMs": 865.3074000000051,
+                "maxMs": 865.3074000000051
+              },
+              "applicationReadiness": {
+                "count": 1,
+                "sumMs": 2035.1190999999963,
+                "meanMs": 2035.1190999999963,
+                "maxMs": 2035.1190999999963
+              },
+              "candidatePreparation": {
+                "count": 1,
+                "sumMs": 1426.8411999999953,
+                "meanMs": 1426.8411999999953,
+                "maxMs": 1426.8411999999953
+              },
+              "candidateExecution": {
+                "count": 1,
+                "sumMs": 3946.3159000000014,
+                "meanMs": 3946.3159000000014,
+                "maxMs": 3946.3159000000014
+              },
+              "evidenceCollection": {
+                "count": 1,
+                "sumMs": 1553.8824000000022,
+                "meanMs": 1553.8824000000022,
+                "maxMs": 1553.8824000000022
+              },
+              "cleanup": {
+                "count": 1,
+                "sumMs": 2785.583700000003,
+                "meanMs": 2785.583700000003,
+                "maxMs": 2785.583700000003
+              },
+              "artifactWrite": {
+                "count": 1,
+                "sumMs": 1.922099999996135,
+                "meanMs": 1.922099999996135,
+                "maxMs": 1.922099999996135
+              }
+            }
+          }
+        },
+        "unclassified": {
+          "executionCount": 0,
+          "wallMs": {
+            "count": 0,
+            "sumMs": 0,
+            "meanMs": null,
+            "maxMs": null
+          },
+          "stages": {}
+        },
+        "missingProfileCount": 0
+      },
+      "judge": {
+        "status": "VERIFIED",
+        "checks": {
+          "buggyFails": true,
+          "sameFailureIdentity": true,
+          "referenceFixPasses": true,
+          "alternateFixPasses": true,
+          "decoyFixStillFails": true,
+          "offlineExecution": true,
+          "isolatedExecution": true,
+          "freshState": true,
+          "noSleepBasedTiming": true,
+          "reviewableTest": true,
+          "sameCandidate": true,
+          "deterministicRuns": 10,
+          "deterministicFailures": 10
+        },
+        "referenceFixAttempts": 3,
+        "referenceFixSuccesses": 3,
+        "alternateFixAttempts": 3,
+        "alternateFixSuccesses": 3,
+        "decoyAttempts": 1,
+        "candidateHash": "16fea9fa5391aa587ee3145d9d091a79bf89295db85b2b7ec117c5cb00424102",
+        "incidentHash": "2bade625af788360c3e29e97fd80c0c7ef3c68d316c0fef9eb63f18fbf59c8d1"
+      },
+      "smoke": {
+        "status": "PASS",
+        "wrongFrameRejected": true,
+        "missingBodyAbstained": true
+      },
+      "pipeline": {
+        "concurrency": 3,
+        "fixRepetitions": 3,
+        "wallMs": 104426.8043,
+        "matrixWallMs": 103314.4996,
+        "maxActiveExecutions": 3
+      },
+      "resources": {
+        "containerCountSamples": 24,
+        "cpuSamples": 14,
+        "memorySamples": 14,
+        "peakActiveLabeledContainers": 9,
+        "peakAggregateCpuPercent": 182.41,
+        "peakAggregateMemoryBytes": 429926645.76,
+        "sampleCount": 24,
+        "samplerErrorCount": 4,
+        "intervalMs": 5000,
+        "commandTimeoutMs": 8000
+      },
+      "artifactErrorCount": 0,
+      "measurementFailed": false
+    },
+    {
+      "schemaVersion": 1,
+      "runId": "55bbfcdc-2773-43e7-a4cd-f40d333c0bd6",
+      "label": "strengthened-concurrency2-repeat",
+      "startedAt": "2026-10-16T20:21:57.158Z",
+      "wallMs": 151202.46589999998,
+      "concurrencyRequested": 2,
+      "sources": {
+        "measurement": "runs/55bbfcdc-2773-43e7-a4cd-f40d333c0bd6/measurement.json",
+        "result": "runs/55bbfcdc-2773-43e7-a4cd-f40d333c0bd6/result.json",
+        "pipeline": "runs/55bbfcdc-2773-43e7-a4cd-f40d333c0bd6/pipeline.json"
+      },
+      "machine": {
+        "platform": "win32",
+        "architecture": "x64",
+        "node": "v22.23.3",
+        "logicalCpus": 12,
+        "totalMemoryBytes": 16995729408
+      },
+      "dockerEngineCapacity": {
+        "cpuCount": 12,
+        "totalMemoryBytes": 8234680320
+      },
+      "images": {
+        "nodeImage": "sha256:c3de60bf2f9dd0ac6370e6117950ff62d6e339527e7472301c9c78a017978392",
+        "postgresImage": "sha256:b0f9560a2de083e2cc7382e75f808c7381a32852a7ec49117deedb300e552b24",
+        "candidateImage": "sha256:0c35c9e7ad3b553c35b03361d4a2700529637b7fb7a5dfbf88e1268a31b87f55",
+        "plannerImage": "sha256:121d1bd73f7a1609362942a40d80ecb702fa72e47ec674788672a72f914f40e6",
+        "appImages": {
+          "buggy": "sha256:9be237516d80e283ddfb4d2530a70a947c6deb24ae6957ab8b4203a7e17e537d",
+          "reference": "sha256:9df5fee2abbc46eb13910b74b789d2752db39ea4135f676970a816a3b9513f6a",
+          "alternate": "sha256:1504ba6b325580f214150d99552633520e455938769a5e28dd77b69de5e51805",
+          "decoy": "sha256:cf51d75968ebd58234b7e274ffd9de08c709e017ab9a1684a4bb501e908c86d9"
+        },
+        "sourceHashes": {
+          "buggy": "6b1c4be39b43148ce483af1818d0b51374296692c347df4ddfe51f3d13060b30",
+          "reference": "59d0cf2a4dacfdcf9e80110c1f2b1285992e6161e6a1420f87424dade1b94fe6",
+          "alternate": "c91367e6ff1e0e07ccbe413bb05ac8e17d0a8a798a5bd9f69fb9d37d562bf121",
+          "decoy": "3c4b4129f02d98b83fefc511e76fb8e12d913bf3bcb5233cdbc441bc092a1fdb"
+        }
+      },
+      "stages": {
+        "capture": {
+          "executionCount": 1,
+          "wallMs": {
+            "count": 1,
+            "sumMs": 12524.755500000001,
+            "meanMs": 12524.755500000001,
+            "maxMs": 12524.755500000001
+          },
+          "stages": {
+            "preparation": {
+              "count": 1,
+              "sumMs": 24.89930000000004,
+              "meanMs": 24.89930000000004,
+              "maxMs": 24.89930000000004
+            },
+            "networkCreation": {
+              "count": 1,
+              "sumMs": 499.4077000000002,
+              "meanMs": 499.4077000000002,
+              "maxMs": 499.4077000000002
+            },
+            "postgresStartup": {
+              "count": 1,
+              "sumMs": 753.3858,
+              "meanMs": 753.3858,
+              "maxMs": 753.3858
+            },
+            "postgresReadiness": {
+              "count": 1,
+              "sumMs": 2096.1515,
+              "meanMs": 2096.1515,
+              "maxMs": 2096.1515
+            },
+            "applicationStartup": {
+              "count": 1,
+              "sumMs": 695.0451000000003,
+              "meanMs": 695.0451000000003,
+              "maxMs": 695.0451000000003
+            },
+            "applicationReadiness": {
+              "count": 1,
+              "sumMs": 1520.1122999999998,
+              "meanMs": 1520.1122999999998,
+              "maxMs": 1520.1122999999998
+            },
+            "candidatePreparation": {
+              "count": 1,
+              "sumMs": 1059.2979000000005,
+              "meanMs": 1059.2979000000005,
+              "maxMs": 1059.2979000000005
+            },
+            "candidateExecution": {
+              "count": 1,
+              "sumMs": 1927.2677999999996,
+              "meanMs": 1927.2677999999996,
+              "maxMs": 1927.2677999999996
+            },
+            "evidenceCollection": {
+              "count": 1,
+              "sumMs": 1198.4038,
+              "meanMs": 1198.4038,
+              "maxMs": 1198.4038
+            },
+            "cleanup": {
+              "count": 1,
+              "sumMs": 2739.0576,
+              "meanMs": 2739.0576,
+              "maxMs": 2739.0576
+            },
+            "artifactWrite": {
+              "count": 1,
+              "sumMs": 11.690800000000309,
+              "meanMs": 11.690800000000309,
+              "maxMs": 11.690800000000309
+            }
+          }
+        },
+        "matrix": {
+          "executionCount": 17,
+          "wallMs": {
+            "count": 17,
+            "sumMs": 257293.75959999993,
+            "meanMs": 15134.927035294113,
+            "maxMs": 15837.740999999998
+          },
+          "stages": {
+            "preparation": {
+              "count": 17,
+              "sumMs": 165.01110000001609,
+              "meanMs": 9.706535294118593,
+              "maxMs": 41.435199999999895
+            },
+            "networkCreation": {
+              "count": 17,
+              "sumMs": 8845.377499999997,
+              "meanMs": 520.3163235294115,
+              "maxMs": 580.9969000000019
+            },
+            "postgresStartup": {
+              "count": 17,
+              "sumMs": 16748.020099999998,
+              "meanMs": 985.1776529411763,
+              "maxMs": 1213.8031999999985
+            },
+            "postgresReadiness": {
+              "count": 17,
+              "sumMs": 39370.7153,
+              "meanMs": 2315.924429411765,
+              "maxMs": 2910.3031000000046
+            },
+            "applicationStartup": {
+              "count": 17,
+              "sumMs": 15964.735899999981,
+              "meanMs": 939.1021117647048,
+              "maxMs": 1117.991900000001
+            },
+            "applicationReadiness": {
+              "count": 17,
+              "sumMs": 32580.565000000024,
+              "meanMs": 1916.5038235294132,
+              "maxMs": 2234.8659000000043
+            },
+            "candidatePreparation": {
+              "count": 17,
+              "sumMs": 18814.690599999987,
+              "meanMs": 1106.7465058823523,
+              "maxMs": 1345.5339999999997
+            },
+            "candidateExecution": {
+              "count": 17,
+              "sumMs": 52880.899200000014,
+              "meanMs": 3110.6411294117656,
+              "maxMs": 3516.281600000002
+            },
+            "evidenceCollection": {
+              "count": 17,
+              "sumMs": 20272.902700000013,
+              "meanMs": 1192.523688235295,
+              "maxMs": 1359.7662999999957
+            },
+            "cleanup": {
+              "count": 17,
+              "sumMs": 51598.84289999999,
+              "meanMs": 3035.226052941176,
+              "maxMs": 3404.234199999999
+            },
+            "artifactWrite": {
+              "count": 17,
+              "sumMs": 51.72549999998955,
+              "meanMs": 3.0426764705876206,
+              "maxMs": 3.9633000000030734
+            }
+          }
+        },
+        "byVariant": {
+          "buggy": {
+            "executionCount": 10,
+            "wallMs": {
+              "count": 10,
+              "sumMs": 153977.2925,
+              "meanMs": 15397.72925,
+              "maxMs": 15837.740999999998
+            },
+            "stages": {
+              "preparation": {
+                "count": 10,
+                "sumMs": 113.0661000000091,
+                "meanMs": 11.30661000000091,
+                "maxMs": 41.435199999999895
+              },
+              "networkCreation": {
+                "count": 10,
+                "sumMs": 5272.661099999992,
+                "meanMs": 527.2661099999992,
+                "maxMs": 580.9969000000019
+              },
+              "postgresStartup": {
+                "count": 10,
+                "sumMs": 10235.821700000004,
+                "meanMs": 1023.5821700000004,
+                "maxMs": 1213.8031999999985
+              },
+              "postgresReadiness": {
+                "count": 10,
+                "sumMs": 24249.091200000006,
+                "meanMs": 2424.9091200000007,
+                "maxMs": 2910.3031000000046
+              },
+              "applicationStartup": {
+                "count": 10,
+                "sumMs": 9301.190199999994,
+                "meanMs": 930.1190199999994,
+                "maxMs": 1117.991900000001
+              },
+              "applicationReadiness": {
+                "count": 10,
+                "sumMs": 19813.983300000014,
+                "meanMs": 1981.3983300000014,
+                "maxMs": 2234.8659000000043
+              },
+              "candidatePreparation": {
+                "count": 10,
+                "sumMs": 11088.320499999987,
+                "meanMs": 1108.8320499999986,
+                "maxMs": 1345.5339999999997
+              },
+              "candidateExecution": {
+                "count": 10,
+                "sumMs": 30577.5128,
+                "meanMs": 3057.75128,
+                "maxMs": 3471.8979000000036
+              },
+              "evidenceCollection": {
+                "count": 10,
+                "sumMs": 12079.468700000005,
+                "meanMs": 1207.9468700000004,
+                "maxMs": 1359.7662999999957
+              },
+              "cleanup": {
+                "count": 10,
+                "sumMs": 31213.466600000003,
+                "meanMs": 3121.34666,
+                "maxMs": 3404.234199999999
+              },
+              "artifactWrite": {
+                "count": 10,
+                "sumMs": 32.4532999999974,
+                "meanMs": 3.24532999999974,
+                "maxMs": 3.9633000000030734
+              }
+            }
+          },
+          "reference": {
+            "executionCount": 3,
+            "wallMs": {
+              "count": 3,
+              "sumMs": 46002.4443,
+              "meanMs": 15334.1481,
+              "maxMs": 15369.479200000002
+            },
+            "stages": {
+              "preparation": {
+                "count": 3,
+                "sumMs": 22.943299999999,
+                "meanMs": 7.647766666666333,
+                "maxMs": 10.835500000001048
+              },
+              "networkCreation": {
+                "count": 3,
+                "sumMs": 1541.1972000000096,
+                "meanMs": 513.7324000000032,
+                "maxMs": 532.9821000000084
+              },
+              "postgresStartup": {
+                "count": 3,
+                "sumMs": 2784.987200000003,
+                "meanMs": 928.3290666666677,
+                "maxMs": 1029.5804999999964
+              },
+              "postgresReadiness": {
+                "count": 3,
+                "sumMs": 6526.489999999991,
+                "meanMs": 2175.4966666666637,
+                "maxMs": 2321.4293999999936
+              },
+              "applicationStartup": {
+                "count": 3,
+                "sumMs": 2940.0146000000095,
+                "meanMs": 980.0048666666698,
+                "maxMs": 1100.62950000001
+              },
+              "applicationReadiness": {
+                "count": 3,
+                "sumMs": 5792.434399999998,
+                "meanMs": 1930.811466666666,
+                "maxMs": 2032.9369000000006
+              },
+              "candidatePreparation": {
+                "count": 3,
+                "sumMs": 3471.370900000009,
+                "meanMs": 1157.1236333333363,
+                "maxMs": 1167.8102000000072
+              },
+              "candidateExecution": {
+                "count": 3,
+                "sumMs": 10427.807100000005,
+                "meanMs": 3475.935700000002,
+                "maxMs": 3516.281600000002
+              },
+              "evidenceCollection": {
+                "count": 3,
+                "sumMs": 3556.1137000000017,
+                "meanMs": 1185.371233333334,
+                "maxMs": 1198.7171999999991
+              },
+              "cleanup": {
+                "count": 3,
+                "sumMs": 8930.551899999991,
+                "meanMs": 2976.8506333333303,
+                "maxMs": 3258.2304000000004
+              },
+              "artifactWrite": {
+                "count": 3,
+                "sumMs": 8.525499999988824,
+                "meanMs": 2.841833333329608,
+                "maxMs": 3.101699999999255
+              }
+            }
+          },
+          "alternate": {
+            "executionCount": 3,
+            "wallMs": {
+              "count": 3,
+              "sumMs": 45552.7631,
+              "meanMs": 15184.254366666666,
+              "maxMs": 15323.645200000014
+            },
+            "stages": {
+              "preparation": {
+                "count": 3,
+                "sumMs": 20.214099999997416,
+                "meanMs": 6.738033333332472,
+                "maxMs": 8.455499999996391
+              },
+              "networkCreation": {
+                "count": 3,
+                "sumMs": 1529.3723000000027,
+                "meanMs": 509.7907666666676,
+                "maxMs": 539.9758000000002
+              },
+              "postgresStartup": {
+                "count": 3,
+                "sumMs": 3008.184799999988,
+                "meanMs": 1002.7282666666628,
+                "maxMs": 1121.7023000000045
+              },
+              "postgresReadiness": {
+                "count": 3,
+                "sumMs": 7197.115600000005,
+                "meanMs": 2399.0385333333347,
+                "maxMs": 2835.7358999999997
+              },
+              "applicationStartup": {
+                "count": 3,
+                "sumMs": 2827.616200000004,
+                "meanMs": 942.5387333333347,
+                "maxMs": 1024.920299999998
+              },
+              "applicationReadiness": {
+                "count": 3,
+                "sumMs": 5441.0581999999995,
+                "meanMs": 1813.6860666666664,
+                "maxMs": 1892.8957999999984
+              },
+              "candidatePreparation": {
+                "count": 3,
+                "sumMs": 3333.541100000002,
+                "meanMs": 1111.1803666666674,
+                "maxMs": 1142.907400000011
+              },
+              "candidateExecution": {
+                "count": 3,
+                "sumMs": 9703.532899999991,
+                "meanMs": 3234.5109666666635,
+                "maxMs": 3459.4661999999953
+              },
+              "evidenceCollection": {
+                "count": 3,
+                "sumMs": 3574.7867000000115,
+                "meanMs": 1191.5955666666705,
+                "maxMs": 1215.650999999998
+              },
+              "cleanup": {
+                "count": 3,
+                "sumMs": 8909.027799999996,
+                "meanMs": 2969.675933333332,
+                "maxMs": 3129.4370999999956
+              },
+              "artifactWrite": {
+                "count": 3,
+                "sumMs": 8.307300000000396,
+                "meanMs": 2.769100000000132,
+                "maxMs": 2.9435000000084983
+              }
+            }
+          },
+          "decoy": {
+            "executionCount": 1,
+            "wallMs": {
+              "count": 1,
+              "sumMs": 11761.259699999995,
+              "meanMs": 11761.259699999995,
+              "maxMs": 11761.259699999995
+            },
+            "stages": {
+              "preparation": {
+                "count": 1,
+                "sumMs": 8.78760000001057,
+                "meanMs": 8.78760000001057,
+                "maxMs": 8.78760000001057
+              },
+              "networkCreation": {
+                "count": 1,
+                "sumMs": 502.14689999999246,
+                "meanMs": 502.14689999999246,
+                "maxMs": 502.14689999999246
+              },
+              "postgresStartup": {
+                "count": 1,
+                "sumMs": 719.0264000000025,
+                "meanMs": 719.0264000000025,
+                "maxMs": 719.0264000000025
+              },
+              "postgresReadiness": {
+                "count": 1,
+                "sumMs": 1398.0185000000056,
+                "meanMs": 1398.0185000000056,
+                "maxMs": 1398.0185000000056
+              },
+              "applicationStartup": {
+                "count": 1,
+                "sumMs": 895.9148999999743,
+                "meanMs": 895.9148999999743,
+                "maxMs": 895.9148999999743
+              },
+              "applicationReadiness": {
+                "count": 1,
+                "sumMs": 1533.089100000012,
+                "meanMs": 1533.089100000012,
+                "maxMs": 1533.089100000012
+              },
+              "candidatePreparation": {
+                "count": 1,
+                "sumMs": 921.4580999999889,
+                "meanMs": 921.4580999999889,
+                "maxMs": 921.4580999999889
+              },
+              "candidateExecution": {
+                "count": 1,
+                "sumMs": 2172.046400000021,
+                "meanMs": 2172.046400000021,
+                "maxMs": 2172.046400000021
+              },
+              "evidenceCollection": {
+                "count": 1,
+                "sumMs": 1062.5335999999952,
+                "meanMs": 1062.5335999999952,
+                "maxMs": 1062.5335999999952
+              },
+              "cleanup": {
+                "count": 1,
+                "sumMs": 2545.7966000000015,
+                "meanMs": 2545.7966000000015,
+                "maxMs": 2545.7966000000015
+              },
+              "artifactWrite": {
+                "count": 1,
+                "sumMs": 2.4394000000029337,
+                "meanMs": 2.4394000000029337,
+                "maxMs": 2.4394000000029337
+              }
+            }
+          }
+        },
+        "unclassified": {
+          "executionCount": 0,
+          "wallMs": {
+            "count": 0,
+            "sumMs": 0,
+            "meanMs": null,
+            "maxMs": null
+          },
+          "stages": {}
+        },
+        "missingProfileCount": 0
+      },
+      "judge": {
+        "status": "VERIFIED",
+        "checks": {
+          "buggyFails": true,
+          "sameFailureIdentity": true,
+          "referenceFixPasses": true,
+          "alternateFixPasses": true,
+          "decoyFixStillFails": true,
+          "offlineExecution": true,
+          "isolatedExecution": true,
+          "freshState": true,
+          "noSleepBasedTiming": true,
+          "reviewableTest": true,
+          "sameCandidate": true,
+          "deterministicRuns": 10,
+          "deterministicFailures": 10
+        },
+        "referenceFixAttempts": 3,
+        "referenceFixSuccesses": 3,
+        "alternateFixAttempts": 3,
+        "alternateFixSuccesses": 3,
+        "decoyAttempts": 1,
+        "candidateHash": "16fea9fa5391aa587ee3145d9d091a79bf89295db85b2b7ec117c5cb00424102",
+        "incidentHash": "35ae53f2c7f78523f9e1059189b1c3013838991eda0919b3916626db12bdd70e"
+      },
+      "smoke": {
+        "status": "PASS",
+        "wrongFrameRejected": true,
+        "missingBodyAbstained": true
+      },
+      "pipeline": {
+        "concurrency": 2,
+        "fixRepetitions": 3,
+        "wallMs": 135716.2128,
+        "matrixWallMs": 134451.6777,
+        "maxActiveExecutions": 2
+      },
+      "resources": {
+        "containerCountSamples": 31,
+        "cpuSamples": 18,
+        "memorySamples": 18,
+        "peakActiveLabeledContainers": 6,
+        "peakAggregateCpuPercent": 94.64,
+        "peakAggregateMemoryBytes": 234933452.8,
+        "sampleCount": 31,
+        "samplerErrorCount": 5,
+        "intervalMs": 5000,
+        "commandTimeoutMs": 8000
+      },
+      "artifactErrorCount": 0,
+      "measurementFailed": false
+    }
+  ]
+}

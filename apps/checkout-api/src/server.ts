@@ -3,9 +3,13 @@ import { buildApp } from './app.js';
 import { initDatabase } from './database.js';
 import { stopTelemetry } from './instrumentation.js';
 
+const connectionString = process.env.DATABASE_URL;
+if (!connectionString)
+  throw new Error(
+    'DATABASE_URL is required; use the development command to load local configuration',
+  );
 const pool = new pg.Pool({
-  connectionString:
-    process.env.DATABASE_URL ?? 'postgres://replaykit:replaykit-local@127.0.0.1:55432/replaykit',
+  connectionString,
   max: 10,
   connectionTimeoutMillis: 5000,
 });

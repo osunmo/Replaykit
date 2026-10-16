@@ -1,5 +1,5 @@
 import { spawn } from 'node:child_process';
-import { createHash, randomUUID } from 'node:crypto';
+import { createHash, randomBytes, randomUUID } from 'node:crypto';
 import { mkdir, readFile, writeFile } from 'node:fs/promises';
 import path from 'node:path';
 import { z } from 'zod';
@@ -16,6 +16,8 @@ import { docker } from './docker.js';
 import { checkIsolation, validateBrokerRequest } from './sandbox-policy.js';
 import { candidateStateError } from './binding.js';
 import { cleanupOwnedResources } from './cleanup.js';
+import { StageProfiler } from './profiling.js';
+import { BrokerQueue } from './broker-queue.js';
 
 export const variants = ['buggy', 'reference', 'alternate', 'decoy'] as const;
 export type Variant = (typeof variants)[number];
@@ -37,6 +39,7 @@ const ManifestSchema = z.object({
   sourceHashes: z.object({ buggy: hash, reference: hash, alternate: hash, decoy: hash }),
   builtAt: z.string(),
 });
+export type SandboxManifest = z.infer<typeof ManifestSchema>;
 export async function loadManifest(root: string) {
   return ManifestSchema.parse(
     JSON.parse(await readFile(path.join(root, 'work/sandbox/manifest.json'), 'utf8')),
@@ -107,14 +110,20 @@ async function runCandidate(
     let buffer = '';
     let count = 0;
     let settled = false;
-    let chain = Promise.resolve();
+    let stopping = false;
+    const queue = new BrokerQueue((error) => fail(error));
     const seen = new Set<number>();
     const fail = (error: Error) => {
-      if (settled) return;
-      settled = true;
+      if (settled || stopping) return;
+      stopping = true;
       clearTimeout(timer);
       child.kill();
-      reject(error);
+      queue.abort(error);
+      void queue.drain().catch(() => {
+        if (settled) return;
+        settled = true;
+        reject(error);
+      });
     };
     const timer = setTimeout(() => fail(new Error('CANDIDATE_TIMEOUT')), timeoutMs);
     child.on('error', fail);
@@ -126,6 +135,7 @@ async function runCandidate(
       if (stderr.length > 65536) fail(new Error('CANDIDATE_OUTPUT_LIMIT'));
     });
     child.stdout.on('data', (chunk: Buffer) => {
+      if (settled || stopping) return;
       stdout += chunk.toString();
       buffer += chunk.toString();
       if (stdout.length > 65536) {
@@ -137,50 +147,51 @@ async function runCandidate(
         const line = buffer.slice(0, end).trim();
         buffer = buffer.slice(end + 1);
         if (!line.startsWith('@replaykit/request:')) continue;
-        chain = chain
-          .then(async () => {
-            const message = validateBrokerRequest(
-              JSON.parse(line.slice('@replaykit/request:'.length)),
-              request,
-            );
-            if (seen.has(message.id) || seen.size >= 20)
-              throw new Error('CANDIDATE_PROTOCOL_REJECTED');
-            seen.add(message.id);
-            const command =
-              message.action === 'pay'
-                ? { action: 'pay', input: message.input }
-                : { action: 'charges', orderId: message.orderId };
-            const raw = await docker(
-              [
-                'exec',
-                app,
-                'node',
-                '/app/dist/apps/checkout-api/src/broker-client.js',
-                JSON.stringify(command),
-              ],
-              { timeoutMs: 10000 },
-            );
-            const result = JsonResponse.parse(JSON.parse(raw.stdout));
-            if (result.status >= 500) throw new Error('APPLICATION_INFRASTRUCTURE_ERROR');
-            if (message.action === 'pay') count += 1;
-            events.push({
-              sequence: events.length + 1,
-              kind: 'request',
-              checkpoint: `${message.action}.${seen.size}`,
-            });
-            if (!child.stdin.destroyed)
-              child.stdin.write(JSON.stringify({ id: message.id, ok: true, value: result }) + '\n');
-          })
-          .catch(fail);
+        queue.enqueue(async () => {
+          const message = validateBrokerRequest(
+            JSON.parse(line.slice('@replaykit/request:'.length)),
+            request,
+          );
+          if (seen.has(message.id) || seen.size >= 20)
+            throw new Error('CANDIDATE_PROTOCOL_REJECTED');
+          seen.add(message.id);
+          const command =
+            message.action === 'pay'
+              ? { action: 'pay', input: message.input }
+              : { action: 'charges', orderId: message.orderId };
+          const raw = await docker(
+            [
+              'exec',
+              app,
+              'node',
+              '/app/dist/apps/checkout-api/src/broker-client.js',
+              JSON.stringify(command),
+            ],
+            { timeoutMs: 10000 },
+          );
+          const result = JsonResponse.parse(JSON.parse(raw.stdout));
+          if (result.status >= 500) throw new Error('APPLICATION_INFRASTRUCTURE_ERROR');
+          if (message.action === 'pay') count += 1;
+          events.push({
+            sequence: events.length + 1,
+            kind: 'request',
+            checkpoint: `${message.action}.${seen.size}`,
+          });
+          if (!child.stdin.destroyed)
+            child.stdin.write(JSON.stringify({ id: message.id, ok: true, value: result }) + '\n');
+        });
       }
     });
     child.on('close', (code) => {
-      void chain.then(() => {
-        if (settled) return;
-        settled = true;
-        clearTimeout(timer);
-        resolve({ code: code ?? -1, stdout, stderr, requests: count });
-      });
+      void queue
+        .drain()
+        .then(() => {
+          if (settled) return;
+          settled = true;
+          clearTimeout(timer);
+          resolve({ code: code ?? -1, stdout, stderr, requests: count });
+        })
+        .catch(fail);
     });
   });
 }
@@ -191,15 +202,18 @@ export async function runSandbox(
   variant: Variant,
   testSource: string,
   rawRequest: PaymentRequest,
-  options: { candidateTimeoutMs?: number } = {},
+  options: { candidateTimeoutMs?: number; manifest?: SandboxManifest } = {},
 ): Promise<ExecutionEvidence> {
   const started = performance.now();
+  const profiler = new StageProfiler();
+  profiler.begin('preparation');
   const runId = randomUUID();
   const prefix = `rk-${runId}`;
   const network = `${prefix}-net`;
   const db = `${prefix}-db`;
   const app = `${prefix}-app`;
   const candidate = `${prefix}-test`;
+  const databasePassword = randomBytes(32).toString('hex');
   // Track intended names before Docker calls: creation may succeed before startup/client failure.
   const ownedContainers = [candidate, app, db];
   const executionDir = path.join(output, 'executions', runId);
@@ -231,12 +245,16 @@ export async function runSandbox(
       .min(100)
       .max(30000)
       .parse(options.candidateTimeoutMs ?? 30000);
-    const manifest = await loadManifest(root);
+    const manifest = options.manifest
+      ? ManifestSchema.parse(options.manifest)
+      : await loadManifest(root);
     evidence.variantHash = manifest.sourceHashes[variant];
+    profiler.begin('networkCreation');
     await docker(['network', 'create', '--internal', '--label', `replaykit.run=${runId}`, network]);
     const netConfig = JSON.parse((await docker(['network', 'inspect', network])).stdout) as {
       Internal: boolean;
     }[];
+    profiler.begin('postgresStartup');
     await docker([
       'run',
       '-d',
@@ -261,11 +279,12 @@ export async function runSandbox(
       '-e',
       'POSTGRES_USER=replaykit',
       '-e',
-      'POSTGRES_PASSWORD=replaykit-local',
+      `POSTGRES_PASSWORD=${databasePassword}`,
       '-e',
       'POSTGRES_DB=replaykit',
       manifest.postgresImage,
     ]);
+    profiler.begin('postgresReadiness');
     await docker(
       [
         'exec',
@@ -276,6 +295,7 @@ export async function runSandbox(
       ],
       { timeoutMs: 20000 },
     );
+    profiler.begin('applicationStartup');
     await docker([
       'run',
       '-d',
@@ -292,12 +312,13 @@ export async function runSandbox(
       '--tmpfs',
       '/tmp:rw,noexec,nosuid,size=16m',
       '-e',
-      'DATABASE_URL=postgres://replaykit:replaykit-local@db:5432/replaykit',
+      `DATABASE_URL=postgres://replaykit:${databasePassword}@db:5432/replaykit`,
       '-e',
       `REPLAYKIT_RELEASE=${manifest.appImages[variant]}`,
       manifest.appImages[variant],
     ]);
     // Readiness polling is infrastructure startup, never test scheduling/correctness.
+    profiler.begin('applicationReadiness');
     await docker(
       [
         'exec',
@@ -308,6 +329,7 @@ export async function runSandbox(
       ],
       { timeoutMs: 18000 },
     );
+    profiler.begin('candidatePreparation');
     const query = async (sql: string) =>
       (
         await docker(['exec', db, 'psql', '-U', 'replaykit', '-d', 'replaykit', '-tA', '-c', sql])
@@ -347,6 +369,7 @@ export async function runSandbox(
     );
     if (!evidence.isolated || !evidence.offline || !evidence.cleanDatabase)
       throw new Error('SANDBOX_PRECONDITION_FAILED');
+    profiler.begin('candidateExecution');
     const result = await runCandidate(
       candidate,
       app,
@@ -354,6 +377,7 @@ export async function runSandbox(
       evidence.schedule,
       candidateTimeoutMs,
     );
+    profiler.begin('evidenceCollection');
     const exited = JSON.parse((await docker(['inspect', candidate])).stdout) as {
       State: unknown;
     }[];
@@ -396,27 +420,68 @@ export async function runSandbox(
     }
     evidence.executionStatus = 'COMPLETED';
   } catch (error) {
+    profiler.fail();
+    profiler.begin('errorEvidence');
     evidence.error = error instanceof Error ? error.message : String(error);
+    // Error diagnostics remain trusted DB observations, never a successful judge gate.
+    const count = await docker(
+      [
+        'exec',
+        db,
+        'psql',
+        '-U',
+        'replaykit',
+        '-d',
+        'replaykit',
+        '-tA',
+        '-c',
+        'SELECT count(*) FROM charges;',
+      ],
+      { allowFailure: true },
+    ).catch(() => null);
+    if (count?.code === 0 && /^\d+$/.test(count.stdout.trim())) {
+      evidence.charges = Number(count.stdout.trim());
+      await writeFile(
+        path.join(executionDir, 'error-database.json'),
+        JSON.stringify({ charges: evidence.charges }),
+      );
+    }
     for (const name of ownedContainers.filter((name) => name === app || name === db)) {
       const logs = await docker(['logs', name], { allowFailure: true }).catch(() => null);
       if (logs)
         await writeFile(
           path.join(executionDir, name === app ? 'application-error.log' : 'postgres-error.log'),
-          logs.stdout + logs.stderr,
+          String(redact(logs.stdout + logs.stderr)),
         );
     }
   } finally {
+    profiler.begin('cleanup');
     try {
       await cleanupOwnedResources(runId, ownedContainers, network);
     } catch (error) {
+      profiler.fail();
       evidence.executionStatus = 'ERROR';
       evidence.error = [evidence.error, error instanceof Error ? error.message : String(error)]
         .filter(Boolean)
         .join('; ');
     }
   }
+  profiler.begin('artifactWrite');
   evidence.durationMs = Math.round(performance.now() - started);
   const validated = ExecutionEvidenceSchema.parse(evidence);
   await writeFile(path.join(executionDir, 'evidence.json'), JSON.stringify(validated, null, 2));
+  await writeFile(
+    path.join(executionDir, 'profile.json'),
+    JSON.stringify(
+      {
+        schemaVersion: 1,
+        runId,
+        variant,
+        ...profiler.finish(),
+      },
+      null,
+      2,
+    ),
+  );
   return validated;
 }

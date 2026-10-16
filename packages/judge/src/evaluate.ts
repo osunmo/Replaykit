@@ -11,8 +11,8 @@ import {
 
 export interface ExecutionMatrix {
   buggy: ExecutionEvidence[];
-  reference: ExecutionEvidence;
-  alternate: ExecutionEvidence;
+  reference: ExecutionEvidence[];
+  alternate: ExecutionEvidence[];
   decoy: ExecutionEvidence;
 }
 export function inspectTest(source: string): { allowed: boolean; reasons: string[] } {
@@ -73,9 +73,12 @@ export function evaluateEvidence(
 ): JudgeResult {
   const incident = IncidentSchema.parse(rawIncident);
   const plan = ReplayPlanSchema.parse(rawPlan);
-  const all = [...matrix.buggy, matrix.reference, matrix.alternate, matrix.decoy].map((e) =>
+  if (!Array.isArray(matrix.reference) || !Array.isArray(matrix.alternate))
+    throw new TypeError('Reference and alternate evidence must be arrays of executions');
+  const all = [...matrix.buggy, ...matrix.reference, ...matrix.alternate, matrix.decoy].map((e) =>
     ExecutionEvidenceSchema.parse(e),
   );
+  const uniqueExecutionIds = new Set(all.map((e) => e.runId)).size === all.length;
   const source = plan.testSource ?? '';
   const policy = inspectTest(source);
   const hash = createHash('sha256').update(source).digest('hex');
@@ -94,8 +97,8 @@ export function evaluateEvidence(
   const checks = {
     buggyFails: matrix.buggy.length === 10 && matrix.buggy.every(realBug),
     sameFailureIdentity: matrix.buggy.length > 0 && matrix.buggy.every(identity),
-    referenceFixPasses: validFix(matrix.reference),
-    alternateFixPasses: validFix(matrix.alternate),
+    referenceFixPasses: matrix.reference.length === 3 && matrix.reference.every(validFix),
+    alternateFixPasses: matrix.alternate.length === 3 && matrix.alternate.every(validFix),
     decoyFixStillFails:
       completed(matrix.decoy) &&
       matrix.decoy.exitCode === 1 &&
@@ -105,7 +108,7 @@ export function evaluateEvidence(
     deterministicFailures: matrix.buggy.filter((e) => realBug(e) && identity(e)).length,
     offlineExecution: all.every((e) => e.offline),
     isolatedExecution: all.every((e) => e.isolated),
-    freshState: all.every((e) => e.cleanDatabase),
+    freshState: uniqueExecutionIds && all.every((e) => e.cleanDatabase),
     noSleepBasedTiming: policy.allowed,
     reviewableTest: source.split(/\r?\n/).length <= 60 && source.trim().length > 0,
     sameCandidate: all.every((e) => e.candidateHash === hash),
@@ -114,6 +117,7 @@ export function evaluateEvidence(
     .filter(([, value]) => value === false)
     .map(([key]) => key.replace(/[A-Z]/g, (s) => `_${s}`).toUpperCase() + '_FAILED');
   reasonCodes.push(...policy.reasons);
+  if (!uniqueExecutionIds) reasonCodes.push('REUSED_EXECUTION_ID');
   const infrastructureError = all.some(
     (e) => !completed(e) || e.exitCode === null || ![0, 1].includes(e.exitCode),
   );
@@ -147,9 +151,13 @@ export function evaluateEvidence(
     durationMs: all.reduce((sum, e) => sum + e.durationMs, 0),
     tokens: null,
     metadata: {
-      evaluator: 'r1-strict-v1',
+      evaluator: 'r1-strict-v2',
       candidateHash: hash,
       incidentHash: plan.sourceHash,
+      referenceFixAttempts: matrix.reference.length,
+      referenceFixSuccesses: matrix.reference.filter(validFix).length,
+      alternateFixAttempts: matrix.alternate.length,
+      alternateFixSuccesses: matrix.alternate.filter(validFix).length,
       executionRunIds: all.map((e) => e.runId),
       variantHashes: all.map((e) => e.variantHash),
     },

@@ -30,14 +30,33 @@ function evidence(overrides: Partial<ExecutionEvidence> = {}): ExecutionEvidence
 function matrix(): ExecutionMatrix {
   return {
     buggy: Array.from({ length: 10 }, (_, i) => evidence({ runId: `buggy-${i}` })),
-    reference: evidence({ exitCode: 0, charges: 1, failure: null }),
-    alternate: evidence({ exitCode: 0, charges: 1, failure: null }),
-    decoy: evidence({ failure: null }),
+    reference: Array.from({ length: 3 }, (_, i) =>
+      evidence({ runId: `reference-${i}`, exitCode: 0, charges: 1, failure: null }),
+    ),
+    alternate: Array.from({ length: 3 }, (_, i) =>
+      evidence({ runId: `alternate-${i}`, exitCode: 0, charges: 1, failure: null }),
+    ),
+    decoy: evidence({ runId: 'decoy-0', failure: null }),
   };
 }
 describe('independent strict judge', () => {
   it('verifies only the complete trusted matrix', () => {
-    expect(evaluateEvidence(incident, plan, matrix()).status).toBe('VERIFIED');
+    const result = evaluateEvidence(incident, plan, matrix());
+    expect(result.status).toBe('VERIFIED');
+    expect(result.metadata).toMatchObject({
+      evaluator: 'r1-strict-v2',
+      referenceFixAttempts: 3,
+      referenceFixSuccesses: 3,
+      alternateFixAttempts: 3,
+      alternateFixSuccesses: 3,
+    });
+  });
+  it('rejects legacy single-execution fix evidence', () => {
+    const m = matrix();
+    const legacy = { ...m, reference: m.reference[0], alternate: m.alternate[0] };
+    expect(() => evaluateEvidence(incident, plan, legacy as unknown as ExecutionMatrix)).toThrow(
+      /arrays/,
+    );
   });
   it('rejects the same exception on a different application path', () => {
     const wrong = {
@@ -61,8 +80,8 @@ describe('independent strict judge', () => {
   });
   it('rejects an empty test even if its process exited successfully on valid fixes', () => {
     const m = matrix();
-    m.reference.requests = 0;
-    m.reference.charges = 0;
+    m.reference[0]!.requests = 0;
+    m.reference[0]!.charges = 0;
     expect(evaluateEvidence(incident, plan, m).checks.referenceFixPasses).toBe(false);
   });
   it('keeps build errors separate from domain failures', () => {
@@ -72,7 +91,7 @@ describe('independent strict judge', () => {
   });
   it('rejects substituted test artifacts', () => {
     const m = matrix();
-    m.alternate.candidateHash = 'f'.repeat(64);
+    m.alternate[0]!.candidateHash = 'f'.repeat(64);
     expect(evaluateEvidence(incident, plan, m).checks.sameCandidate).toBe(false);
   });
   it('does not trust a printed matching exception without a real domain observation', () => {
@@ -95,6 +114,84 @@ describe('independent strict judge', () => {
     m.buggy = m.buggy.map((e) => ({ ...e, exitCode: 137 }));
     m.decoy.exitCode = 137;
     expect(evaluateEvidence(incident, plan, m).status).not.toBe('VERIFIED');
+  });
+  it('rejects a decoy failure without duplicate ledger charges', () => {
+    const m = matrix();
+    m.decoy.charges = 1;
+    const result = evaluateEvidence(incident, plan, m);
+    expect(result.status).not.toBe('VERIFIED');
+    expect(result.checks.decoyFixStillFails).toBe(false);
+  });
+  it('rejects execution IDs reused across variants', () => {
+    const m = matrix();
+    m.alternate[2]!.runId = m.buggy[0]!.runId;
+    const result = evaluateEvidence(incident, plan, m);
+    expect(result.status).not.toBe('VERIFIED');
+    expect(result.checks.freshState).toBe(false);
+    expect(result.reasonCodes).toContain('REUSED_EXECUTION_ID');
+  });
+});
+
+describe.each(['reference', 'alternate'] as const)('%s fix repetition gates', (variant) => {
+  const gate = variant === 'reference' ? 'referenceFixPasses' : 'alternateFixPasses';
+  it('rejects an omitted repetition', () => {
+    const m = matrix();
+    m[variant].pop();
+    const result = evaluateEvidence(incident, plan, m);
+    expect(result.status).not.toBe('VERIFIED');
+    expect(result.checks[gate]).toBe(false);
+    expect(result.metadata[`${variant}FixAttempts`]).toBe(2);
+  });
+  it('requires exactly three repetitions', () => {
+    const m = matrix();
+    m[variant].push(evidence({ runId: `${variant}-3`, exitCode: 0, charges: 1, failure: null }));
+    expect(evaluateEvidence(incident, plan, m).checks[gate]).toBe(false);
+  });
+  it('rejects a reused successful repetition', () => {
+    const m = matrix();
+    m[variant][2] = { ...m[variant][0]! };
+    const result = evaluateEvidence(incident, plan, m);
+    expect(result.status).not.toBe('VERIFIED');
+    expect(result.checks.freshState).toBe(false);
+    expect(result.reasonCodes).toContain('REUSED_EXECUTION_ID');
+  });
+  describe.each([0, 1, 2])('repetition %i', (index) => {
+    it('rejects a failing valid fix', () => {
+      const m = matrix();
+      m[variant][index] = evidence({ runId: `${variant}-${index}` });
+      const result = evaluateEvidence(incident, plan, m);
+      expect(result.status).not.toBe('VERIFIED');
+      expect(result.checks[gate]).toBe(false);
+      expect(result.metadata[`${variant}FixSuccesses`]).toBe(2);
+    });
+    it('rejects a substituted candidate hash', () => {
+      const m = matrix();
+      m[variant][index]!.candidateHash = 'f'.repeat(64);
+      const result = evaluateEvidence(incident, plan, m);
+      expect(result.status).not.toBe('VERIFIED');
+      expect(result.checks.sameCandidate).toBe(false);
+    });
+    it.each([
+      ['offline', 'offlineExecution'],
+      ['isolated', 'isolatedExecution'],
+      ['cleanDatabase', 'freshState'],
+    ] as const)('rejects a missing %s guarantee', (field, resultGate) => {
+      const m = matrix();
+      m[variant][index]![field] = false;
+      const result = evaluateEvidence(incident, plan, m);
+      expect(result.status).not.toBe('VERIFIED');
+      expect(result.checks[resultGate]).toBe(false);
+    });
+    it('classifies infrastructure failure as ERROR', () => {
+      const m = matrix();
+      m[variant][index]!.executionStatus = 'ERROR';
+      expect(evaluateEvidence(incident, plan, m).status).toBe('ERROR');
+    });
+    it('classifies killed candidate processes as ERROR', () => {
+      const m = matrix();
+      m[variant][index]!.exitCode = 137;
+      expect(evaluateEvidence(incident, plan, m).status).toBe('ERROR');
+    });
   });
 });
 describe('candidate review policy', () => {

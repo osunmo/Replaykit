@@ -1,5 +1,56 @@
 # Progress
 
+## 2026-10-16 — R1 performance hardening
+
+The optimized R1 pipeline uses a bounded worker pool with configurable concurrency 1–10, default 3. The strict matrix now requires 10 fresh buggy failures, three reference passes, three alternate passes, and a decoy failure. Every execution retains independent PostgreSQL state, application and candidate containers, an internal Docker network, resource limits and trusted evidence collection. A single pinned image manifest and identical candidate bytes are used throughout each matrix. No verification gate was removed; duplicate execution IDs are additionally rejected. No D2, Cursor integration, dashboard or additional benchmark case was implemented.
+
+### Measured results and limitations
+
+Five full local smoke measurements passed, including wrong-frame rejection and missing-body abstention. [PERFORMANCE.md](PERFORMANCE.md) contains the stage and resource tables; [the portable JSON artifact](measurements/r1-performance.json) records the measurements, gates, hashes, image IDs and relative evidence references.
+
+| Configuration                        | Matrix executions |           Observed full-smoke wall time |
+| ------------------------------------ | ----------------: | --------------------------------------: |
+| Original instrumented batches of two |                13 |                               281.939 s |
+| Hardened worker pool, concurrency 2  |                17 | 112.897 s and 151.202 s; mean 132.050 s |
+| Hardened worker pool, concurrency 3  |                17 |  92.864 s and 117.853 s; mean 105.359 s |
+
+The matched 17-execution comparison measured a 20.2% mean reduction, with two samples per setting in order 2, 3, 3, 2. Ranges overlap and host timing varied substantially; no statistical significance or general speed guarantee is claimed. The original baseline had different warm-up and host activity, so its much larger latency cannot be attributed to concurrency alone. All five measurements used the same immutable images and candidate hash.
+
+Profiling separates network creation, PostgreSQL startup/readiness, application startup/readiness, candidate preparation/execution, trusted evidence collection, cleanup and artifact writes. Per-execution profiles preserve failed stages too. Pipeline timing distinguishes overlapping wall time from summed execution durations. Capture and negative-control timing are recorded separately. The measurement wrapper records Docker capacity and periodic resource samples; missing/failed observations remain unavailable rather than zero.
+
+Concurrency 3 increased per-execution duration and sampled resource use while reducing observed total wall time. Peaks reached nine running containers, 182.41% aggregate CPU and 410.0 MiB sampled memory. These samples can miss peaks and do not establish throttling. Observer EOF/removal errors during container teardown are retained separately from execution failures. No smoke execution timed out, ran out of memory or failed infrastructure checks. PostgreSQL startup/readiness accounted for about 21% of original summed duration. Database reuse was considered after profiling but neither implemented nor benchmarked; independent database lifecycles remain intact.
+
+### Invariant and security review
+
+[R1_INVARIANT.md](R1_INVARIANT.md) traces DuplicatePaymentError to the shared application check of committed provider-ledger rows. Real duplicate inserts trigger the check; the buggy policy does not inject an error. Both valid implementations retain the same invariant, with real PostgreSQL regression coverage. The decoy alone suppresses the symptom and is still rejected because trusted evidence detects duplicate charges.
+
+Independent review also found and corrected unavailable resource samples being represented as zero, measurement provenance relying on a mutable image manifest, and broker requests remaining queued after candidate rejection. The broker now stops dispatch and drains in-flight work before evidence collection and cleanup. The live rejection probe queues valid payment requests after an invalid command and confirms zero charges in trusted database evidence.
+
+### Publishing and repository hygiene
+
+The repository was already initialized on `codex/replaykit-r1` with no remote. Removed 210 accidentally tracked raw result files and one generated incident fixture from the current index while retaining them locally. Runs, benchmark results, generated fixtures, logs, build outputs and local environment files are ignored. Published reports use relative paths; the portable measurement exporter uses an explicit field allowlist and excludes raw Docker inspections, environment variables and host paths.
+
+Removed fixed synthetic database passwords from source/configuration. Development commands generate an ignored local environment file, preserving existing valid configuration; sandbox passwords are random per execution and error logs redact them. The generated development volume is retained after shutdown. Previous local commits still contain the original raw artifacts and synthetic defaults; history was not rewritten. No remote publishing or remote CI run occurred.
+
+### Final validation
+
+| Check                                                            | Observed result                                                                                                                                               |
+| ---------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `pnpm install --frozen-lockfile --offline`                       | PASS; current lockfile across all 8 workspace projects                                                                                                        |
+| `pnpm test`                                                      | PASS; 151 tests in 20 files                                                                                                                                   |
+| `pnpm test:sdk`                                                  | PASS; 6 tests                                                                                                                                                 |
+| `pnpm test:integration`                                          | PASS; 14 real PostgreSQL tests, including both valid implementations' invariant checks                                                                        |
+| `pnpm typecheck`, `pnpm lint`, `pnpm build`, `pnpm format:check` | PASS                                                                                                                                                          |
+| `pnpm sandbox:build`                                             | PASS; the same immutable images were used for all five measurements                                                                                           |
+| Full R1 smoke through the measurement wrapper                    | PASS; all five measurements and negative controls; hardened runs require 10/10 buggy failures, 3/3 reference passes, 3/3 alternate passes and decoy rejection |
+| `pnpm test:security`                                             | PASS; all four live probe groups                                                                                                                              |
+| Git and publishing audit                                         | PASS; no generated execution artifacts or local environment files in the current index; published paths are relative                                          |
+| Docker cleanup audit                                             | PASS; no containers or networks with the `replaykit.run` ownership label remain; development database stopped                                                 |
+
+The live security run `1801ebba-6076-4981-9a22-5fed6dbbff34` passed filesystem/secrets/egress restrictions, broker protocol rejection with zero charges, timeout enforcement and memory-limit enforcement. Final formatting initially flagged two Markdown tables; formatting was corrected and the full formatting check passed. Independent review and the final checks found no remaining material issues in this scope.
+
+The CI workflow now includes the existing security probes, but remote CI has not run. This milestone ends at the optimized and verified R1 pipeline; later scenarios and product integrations remain deferred.
+
 ## 2026-10-16 — first working R1 slice
 
 The initial workspace was empty. This delivery implements the R1 path through foundation, checkout payments, replay isolation, strict judging and CLI. It does **not** claim completion of every Phase 0–3 gate: full checkout orders/inventory/webhooks and real scheduler-controlled DB races are still missing, and remote CI has not run.
@@ -36,7 +87,7 @@ The initial workspace was empty. This delivery implements the R1 path through fo
 | `pnpm format:check`                                                                                 | PASS                                                                                                                                                                        |
 | `pnpm db:down`                                                                                      | PASS, development container/network stopped; synthetic named volume retained                                                                                                |
 
-The smoke report and raw evidence are copied under `benchmark/results/r1-smoke-2026-10-16/`. Security evidence is under `benchmark/results/security-2026-10-16/`, and the second full verification is under `benchmark/results/r1-rerun-2026-10-16/`. Minimal-input abstention evidence is under `benchmark/results/r1-minimal-2026-10-16/`. These are measured single-scenario records, not full-benchmark performance claims. No containers or networks with the `replaykit.run` ownership label remained after the runs completed.
+Historical smoke reports and raw evidence remain locally under `benchmark/results/r1-smoke-2026-10-16/`, `security-2026-10-16/`, `r1-rerun-2026-10-16/` and `r1-minimal-2026-10-16/`. Performance hardening removes these generated directories from the current Git index and published source, preserving local evidence and previous commits. These are measured single-scenario records, not full-benchmark performance claims. No containers or networks with the `replaykit.run` ownership label remained after those runs completed.
 
 ### Review and corrections
 
@@ -52,6 +103,6 @@ Node 22.23.3, pnpm 10.20.0, TypeScript 5.9.3, PostgreSQL 17.11, Docker Engine 29
 
 The complete 20-case benchmark, fixed 12/8 split, three-trial model comparisons, LLM adapter, Cursor/MCP integration, arbitrary patch verification and dashboard remain incomplete. No remote repository, CI run or release publication was created.
 
-### Next concrete task
+### Superseded next-task proposal
 
-Implement D2 inventory lost update with real PostgreSQL operations controlled by the existing cooperative scheduler, independently validate its buggy/reference/alternate/decoy matrix, then add N5 as an executed different-code-path negative case. Preserve the supplied milestone order and expand the corpus only after those cases pass the strict judge.
+The earlier D2/N5 proposal is superseded by the user's R1 performance-hardening milestone. D2, Cursor/MCP, a dashboard and additional benchmark cases are explicitly deferred. Stop after the optimized R1 pipeline and applicable checks pass.

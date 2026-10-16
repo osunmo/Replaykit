@@ -4,7 +4,7 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "dev": "tsx src/bootstrap.ts",
+    "dev": "tsx ../../scripts/dev-db.ts api",
     "start": "node ../../dist/apps/checkout-api/src/bootstrap.js"
   }
 }

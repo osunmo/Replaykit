@@ -3,7 +3,7 @@ services:
     image: postgres:17-alpine
     environment:
       POSTGRES_USER: replaykit
-      POSTGRES_PASSWORD: replaykit-local
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?Run pnpm db:up to generate local credentials}
       POSTGRES_DB: replaykit
     ports:
       - '127.0.0.1:55432:5432'
@@ -16,3 +16,4 @@ services:
       - replaykit-dev-data:/var/lib/postgresql/data
 volumes:
   replaykit-dev-data:
+    name: replaykit-dev-${REPLAYKIT_DEV_VOLUME:?Run pnpm db:up to generate a local volume name}

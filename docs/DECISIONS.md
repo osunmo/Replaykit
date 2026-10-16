@@ -1,5 +1,15 @@
 # Decisions
 
+## 2026-10-16 — performance hardening
+
+- Use a refillable worker pool, configurable from 1 to 10 concurrent executions with default 3. Every execution owns its PostgreSQL state, application, candidate and Docker network; no mutable state is shared.
+- Require three passing repetitions of each valid fix, alongside 10 fresh buggy failures and the duplicate-charge decoy. Preserve every existing verification gate and add distinct execution IDs.
+- Pin one image manifest and candidate source per verification matrix. Treat trusted database/application observations as decisive evidence.
+- Profile exclusive execution stages and pipeline wall time separately. Compare concurrency 2 and 3 using the same strengthened matrix, images and candidate, and retain failed resource samples as unavailable.
+- Retain independent database lifecycles. Profiling motivated evaluating the tradeoff, but this milestone has no database-reuse experiment or measured reuse benefit.
+- Keep raw evidence and generated credentials local and ignored. Publish only an allowlisted, portable measurement summary with relative paths. Preserve local Git history and explicitly document historical generated artifacts.
+- Stop at R1 performance hardening. D2, Cursor/MCP integration, a dashboard and additional benchmark cases remain deferred; local test success does not imply remote CI success.
+
 ## 2026-10-16
 
 - First delivery is the R1 vertical slice from the supplied milestone order. Later phases remain explicitly incomplete.

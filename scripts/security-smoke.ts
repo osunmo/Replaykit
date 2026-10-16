@@ -2,6 +2,7 @@ import { writeFile } from 'node:fs/promises';
 import path from 'node:path';
 import { newOutput } from '../packages/cli/src/workflow.js';
 import { runSandbox } from '../packages/judge/src/sandbox.js';
+import { relativeArtifactPath } from '../packages/cli/src/publication.js';
 
 // These adversarial probes are source strings executed ONLY inside the candidate container.
 const root = process.cwd();
@@ -29,6 +30,8 @@ await assert.rejects(fetch('http://host.docker.internal:55432', { signal: AbortS
     timeout: 5000,
     source: [
       "process.stdout.write('@replaykit/request:' + JSON.stringify({ id: 1, action: 'exec', command: 'cat /etc/passwd' }) + String.fromCharCode(10));",
+      `process.stdout.write('@replaykit/request:' + JSON.stringify({ id: 2, action: 'pay', input: ${JSON.stringify(request)} }) + String.fromCharCode(10));`,
+      `process.stdout.write('@replaykit/request:' + JSON.stringify({ id: 3, action: 'pay', input: ${JSON.stringify(request)} }) + String.fromCharCode(10));`,
       'setInterval(() => {}, 1000);',
     ].join('\n'),
     expected: 'CANDIDATE_PROTOCOL_REJECTED',
@@ -60,7 +63,9 @@ for (const probe of probes) {
         evidence.charges === 0
       : probe.expected === 'ERROR'
         ? evidence.executionStatus === 'ERROR' && evidence.requests === 0
-        : evidence.executionStatus === 'ERROR' && evidence.error?.includes(probe.expected) === true;
+        : evidence.executionStatus === 'ERROR' &&
+          evidence.error?.includes(probe.expected) === true &&
+          (probe.name !== 'arbitrary-broker-command' || evidence.charges === 0);
   results.push({
     name: probe.name,
     status: passed ? 'PASS' : 'FAIL',
@@ -75,5 +80,7 @@ const summary = {
   probes: results,
 };
 await writeFile(path.join(output, 'security.json'), JSON.stringify(summary, null, 2) + '\n');
-process.stdout.write(JSON.stringify({ ...summary, output }, null, 2) + '\n');
+process.stdout.write(
+  JSON.stringify({ ...summary, output: relativeArtifactPath(root, output) }, null, 2) + '\n',
+);
 if (summary.status !== 'PASS') process.exitCode = 1;

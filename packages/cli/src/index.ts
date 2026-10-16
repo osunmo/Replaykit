@@ -5,14 +5,16 @@ import { IncidentSchema, JudgeResultSchema, TierSchema } from '../../contracts/s
 import { normalizeIncident } from '../../telemetry/src/index.js';
 import { captureIncident, newOutput, smoke, verifyPlan } from './workflow.js';
 import { readJson, safeRunId } from './report.js';
+import { parseConcurrency } from './concurrency.js';
+import { relativeArtifactPath } from './publication.js';
 
 const help = `ReplayKit — first R1 vertical slice
 
 pnpm sandbox:build
-pnpm benchmark smoke
+pnpm benchmark smoke [--concurrency 3]
 pnpm replaykit incident capture --output benchmark/incidents/R1/visible/incident.json
-pnpm replaykit incident run --fixture <incident.json> [--tier full|partial|minimal]
-pnpm replaykit replay verify --run <run-id>
+pnpm replaykit incident run --fixture <incident.json> [--tier full|partial|minimal] [--concurrency 3]
+pnpm replaykit replay verify --run <run-id> [--concurrency 3]
 pnpm benchmark report --input <runs/run-id>
 
 Exit codes: 0 success/VERIFIED; 2 non-verified; 1 infrastructure/input error.
@@ -42,12 +44,19 @@ async function main() {
   }
   if (!['benchmark smoke', 'incident run', 'incident capture', 'replay verify'].includes(command))
     throw new Error(`Unsupported command: ${command}. ${help}`);
+  const concurrency = parseConcurrency(
+    args.includes('--concurrency') ? option('--concurrency') : undefined,
+  );
   const output = await newOutput(root);
   try {
     if (command === 'benchmark smoke') {
-      const summary = await smoke(root, output);
+      const summary = await smoke(root, output, { concurrency });
       process.stdout.write(
-        JSON.stringify({ ...summary, report: path.join(output, 'report.md') }, null, 2) + '\n',
+        JSON.stringify(
+          { ...summary, report: relativeArtifactPath(root, path.join(output, 'report.md')) },
+          null,
+          2,
+        ) + '\n',
       );
       if (summary.status !== 'PASS') process.exitCode = 2;
       return;
@@ -58,7 +67,12 @@ async function main() {
       const { mkdir } = await import('node:fs/promises');
       await mkdir(path.dirname(target), { recursive: true });
       await writeFile(target, JSON.stringify(incident, null, 2) + '\n');
-      process.stdout.write(JSON.stringify({ incident: target, capture: output }) + '\n');
+      process.stdout.write(
+        JSON.stringify({
+          incident: relativeArtifactPath(root, target),
+          capture: relativeArtifactPath(root, output),
+        }) + '\n',
+      );
       return;
     }
     let incident: unknown;
@@ -98,14 +112,14 @@ async function main() {
           });
       }
     }
-    const { result } = await verifyPlan(root, output, incident, plan);
+    const { result } = await verifyPlan(root, output, incident, plan, { concurrency });
     process.stdout.write(
       JSON.stringify(
         {
           status: result.status,
           runId: result.runId,
           reasonCodes: result.reasonCodes,
-          report: path.join(output, 'report.md'),
+          report: relativeArtifactPath(root, path.join(output, 'report.md')),
         },
         null,
         2,

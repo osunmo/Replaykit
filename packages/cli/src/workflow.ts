@@ -16,6 +16,7 @@ import { loadManifest, planInSandbox, runSandbox, type Variant } from '../../jud
 import { normalizeIncident, redact } from '../../telemetry/src/index.js';
 import { replayBindingIssues } from '../../judge/src/binding.js';
 import { reportMarkdown } from './report.js';
+import { parseConcurrency, runBounded } from './concurrency.js';
 
 const json = (value: unknown) => JSON.stringify(value, null, 2) + '\n';
 const sha256 = (value: string) => createHash('sha256').update(value).digest('hex');
@@ -68,7 +69,19 @@ export async function verifyPlan(
   output: string,
   rawIncident: unknown,
   rawPlan?: unknown,
+  options: { concurrency?: number } = {},
 ): Promise<{ result: JudgeResult; matrix?: ExecutionMatrix }> {
+  const started = performance.now();
+  const concurrency = parseConcurrency(String(options.concurrency ?? 3));
+  let matrixWallMs = 0;
+  let active = 0;
+  let maxActiveExecutions = 0;
+  const executionTimeline: {
+    variant: Variant;
+    runId: string;
+    startOffsetMs: number;
+    finishOffsetMs: number;
+  }[] = [];
   const incident = IncidentSchema.parse(redact(rawIncident));
   const plan = rawPlan ? ReplayPlanSchema.parse(rawPlan) : await planInSandbox(root, incident);
   if (plan.sourceHash !== sha256(JSON.stringify(incident)))
@@ -104,18 +117,46 @@ export async function verifyPlan(
         }),
       );
       const counts = { buggy: 0, reference: 0, alternate: 0, decoy: 0 };
+      const candidateSource = plan.testSource!;
       const execute = async (variant: Variant) => {
         counts[variant] += 1;
         process.stderr.write(`Running isolated ${variant} execution ${counts[variant]}...\n`);
-        const evidence = await runSandbox(root, output, variant, plan.testSource!, plan.request!);
-        rows.push({ variant, evidence });
-        return evidence;
+        const startOffsetMs = performance.now() - started;
+        active += 1;
+        maxActiveExecutions = Math.max(maxActiveExecutions, active);
+        try {
+          const evidence = await runSandbox(root, output, variant, candidateSource, plan.request!, {
+            manifest,
+          });
+          rows.push({ variant, evidence });
+          executionTimeline.push({
+            variant,
+            runId: evidence.runId,
+            startOffsetMs,
+            finishOffsetMs: performance.now() - started,
+          });
+          return { variant, evidence };
+        } finally {
+          active -= 1;
+        }
       };
-      const buggy: ExecutionEvidence[] = [];
-      for (let i = 0; i < 10; i += 2) {
-        const batch = await Promise.all([execute('buggy'), execute('buggy')]);
-        buggy.push(...batch);
-        if (batch.some((e) => e.executionStatus === 'ERROR')) break;
+      const matrixStarted = performance.now();
+      const jobs: Variant[] = [
+        ...Array<Variant>(10).fill('buggy'),
+        ...Array<Variant>(3).fill('reference'),
+        ...Array<Variant>(3).fill('alternate'),
+        'decoy',
+      ];
+      let completed: Awaited<ReturnType<typeof execute>>[];
+      try {
+        completed = await runBounded(
+          jobs,
+          concurrency,
+          execute,
+          ({ evidence }) => evidence.executionStatus === 'ERROR',
+        );
+      } finally {
+        matrixWallMs = performance.now() - matrixStarted;
       }
       const skipped = (): ExecutionEvidence => ({
         runId: randomUUID(),
@@ -135,10 +176,12 @@ export async function verifyPlan(
         stderr: '',
         error: 'NOT_EXECUTED_AFTER_ERROR',
       });
-      const failed = buggy.some((e) => e.executionStatus === 'ERROR');
-      const reference = failed ? skipped() : await execute('reference');
-      const alternate = failed ? skipped() : await execute('alternate');
-      const decoy = failed ? skipped() : await execute('decoy');
+      const evidenceFor = (variant: Variant) =>
+        completed.filter((row) => row.variant === variant).map((row) => row.evidence);
+      const buggy = evidenceFor('buggy');
+      const reference = evidenceFor('reference');
+      const alternate = evidenceFor('alternate');
+      const decoy = evidenceFor('decoy')[0] ?? skipped();
       matrix = { buggy, reference, alternate, decoy };
       result = evaluateEvidence(incident, plan, matrix);
       await writeFile(path.join(output, 'matrix.json'), json(matrix));
@@ -148,6 +191,22 @@ export async function verifyPlan(
     }
   }
   result.runId = path.basename(output);
+  result.metadata.verificationWallMs = performance.now() - started;
+  result.metadata.matrixWallMs = matrixWallMs;
+  result.metadata.concurrency = concurrency;
+  result.metadata.maxActiveExecutions = maxActiveExecutions;
+  await writeFile(
+    path.join(output, 'pipeline.json'),
+    json({
+      schemaVersion: 1,
+      concurrency,
+      fixRepetitions: 3,
+      wallMs: result.metadata.verificationWallMs,
+      matrixWallMs,
+      maxActiveExecutions,
+      executionTimeline,
+    }),
+  );
   await writeFile(path.join(output, 'result.json'), json(result));
   await writeFile(path.join(output, 'report.md'), reportMarkdown(result, rows));
   await writeFile(
@@ -180,9 +239,14 @@ export async function captureIncident(root: string, output: string): Promise<Inc
   await writeFile(path.join(output, 'incident.json'), json(incident));
   return incident;
 }
-export async function smoke(root: string, output: string) {
+export async function smoke(root: string, output: string, options: { concurrency?: number } = {}) {
+  const started = performance.now();
   const incident = await captureIncident(root, output);
-  const verified = await verifyPlan(root, output, incident);
+  const captureWallMs = performance.now() - started;
+  const verificationStarted = performance.now();
+  const verified = await verifyPlan(root, output, incident, undefined, options);
+  const verificationWallMs = performance.now() - verificationStarted;
+  const negativesStarted = performance.now();
   let wrongFrameRejected = false;
   if (verified.matrix) {
     const wrong = {
@@ -218,5 +282,15 @@ export async function smoke(root: string, output: string) {
     scope: 'R1 smoke; identity and missing-evidence checks are not the full N1-N5 benchmark',
   };
   await writeFile(path.join(output, 'smoke.json'), json(summary));
+  await writeFile(
+    path.join(output, 'smoke-profile.json'),
+    json({
+      schemaVersion: 1,
+      wallMs: performance.now() - started,
+      captureWallMs,
+      verificationWallMs,
+      negativeChecksWallMs: performance.now() - negativesStarted,
+    }),
+  );
   return summary;
 }

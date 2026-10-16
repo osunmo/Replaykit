@@ -12,8 +12,8 @@ import type { PaymentPolicy } from '../src/payment-types.js';
 import { createPayment, DuplicatePaymentError } from '../src/payments.js';
 import { applicationFrames } from '../src/stack-frames.js';
 
-const connectionString =
-  process.env.DATABASE_URL ?? 'postgres://replaykit:replaykit-local@127.0.0.1:55432/replaykit';
+const connectionString = process.env.DATABASE_URL;
+if (!connectionString) throw new Error('DATABASE_URL is required; run pnpm test:integration');
 const target = new URL(connectionString);
 if (
   !['127.0.0.1', 'localhost', '[::1]'].includes(target.hostname) ||
@@ -136,6 +136,33 @@ describe('PostgreSQL checkout policy matrix', () => {
     expect((await pool.query('SELECT * FROM public.payment_attempts')).rows).toHaveLength(2);
     expect(lines).toHaveLength(0);
   });
+
+  it.each([
+    ['reference', reference],
+    ['alternate', alternate],
+  ] as const)(
+    '%s fix retains the invariant check when duplicate ledger rows already exist',
+    async (_name, policy) => {
+      await pool.query(
+        `INSERT INTO public.charges (id, order_id, client_key, provider_key, amount)
+       VALUES ($1, $3, $4, $4, $5), ($2, $3, $4, $6, $5)`,
+        [
+          'seed-charge-1',
+          'seed-charge-2',
+          input.orderId,
+          input.idempotencyKey,
+          input.amount,
+          'seed-other-provider-key',
+        ],
+      );
+      await expect(createPayment(pool, input, policy)).rejects.toMatchObject({
+        name: 'DuplicatePaymentError',
+        chargeCount: 2,
+      });
+      expect((await pool.query('SELECT * FROM public.charges')).rows).toHaveLength(2);
+      expect((await pool.query('SELECT * FROM public.payment_attempts')).rows).toHaveLength(1);
+    },
+  );
 
   it('decoy hides the domain error while leaving two real charges', async () => {
     const service = await open(decoy);

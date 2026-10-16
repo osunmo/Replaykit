@@ -8,14 +8,16 @@ The same payment request is sent twice. Its client idempotency key, order identi
 
 The policies in `private/R1` are build inputs for the trusted evaluator:
 
-| Variant        | Mechanism                                                             | Required role in evaluation                                |
-| -------------- | --------------------------------------------------------------------- | ---------------------------------------------------------- |
-| `buggy.ts`     | Fresh payment ID becomes the provider key.                            | Real duplicate observed in all ten fresh buggy executions. |
-| `reference.ts` | Client idempotency key becomes the provider key.                      | Candidate passes with one charge.                          |
-| `alternate.ts` | Prior durable charge is retrieved before a new provider call.         | Same candidate passes with one charge.                     |
-| `decoy.ts`     | Duplicate charge remains, while domain-error reporting is suppressed. | Candidate still fails the ledger invariant.                |
+| Variant        | Mechanism                                                             | Required role in evaluation                                               |
+| -------------- | --------------------------------------------------------------------- | ------------------------------------------------------------------------- |
+| `buggy.ts`     | Fresh payment ID becomes the provider key.                            | Real duplicate observed in all ten fresh buggy executions.                |
+| `reference.ts` | Client idempotency key becomes the provider key.                      | Identical candidate passes with one charge in all three fresh executions. |
+| `alternate.ts` | Prior durable charge is retrieved before a new provider call.         | Identical candidate passes with one charge in all three fresh executions. |
+| `decoy.ts`     | Duplicate charge remains, while domain-error reporting is suppressed. | Candidate still fails the ledger invariant.                               |
 
 These are expected case semantics, not measured run results. Recorded execution evidence determines the actual verdict. Variants are separate source artifacts and compiled into separate immutable-image snapshots; a production environment variable does not select their behavior.
+
+The shared duplicate-charge invariant remains active in both valid implementations; [the invariant audit](../docs/R1_INVARIANT.md) documents its origin and real PostgreSQL regression checks. The 17-execution matrix uses bounded concurrency (default 3), with an independent database/app/network for every execution. Raw results and captured fixtures remain local ignored files; reviewed portable performance projections live under `docs/measurements`.
 
 ## Visible evidence and planner boundary
 

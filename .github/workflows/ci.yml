@@ -31,5 +31,6 @@ jobs:
       - run: pnpm build
       - run: pnpm sandbox:build
       - run: pnpm benchmark smoke
+      - run: pnpm test:security
       - if: always()
         run: pnpm db:down

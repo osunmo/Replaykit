@@ -3,7 +3,10 @@ dist/
 runs/
 work/
 .env
+.env.*
+!.env.example
 coverage/
 .superpowers/
 *.log
-!benchmark/results/**/*.log
+benchmark/results/
+benchmark/incidents/R1/visible/incident.json

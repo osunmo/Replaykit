@@ -15,7 +15,11 @@ pnpm sandbox:build
 pnpm benchmark smoke
 ```
 
-The image build needs internet access to download pinned dependency resolutions and base images. Candidate execution and planning run offline. The smoke command captures a real synthetic incident, generates a short TypeScript regression test, runs ten fresh buggy environments plus reference/alternate/decoy environments, and checks wrong-frame rejection and missing-body abstention. It prints the measured verdict and report path. A missing Docker engine or broken execution produces an error, never a verified reproduction.
+The image build needs internet access to download pinned dependency resolutions and base images. Candidate execution and planning run offline. The smoke command captures a real synthetic incident, generates a short TypeScript regression test, runs ten fresh buggy environments, three reference fixes, three alternate fixes and one decoy, then checks wrong-frame rejection and missing-body abstention. It prints the measured verdict and relative report path. A missing Docker engine or broken execution produces an error, never a verified reproduction.
+
+The matrix uses a bounded worker pool with concurrency **3** by default. Configure it with `pnpm benchmark smoke --concurrency 2` (allowed range 1–10). `incident run` and `replay verify` accept the same flag. Each execution has its own PostgreSQL container, empty tables, app container and internal network, with unchanged per-container limits. Candidate bytes and hashes stay identical across all seventeen executions. The pool stops dispatching after infrastructure errors and drains active work before returning.
+
+For measured wall time, stage breakdowns and sampled Docker resource use, run `pnpm benchmark:measure --label local-concurrency3 --concurrency 3`. Raw `measurement.json`, per-execution `profile.json`, `pipeline.json` and `smoke-profile.json` stay under ignored `runs/`. Run comparisons one at a time. Stage sums overlap under concurrency; use the measured wall time for elapsed latency. See [performance findings](docs/PERFORMANCE.md).
 
 Artifacts appear under `runs/<run-id>/`: `incident.json`, `plan.json`, `repro.test.ts`, `matrix.json`, `result.json`, `report.md`, `executions.csv`, and per-execution application/database/isolation evidence. `environment.json` records immutable image IDs and source/dependency hashes. The Docker build manifest lives at `work/sandbox/manifest.json`; rebuild after changing source.
 
@@ -38,7 +42,7 @@ pnpm db:up
 pnpm --filter checkout-api dev
 ```
 
-The dev API listens on port 4318; PostgreSQL is bound only to `127.0.0.1:55432`. The `.env.example` documents synthetic local credentials. The service uses those defaults, or an explicitly set `DATABASE_URL`. No `.env` auto-loader is installed. Stop the dev API with Ctrl+C.
+The dev API listens on port 4318; PostgreSQL is bound only to `127.0.0.1:55432`. `db:up` generates a random password and volume suffix in the ignored root `.env`. The development and integration-test commands load this file; `.env.example` contains documentation placeholders only and should not be copied over it. Existing local configuration and database volumes are preserved. The raw server requires an explicit `DATABASE_URL`. Stop the dev API with Ctrl+C.
 
 In another terminal:
 
@@ -57,7 +61,7 @@ Integration tests reset the dedicated local replaykit test tables and require `p
 
 `test:security` runs live disposable-container probes for private-file/host access, read-only filesystem enforcement, network egress, arbitrary broker commands, infinite loops and memory exhaustion. It never executes those probe strings on the developer host.
 
-The included captured fixture identifies an exact application image. Recapture it after rebuilding images; ReplayKit rejects an unsupported revision rather than testing a different application snapshot.
+Captured fixtures identify an exact application image and are local generated files excluded from Git. Capture one before `incident run`, and recapture it after rebuilding images; ReplayKit rejects an unsupported revision rather than testing a different application snapshot. `benchmark smoke` captures its own fresh incident automatically.
 
 ## Trust boundaries and verdicts
 
@@ -65,7 +69,7 @@ The included captured fixture identifies an exact application image. Recapture i
 - Candidate tests run as an unprivileged user with no network, a read-only filesystem, bounded temporary storage and process/memory/time limits. Only the generated test directory is mounted read-only.
 - A bounded stdin/stdout broker permits the captured payment request and its charge-count query. It exposes no arbitrary URLs, shell commands, file paths, headers or database credentials.
 - The trusted supervisor gathers application failure frames and PostgreSQL state separately from candidate stdout. Candidate code never runs on the developer host.
-- `VERIFIED` requires the actual failure identity, both valid fixes, a still-failing decoy, 10/10 fresh buggy failures, consistent test hash and satisfied isolation/review gates. `PARTIAL` and `NOT_REPRODUCED` include failed checks; infrastructure faults are `ERROR`.
+- `VERIFIED` requires the actual failure identity, 3/3 successes for each valid fix, a still-failing decoy, 10/10 fresh buggy failures, distinct execution IDs, consistent test hash and satisfied isolation/review gates. `PARTIAL` and `NOT_REPRODUCED` include failed checks; infrastructure faults are `ERROR`.
 
 The cooperative scheduler has finite named checkpoints, cancellation and deadlock diagnostics. It is currently tested independently; R1 uses sequential retries, and real scheduled database-race scenarios remain future work.
 
@@ -76,6 +80,8 @@ Implemented: PostgreSQL payment endpoint, four R1 source variants, real OTel spa
 Not implemented: full order/inventory/webhook API, the remaining incident corpus, the 12/8 development/held-out split, three-trial model baselines, LLM provider adapter, arbitrary candidate patch verification, Cursor/MCP integration, dashboard or release publishing. Smoke counts are not a 20-case benchmark score. GitHub Actions is supplied but remote CI has not run in this local workspace.
 
 See [progress](docs/PROGRESS.md), [architecture](docs/ARCHITECTURE.md), [threat model](docs/THREAT_MODEL.md), [evaluation](docs/EVALUATION.md), and [limitations](docs/LIMITATIONS.md).
+
+Raw runs, Docker inspections, logs, generated incident fixtures and local `.env` credentials are excluded from Git and source archives. To publish a reviewed portable measurement projection, run `node --import tsx scripts/publish-r1-measurements.ts <run-id> ...`; only allowlisted fields reach `docs/measurements/r1-performance.json`. Previous local commits retain the first delivery's raw archived reports; history has not been rewritten or published to a remote.
 
 ## Layout
 
