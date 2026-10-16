@@ -1,5 +1,15 @@
 # Progress
 
+## 2026-10-16 — Performance closed; next correctness milestone proposed
+
+The user's latest direction closes speed work and resumes D2/N5 plus saved-test candidate-patch verification. Fresh initdb, concurrency three and fsync on remain the defaults. No new performance experiment or product-code change was made in this review.
+
+Completed a read-only comparison of the 219.051-second run with the other sixteen published observations. App/candidate/planner image IDs differ between build groups; all four variant-policy hashes and the generated test hash match. The policy hashes omit shared application code, and no historical record contains a controller-source digest. Therefore this comparison cannot establish a host-only cause. See [PROVENANCE_COMPARISON.md](PROVENANCE_COMPARISON.md).
+
+Prepared a [proposed D2/N5 and patch-verification design](superpowers/specs/2026-10-16-d2-n5-patch-design.md). It separates full strict reproduction, provisional progress, and one/two-run saved-test patch results; scopes the new work to core/CLI; and requires isolated patch builds and authentic source/test provenance. This is an architectural design for review, not shipped functionality. D2/N5, preliminary progress and candidate-patch verification are still unimplemented. The existing tested R1 source archive remains unchanged.
+
+Next concrete task: review this design, then write the implementation plan and implement/test D2/N5 and the saved-test patch path. No tests or CI were rerun for the read-only provenance inspection. Prettier formatting and `git diff --check` passed for these documentation changes.
+
 ## 2026-10-16 — PostgreSQL and measurement follow-up
 
 The PostgreSQL template experiment reduced observed database startup/readiness cost but did not establish a full-smoke speedup at default concurrency three. Two sampled, fsync-on runs per mode averaged **109.359 seconds with initdb** and **121.653 seconds with template copying**. Fresh initdb remains the default; template copying is opt-in through `pnpm sandbox:build --postgres-mode template-copy`. Concurrency remains three and fsync remains on. [POSTGRES_PERFORMANCE.md](POSTGRES_PERFORMANCE.md) records all nine runs, exclusive stage means, sampling/resource limits and comparison caveats; [the portable JSON](measurements/r1-performance.json) retains individual observations and all judge gates.
@@ -169,4 +179,4 @@ The complete 20-case benchmark, fixed 12/8 split, three-trial model comparisons,
 
 ### Superseded next-task proposal
 
-The earlier D2/N5 proposal is superseded by the user's R1 performance-hardening milestone. D2, Cursor/MCP, a dashboard and additional benchmark cases are explicitly deferred. Stop after the optimized R1 pipeline and applicable checks pass.
+The R1 performance-hardening milestone is complete. The user's latest direction resumes D2/N5 and saved-test patch verification; see the current proposed design at the top of this progress record. Cursor/MCP transport, a dashboard and the remaining benchmark corpus stay outside that proposed core/CLI milestone.
