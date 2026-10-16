@@ -1,0 +1,8 @@
+{
+  "status": "PASS",
+  "runId": "40a29c65-b65e-4853-9911-665e984f7893",
+  "verdict": "VERIFIED",
+  "wrongFrameRejected": true,
+  "missingBodyAbstained": true,
+  "scope": "R1 smoke; identity and missing-evidence checks are not the full N1-N5 benchmark"
+}

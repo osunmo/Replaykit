@@ -1,0 +1,8 @@
+node_modules
+dist
+runs
+work
+pnpm-lock.yaml
+AGENTS.md
+benchmark/results
+benchmark/incidents

@@ -1,0 +1,18 @@
+{
+  "runId": "012d68b7-1f8d-4a07-8592-ba924d8a7ed0",
+  "variantHash": "6b1c4be39b43148ce483af1818d0b51374296692c347df4ddfe51f3d13060b30",
+  "candidateHash": "912675c0319bdbfc223293c3f37a66c9c7db02ad395ca29f4e5ee5b27321db1d",
+  "executionStatus": "ERROR",
+  "exitCode": null,
+  "failure": null,
+  "charges": null,
+  "requests": 0,
+  "cleanDatabase": true,
+  "isolated": true,
+  "offline": true,
+  "schedule": [],
+  "durationMs": 19950,
+  "stdout": "",
+  "stderr": "",
+  "error": "CANDIDATE_OOM"
+}

@@ -1,0 +1,18 @@
+{
+  "runId": "b9231160-f741-4950-8c13-622f0948150e",
+  "variantHash": "6b1c4be39b43148ce483af1818d0b51374296692c347df4ddfe51f3d13060b30",
+  "candidateHash": "ae4d2ecd79b7402c8aa05670777dcbcdb4af03ea0f07192358e2b1130898c1c9",
+  "executionStatus": "ERROR",
+  "exitCode": null,
+  "failure": null,
+  "charges": null,
+  "requests": 0,
+  "cleanDatabase": true,
+  "isolated": true,
+  "offline": true,
+  "schedule": [],
+  "durationMs": 21606,
+  "stdout": "",
+  "stderr": "",
+  "error": "CANDIDATE_PROTOCOL_REJECTED"
+}

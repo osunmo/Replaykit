@@ -1,0 +1,66 @@
+{
+  "schemaVersion": 1,
+  "incidentId": "R1",
+  "runId": "40a29c65-b65e-4853-9911-665e984f7893",
+  "status": "VERIFIED",
+  "telemetryTier": "full",
+  "failureMatch": {
+    "type": "DuplicatePaymentError",
+    "topApplicationFrame": "payments/createPayment"
+  },
+  "checks": {
+    "buggyFails": true,
+    "sameFailureIdentity": true,
+    "referenceFixPasses": true,
+    "alternateFixPasses": true,
+    "decoyFixStillFails": true,
+    "deterministicRuns": 10,
+    "deterministicFailures": 10,
+    "offlineExecution": true,
+    "isolatedExecution": true,
+    "freshState": true,
+    "noSleepBasedTiming": true,
+    "reviewableTest": true,
+    "sameCandidate": true
+  },
+  "missingEvidence": [],
+  "reasonCodes": [],
+  "testArtifact": "repro.test.ts",
+  "durationMs": 318758,
+  "tokens": null,
+  "metadata": {
+    "evaluator": "r1-strict-v1",
+    "candidateHash": "16fea9fa5391aa587ee3145d9d091a79bf89295db85b2b7ec117c5cb00424102",
+    "incidentHash": "5377af70daf7d7d2e03fb4e0ccafb18016c63148b2d930ca0aafbd7a07c0abcd",
+    "executionRunIds": [
+      "cbbf8061-c208-4381-8452-9979058ab841",
+      "fe310515-5815-4cdd-a82d-ed682eb61351",
+      "3b57a77a-4157-48d5-99bc-9c67fc88017e",
+      "b999f595-74ca-41f3-b07a-9bd81eaab14d",
+      "6304eb0c-7d78-4bcc-b1e8-6939d2ff5f54",
+      "d11ed37e-dc9b-4ce3-b3de-e01f0c73a267",
+      "ade639fe-41a6-474e-b550-290cc7f2a0c8",
+      "c7e0f246-4890-4a16-853e-71a52388eb47",
+      "1c1781e7-2a8b-4202-979f-c75e7e9d1eb9",
+      "c5c08646-a314-481f-94d2-d5e7b646ba15",
+      "9db3415e-57d5-4646-9697-e49c664ad305",
+      "7552af0c-e071-4301-a44d-63c559b3ae42",
+      "ede39e3c-6511-4264-973c-ffe2af315c7a"
+    ],
+    "variantHashes": [
+      "6b1c4be39b43148ce483af1818d0b51374296692c347df4ddfe51f3d13060b30",
+      "6b1c4be39b43148ce483af1818d0b51374296692c347df4ddfe51f3d13060b30",
+      "6b1c4be39b43148ce483af1818d0b51374296692c347df4ddfe51f3d13060b30",
+      "6b1c4be39b43148ce483af1818d0b51374296692c347df4ddfe51f3d13060b30",
+      "6b1c4be39b43148ce483af1818d0b51374296692c347df4ddfe51f3d13060b30",
+      "6b1c4be39b43148ce483af1818d0b51374296692c347df4ddfe51f3d13060b30",
+      "6b1c4be39b43148ce483af1818d0b51374296692c347df4ddfe51f3d13060b30",
+      "6b1c4be39b43148ce483af1818d0b51374296692c347df4ddfe51f3d13060b30",
+      "6b1c4be39b43148ce483af1818d0b51374296692c347df4ddfe51f3d13060b30",
+      "6b1c4be39b43148ce483af1818d0b51374296692c347df4ddfe51f3d13060b30",
+      "59d0cf2a4dacfdcf9e80110c1f2b1285992e6161e6a1420f87424dade1b94fe6",
+      "c91367e6ff1e0e07ccbe413bb05ac8e17d0a8a798a5bd9f69fb9d37d562bf121",
+      "3c4b4129f02d98b83fefc511e76fb8e12d913bf3bcb5233cdbc441bc092a1fdb"
+    ]
+  }
+}

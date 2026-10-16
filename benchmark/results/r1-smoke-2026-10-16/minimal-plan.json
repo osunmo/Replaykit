@@ -1,0 +1,16 @@
+{
+  "schemaVersion": 1,
+  "incidentId": "R1",
+  "status": "ABSTAIN",
+  "testSource": null,
+  "reasonCodes": [
+    "MISSING_REQUEST_BODY"
+  ],
+  "missingEvidence": [
+    "request.body",
+    "breadcrumbs",
+    "spans"
+  ],
+  "assumptions": [],
+  "sourceHash": "73046f24ce1d0f31baaeb0a88754eb06be81b393f09d88231d13b08fc4e5d923"
+}

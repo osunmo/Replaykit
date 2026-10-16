@@ -1,0 +1,33 @@
+{
+  "runId": "7552af0c-e071-4301-a44d-63c559b3ae42",
+  "variantHash": "c91367e6ff1e0e07ccbe413bb05ac8e17d0a8a798a5bd9f69fb9d37d562bf121",
+  "candidateHash": "16fea9fa5391aa587ee3145d9d091a79bf89295db85b2b7ec117c5cb00424102",
+  "executionStatus": "COMPLETED",
+  "exitCode": 0,
+  "failure": null,
+  "charges": 1,
+  "requests": 2,
+  "cleanDatabase": true,
+  "isolated": true,
+  "offline": true,
+  "schedule": [
+    {
+      "sequence": 1,
+      "kind": "request",
+      "checkpoint": "pay.1"
+    },
+    {
+      "sequence": 2,
+      "kind": "request",
+      "checkpoint": "pay.2"
+    },
+    {
+      "sequence": 3,
+      "kind": "request",
+      "checkpoint": "charges.3"
+    }
+  ],
+  "durationMs": 23220,
+  "stdout": "@replaykit/request:{\"id\":1,\"action\":\"pay\",\"input\":{\"orderId\":\"order-synthetic-1\",\"idempotencyKey\":\"checkout-key-1\",\"amount\":1250}}\nTAP version 13\n@replaykit/request:{\"id\":2,\"action\":\"pay\",\"input\":{\"orderId\":\"order-synthetic-1\",\"idempotencyKey\":\"checkout-key-1\",\"amount\":1250}}\n@replaykit/request:{\"id\":3,\"action\":\"charges\",\"orderId\":\"order-synthetic-1\"}\n# Subtest: repeated payment keeps one charge per idempotency key\nok 1 - repeated payment keeps one charge per idempotency key\n  ---\n  duration_ms: 3392.548212\n  type: 'test'\n  ...\n1..1\n# tests 1\n# suites 0\n# pass 1\n# fail 0\n# cancelled 0\n# skipped 0\n# todo 0\n# duration_ms 3409.478225\n",
+  "stderr": ""
+}

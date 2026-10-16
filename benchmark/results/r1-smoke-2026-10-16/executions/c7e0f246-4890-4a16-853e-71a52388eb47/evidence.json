@@ -1,0 +1,134 @@
+{
+  "runId": "c7e0f246-4890-4a16-853e-71a52388eb47",
+  "variantHash": "6b1c4be39b43148ce483af1818d0b51374296692c347df4ddfe51f3d13060b30",
+  "candidateHash": "16fea9fa5391aa587ee3145d9d091a79bf89295db85b2b7ec117c5cb00424102",
+  "executionStatus": "COMPLETED",
+  "exitCode": 1,
+  "failure": {
+    "type": "DuplicatePaymentError",
+    "topApplicationFrame": "payments/createPayment"
+  },
+  "charges": 2,
+  "requests": 2,
+  "cleanDatabase": true,
+  "isolated": true,
+  "offline": true,
+  "schedule": [
+    {
+      "sequence": 1,
+      "kind": "request",
+      "checkpoint": "pay.1"
+    },
+    {
+      "sequence": 2,
+      "kind": "request",
+      "checkpoint": "pay.2"
+    },
+    {
+      "sequence": 3,
+      "kind": "request",
+      "checkpoint": "charges.3"
+    }
+  ],
+  "durationMs": 22453,
+  "stdout": "@replaykit/request:{\"id\":1,\"action\":\"pay\",\"input\":{\"orderId\":\"order-synthetic-1\",\"idempotencyKey\":\"checkout-key-1\",\"amount\":1250}}\nTAP version 13\n@replaykit/request:{\"id\":2,\"action\":\"pay\",\"input\":{\"orderId\":\"order-synthetic-1\",\"idempotencyKey\":\"checkout-key-1\",\"amount\":1250}}\n@replaykit/request:{\"id\":3,\"action\":\"charges\",\"orderId\":\"order-synthetic-1\"}\n# Subtest: repeated payment keeps one charge per idempotency key\nnot ok 1 - repeated payment keeps one charge per idempotency key\n  ---\n  duration_ms: 3235.834832\n  type: 'test'\n  location: '/candidate/repro.test.ts:5:1'\n  failureType: 'testCodeFailure'\n  error: |-\n    Expected values to be strictly equal:\n    \n    2 !== 1\n    \n  code: 'ERR_ASSERTION'\n  name: 'AssertionError'\n  expected: 1\n  actual: 2\n  operator: 'strictEqual'\n  stack: |-\n    TestContext.<anonymous> (file:///candidate/repro.test.ts:9:10)\n    process.processTicksAndRejections (node:internal/process/task_queues:103:5)\n    async Test.run (node:internal/test_runner/test:1054:7)\n    async startSubtestAfterBootstrap (node:internal/test_runner/harness:296:3)\n  ...\n1..1\n# tests 1\n# suites 0\n# pass 0\n# fail 1\n# cancelled 0\n# skipped 0\n# todo 0\n# duration_ms 3256.015007\n",
+  "stderr": "",
+  "incident": {
+    "event_id": "checkout-00000001",
+    "release": "sha256:258752f4e273fe8171780ab17b1dd9fdec27fea9c6389ed21bbb6365cabfeb35",
+    "timestamp": "2026-10-16T19:18:43.415Z",
+    "exception": {
+      "values": [
+        {
+          "type": "DuplicatePaymentError",
+          "value": "Repeated idempotency key produced more than one provider charge",
+          "stacktrace": {
+            "frames": [
+              {
+                "function": "payments/createPayment",
+                "in_app": true
+              }
+            ]
+          }
+        }
+      ]
+    },
+    "request": {
+      "data": {
+        "orderId": "order-synthetic-1",
+        "idempotencyKey": "checkout-key-1",
+        "amount": 1250
+      }
+    },
+    "breadcrumbs": [
+      {
+        "category": "payment",
+        "message": "provider-charge",
+        "data": {
+          "clientKey": "checkout-key-1",
+          "providerKey": "payment-0000000001",
+          "orderId": "order-synthetic-1",
+          "amount": 1250
+        }
+      },
+      {
+        "category": "payment",
+        "message": "provider-charge",
+        "data": {
+          "clientKey": "checkout-key-1",
+          "providerKey": "payment-0000000002",
+          "orderId": "order-synthetic-1",
+          "amount": 1250
+        }
+      }
+    ],
+    "spans": [
+      {
+        "traceId": "d2bbb446bd2b5a2600ef42de72ef119e",
+        "spanId": "afca13bb09a2e7a9",
+        "name": "provider/charge",
+        "attributes": {
+          "payment.client_key": "checkout-key-1",
+          "payment.provider_key": "payment-0000000001",
+          "payment.order_id": "order-synthetic-1",
+          "payment.amount": 1250,
+          "payment.inserted": true
+        }
+      },
+      {
+        "traceId": "d2bbb446bd2b5a2600ef42de72ef119e",
+        "spanId": "8d63a4117cbe9b7e",
+        "name": "payments/createPayment",
+        "attributes": {
+          "payment.client_key": "checkout-key-1",
+          "payment.order_id": "order-synthetic-1",
+          "payment.amount": 1250,
+          "payment.cached": false
+        }
+      },
+      {
+        "traceId": "6216e8156138b5b0b02e1d66455b7b28",
+        "spanId": "97bd30c54124bd27",
+        "name": "provider/charge",
+        "attributes": {
+          "payment.client_key": "checkout-key-1",
+          "payment.provider_key": "payment-0000000002",
+          "payment.order_id": "order-synthetic-1",
+          "payment.amount": 1250,
+          "payment.inserted": true
+        }
+      },
+      {
+        "traceId": "6216e8156138b5b0b02e1d66455b7b28",
+        "spanId": "b3acc02bdb7964c2",
+        "name": "payments/createPayment",
+        "attributes": {
+          "payment.client_key": "checkout-key-1",
+          "payment.order_id": "order-synthetic-1",
+          "payment.amount": 1250,
+          "payment.cached": false
+        }
+      }
+    ]
+  }
+}

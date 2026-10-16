@@ -1,0 +1,8 @@
+node_modules/
+dist/
+runs/
+work/
+.env
+coverage/
+.superpowers/
+*.log

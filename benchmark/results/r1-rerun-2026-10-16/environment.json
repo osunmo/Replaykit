@@ -1,0 +1,23 @@
+{
+  "schemaVersion": 1,
+  "nodeImage": "sha256:c3de60bf2f9dd0ac6370e6117950ff62d6e339527e7472301c9c78a017978392",
+  "postgresImage": "sha256:b0f9560a2de083e2cc7382e75f808c7381a32852a7ec49117deedb300e552b24",
+  "candidateImage": "sha256:bf1008b86d8427ed354b0aa5f40c9a3377f046992e8545ea99ef03bec6f953af",
+  "plannerImage": "sha256:0fcb6c9d93f02b105441e5c8ae24a9096776c31e74bbd0ac0ba27e214ef2191e",
+  "appImages": {
+    "buggy": "sha256:258752f4e273fe8171780ab17b1dd9fdec27fea9c6389ed21bbb6365cabfeb35",
+    "reference": "sha256:9d7bbf81c2cca343f34e5c650d97b79dc3df00a0855b3a8fae1ace454cf18824",
+    "alternate": "sha256:a591f29a585d9e291c9a98a0eb91d02e81d7b47eaff487f62b7f36d382719a49",
+    "decoy": "sha256:4e37b2f13c037421458e1e41fcdc0a1e80a1beb6da2e4bad6e1c9f5c17f5f272"
+  },
+  "sourceHashes": {
+    "buggy": "6b1c4be39b43148ce483af1818d0b51374296692c347df4ddfe51f3d13060b30",
+    "reference": "59d0cf2a4dacfdcf9e80110c1f2b1285992e6161e6a1420f87424dade1b94fe6",
+    "alternate": "c91367e6ff1e0e07ccbe413bb05ac8e17d0a8a798a5bd9f69fb9d37d562bf121",
+    "decoy": "3c4b4129f02d98b83fefc511e76fb8e12d913bf3bcb5233cdbc441bc092a1fdb"
+  },
+  "builtAt": "2026-10-16T19:14:22.252Z",
+  "hostNode": "v22.23.3",
+  "hostPlatform": "win32",
+  "lockfileHash": "9201803cdd87a590252bd1a9453760429d7f31f24fa28cbe10dace2593a24f30"
+}

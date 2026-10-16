@@ -1,0 +1,36 @@
+{
+  "status": "PASS",
+  "probes": [
+    {
+      "name": "filesystem-secrets-and-egress",
+      "status": "PASS",
+      "expected": "COMPLETED",
+      "executionStatus": "COMPLETED",
+      "evidence": "executions/d3456bf3-c52b-433c-8fa7-8bcc56b24382/evidence.json"
+    },
+    {
+      "name": "arbitrary-broker-command",
+      "status": "PASS",
+      "expected": "CANDIDATE_PROTOCOL_REJECTED",
+      "executionStatus": "ERROR",
+      "error": "CANDIDATE_PROTOCOL_REJECTED",
+      "evidence": "executions/b9231160-f741-4950-8c13-622f0948150e/evidence.json"
+    },
+    {
+      "name": "infinite-loop",
+      "status": "PASS",
+      "expected": "CANDIDATE_TIMEOUT",
+      "executionStatus": "ERROR",
+      "error": "CANDIDATE_TIMEOUT",
+      "evidence": "executions/2c7c7644-4d5b-489f-987e-9996598638a8/evidence.json"
+    },
+    {
+      "name": "memory-limit",
+      "status": "PASS",
+      "expected": "CANDIDATE_OOM",
+      "executionStatus": "ERROR",
+      "error": "CANDIDATE_OOM",
+      "evidence": "executions/012d68b7-1f8d-4a07-8592-ba924d8a7ed0/evidence.json"
+    }
+  ]
+}
