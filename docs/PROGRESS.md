@@ -1,5 +1,84 @@
 # Progress
 
+## 2026-10-17 — Approved contract implementation and Gate 0 green
+
+The user approved the separate external official-suite contract. The legacy R1
+schema and evaluator are restored exactly to commit `94fc971`; compared with the
+pre-Sentry evaluator (`62b92f1`), only the existing separate execution-time sum
+field differs. No charge/request acceptance predicate was generalized.
+
+- Added permanent null-charge and mixed-field rejection tests. External evidence
+  has an explicit versioned schema/evaluator and never dispatches from telemetry
+  or missing R1 observations. Its matrices are unit fixtures only; no external
+  execution is claimed here.
+- Replaced the scanner with fail-closed Git enumeration, tracked/untracked and
+  ignored artifact byte scanning, uppercase matching, exact-canary handling,
+  symlink rejection, and token-free findings. CI explicitly runs it. Review found
+  inherited ripgrep config, BOM decoding and bare timer imports; regression tests
+  reproduced all three, fixes passed, and independent re-review found no remaining
+  important issue in that scope.
+- Final `pnpm test`: exit 0; token scan clean across 49,807 files; 40 test files,
+  422 tests passed. `pnpm exec tsc --noEmit`, `pnpm lint`, `pnpm format:check`:
+  all exit 0. Vitest emitted an existing duplicate Sentry initialization warning.
+- `pnpm benchmark smoke`: exit 0, PASS / VERIFIED, run
+  `d4941e32-8d5c-4b8c-8164-afbb421e1400`. Matrix: 10 buggy failures, 3 reference
+  passes, 3 alternate passes, decoy rejection. Wrong-frame rejection and missing-body
+  abstention passed. Verification wall time 408,708 ms; execution sum 1,140,273 ms;
+  whole smoke wall time 472,318.2805 ms. No owned containers remained afterward.
+- Required cleanup grep is empty (exit 1); all four variant-comparison hits were
+  reviewed as unit fixtures, progress or grouping. Removed simulation directories
+  remain absent. No remote is configured; no push is possible.
+
+Raw outputs and a copy of the fresh smoke artifacts are preserved in the current
+next-steps chat's `outputs/phase1/` directory. Gate 0 is complete. Next: verify
+official benchmark provenance/licenses/images, then build and run real Stage A.
+Stage B, Stage C, external sensitivities and external verification are not built
+or run at this checkpoint. Phases 2–4 have not started.
+
+## 2026-10-17 — Next-steps Gate 0 audit blocked before external validation
+
+This audit follows the user's ordered next-steps instructions. Phase 1 Stage A
+has not started, and no external-repository verdict is claimed.
+
+- Found the existing snapshot `ebb0f7d` on `wip/before-medusa-cleanup` and cleanup
+  commit `94fc971` on `codex/replaykit-r1`. No replacement snapshot was made.
+- Preserved pre-existing uncommitted changes in `packages/contracts/src/index.ts`,
+  `packages/judge/src/evaluate.ts`, and `packages/judge/src/judge.test.ts`.
+  The proposed `charges: null` fallback changes R1 acceptance. A diagnostic
+  comparison against the committed evaluator ran 39 checks: 34 passed and five
+  failed, each admitting evidence that the committed R1 evaluator rejects.
+  These are unit fixtures, not container evidence or external-benchmark results.
+- The token scanner still contains two Medusa references. Four isolated scanner
+  probes produced two passes and two failures: uppercase token shapes are missed,
+  and a Git scan error reports success. No real credential was used by the probes;
+  generated fake fixtures were removed.
+- Fresh `pnpm test`: exit 0, 38 files and 361 tests passed, including the existing
+  token scanner. Fresh `pnpm exec tsc --noEmit`, `pnpm lint`, and
+  `pnpm format:check`: exit 0. Initial sandboxed attempts had dependency-access
+  failures; the results above are from approved execution outside that sandbox.
+- `git grep -niE 'medusa|upstreamRepo' -- packages scripts apps`: exit 0 with two
+  token-scanner hits, so the required empty-output cleanup gate fails.
+  Both removed simulation directories are absent. The four variant-comparison
+  hits were reviewed; none establishes runtime verdict evidence from a label.
+- Docker inspection found no containers labeled `replaykit.run` and no container
+  named `medusa-postgres`. A supplemental source/artifact token scan with ripgrep
+  completed without matches after excluding dependency and Git internals. An
+  earlier recursive PowerShell scan was stopped before completion.
+- R1 smoke was not run because Gate 0 remains blocked by the judge contract change
+  and scanner gaps. Previous smoke reports are historical, not fresh evidence.
+- No remote is configured; nothing was committed or pushed during this audit.
+
+The full report, raw verification outputs, machine-readable audit, preserved
+pre-existing diff, and contract proposal are in the next-steps chat's
+`outputs/gate0-audit/` directory. Diagnostic sources are ignored local files in
+`work/gate0-audit/`; they are not yet permanent CI regression tests.
+
+**Next concrete task:** review the proposed external-invariant evidence contract
+under Rule 3, replace the unreviewed null-based fallback only after that decision,
+repair the scanner and add permanent regression coverage, then rerun every Gate 0
+check including real R1 smoke. Benchmark selection and external runner work remain
+unbuilt pending Gate 0.
+
 ## 2026-10-17 — Provenance, Shared Runtime, MCP Server, VS Code / Cursor Extension, and Sentry Integration
 
 Completed the next development milestones for ReplayKit while preserving the R1 benchmark baseline:

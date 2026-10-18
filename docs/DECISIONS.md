@@ -1,5 +1,32 @@
 # Decisions
 
+## 2026-10-17 — Approved separate official-suite evidence contract
+
+- The user approved replacing the unreviewed null-charge fallback. Restore the
+  committed R1 execution schema and evaluator exactly; null ledger observations
+  cannot select another contract. Permanent tests reject the former invariant
+  field on buggy, reference, alternate, decoy, and complete-matrix inputs.
+- External official tests use `packages/contracts/src/external.ts` and the
+  explicit `evaluateExternalEvidence` entry point in `packages/judge/src/external.ts`.
+  No incident or telemetry argument dispatches to that entry point. A trusted
+  runner must bind the pinned manifest, content hashes and official test inventory.
+  The evaluator's unit fixtures are not external-project verification evidence.
+- Require complete normalized official reports with their content hashes. Reject
+  duplicate/skipped/missing required tests, altered reports, mixed schemas and
+  fabricated invariant fields. Both independent valid fixes must pass; the decoy
+  must still fail the invariant. Preserve the 10/3/3/1 matrix, failure identity,
+  candidate consistency, resource/isolation, fresh-state and static-review gates.
+- Require inspected mount information and distinct patch content hashes. Host
+  bind mounts are not accepted by the external contract. A documented official
+  test review-length exception or writable-root exception belongs only to trusted
+  configuration; neither relaxes R1 or disables network/resource restrictions.
+- Replace the scanner's text grep prefilter with NUL-delimited Git file
+  enumeration and byte-stream scanning. Include binary files, tracked files
+  subsequently ignored, and ignored runs/work/docs artifacts. Skip Git object
+  stores and dependency directories generically. Symlinks and scan failures are
+  rejected; findings contain file and line only. Bound reading to eight streams
+  and handle token/canary boundaries across chunks.
+
 ## 2026-10-16 — PostgreSQL template and measurement follow-up
 
 - Retain fresh initdb as the default after measurement. The template reduced observed PostgreSQL startup/readiness cost at concurrency three from 3.232 to 1.943 seconds per execution, but sampled full-smoke means were 109.359 seconds for initdb and 121.653 seconds for the template, two runs per mode with substantial variation. This is not an established end-to-end optimization. Expose the template through `pnpm sandbox:build --postgres-mode template-copy`; restore the default through `--postgres-mode initdb`. Keep concurrency three and fsync on. See [the complete measurement report](POSTGRES_PERFORMANCE.md).

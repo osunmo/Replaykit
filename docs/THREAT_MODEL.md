@@ -4,6 +4,15 @@ The security boundary protects the host, benchmark evidence and private fix arti
 
 ## Trust boundaries
 
+The approved external official-suite contract has a separate evaluator and strict
+schema. Its only caller may be a trusted supervisor using operator-selected pinned
+configuration. Incident metadata and candidate output cannot select that evaluator.
+Official report normalization, expected-test inventory, report/source/patch hashes,
+Docker inspection, fresh-workspace checks and measured execution status must be
+collected by that supervisor. No external runner or real external verdict is
+established by the contract's unit fixtures; real Stage A validation remains pending.
+R1 retains its original ledger/request gates and rejects external invariant fields.
+
 | Surface                                           | Trust and access                                                                                                                        |
 | ------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------- |
 | Incident JSON                                     | Untrusted, schema-validated and redacted before planning; its text is evidence, not instructions.                                       |

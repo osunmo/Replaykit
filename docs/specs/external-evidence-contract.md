@@ -1,0 +1,9 @@
+# External-suite evidence contract
+
+Approved by the user in this chat on 2026-10-17. The full approved proposal is preserved in the chat output CONTRACT_PROPOSAL.md.
+
+Legacy R1 keeps its strict execution schema and its charge/request acceptance predicates. External official-suite evidence uses a separate versioned schema and evaluator; no missing charge value, telemetry field, incident metadata or variant label selects that evaluator. Trusted operator configuration selects a pinned benchmark manifest. Never translate suite outcomes into synthetic charge counts.
+
+The supervisor collects official reporter JSON, exit status, the required FAIL_TO_PASS/PASS_TO_PASS inventory, failure identity, source-content and patch-content hashes, pinned image digest, isolation inspection and measured execution wall time. Missing, malformed, skipped or incomplete official evidence fails closed. Candidate assertions and stdout booleans are not authoritative evidence.
+
+Both entry points require 10 fresh buggy failures, 3 reference successes, 3 alternate successes, a genuinely failing decoy, consistent candidate bytes, correct buggy failure identity, independent execution IDs, offline isolation, fresh state and static review. Infrastructure failures are ERROR. External Stage A additionally requires all four requested sensitivity runs. Existing R1 null-charge and request-count rejection behavior must remain unchanged.
