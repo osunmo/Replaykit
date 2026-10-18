@@ -194,6 +194,39 @@ describe.each(['reference', 'alternate'] as const)('%s fix repetition gates', (v
     });
   });
 });
+describe('R1 evidence contract remains strict', () => {
+  it.each(['buggy', 'reference', 'alternate', 'decoy', 'all'] as const)(
+    'rejects null charge observations for %s',
+    (target) => {
+      const m = matrix();
+      const rows =
+        target === 'all'
+          ? [...m.buggy, ...m.reference, ...m.alternate, m.decoy]
+          : target === 'decoy'
+            ? [m.decoy]
+            : [m[target][0]!];
+      for (const row of rows) {
+        row.charges = null;
+      }
+      expect(evaluateEvidence(incident, plan, m).status).not.toBe('VERIFIED');
+    },
+  );
+  it.each(['buggy', 'reference', 'alternate', 'decoy', 'all'] as const)(
+    'rejects invariant-field injection for %s',
+    (target) => {
+      const m = matrix();
+      const rows =
+        target === 'all'
+          ? [...m.buggy, ...m.reference, ...m.alternate, m.decoy]
+          : target === 'decoy'
+            ? [m.decoy]
+            : [m[target][0]!];
+      for (const row of rows)
+        Object.assign(row, { charges: null, requests: 0, invariantPassed: row.exitCode === 0 });
+      expect(() => evaluateEvidence(incident, plan, m)).toThrow();
+    },
+  );
+});
 describe('candidate review policy', () => {
   it('permits the supported readable generated test', () =>
     expect(inspectTest(plan.testSource!).allowed).toBe(true));
