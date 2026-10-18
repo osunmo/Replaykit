@@ -37,6 +37,11 @@ const ManifestSchema = z.object({
   plannerImage: imageId,
   appImages: variantImages,
   sourceHashes: z.object({ buggy: hash, reference: hash, alternate: hash, decoy: hash }),
+  // Optional only for reading historical manifests; new-run provenance requires these.
+  applicationSourceHash: hash.optional(),
+  buildLockfileHash: hash.optional(),
+  sdkSourceHash: hash.optional(),
+  plannerSourceHash: hash.optional(),
   postgresRuntime: z
     .object({
       mode: z.enum(['initdb', 'template-copy']),

@@ -17,6 +17,19 @@ import { normalizeIncident, redact } from '../../telemetry/src/index.js';
 import { replayBindingIssues } from '../../judge/src/binding.js';
 import { reportMarkdown } from './report.js';
 import { parseConcurrency, runBounded } from './concurrency.js';
+import { collectProvenance } from './provenance.js';
+
+export interface VerificationProgress {
+  phase: 'PLANNING' | 'VERIFYING';
+  completedExecutions: number;
+  totalExecutions: 17;
+  preliminary: boolean;
+}
+export interface VerificationOptions {
+  concurrency?: number;
+  signal?: AbortSignal;
+  onProgress?: (progress: VerificationProgress) => Promise<void>;
+}
 
 const json = (value: unknown) => JSON.stringify(value, null, 2) + '\n';
 const sha256 = (value: string) => createHash('sha256').update(value).digest('hex');
@@ -60,6 +73,7 @@ function unavailable(
     reasonCodes,
     testArtifact: plan.testSource ? 'repro.test.ts' : null,
     durationMs: 0,
+    executionTimeSumMs: 0,
     tokens: null,
     metadata: { planner: 'rule-based-v1', incidentHash: plan.sourceHash },
   });
@@ -69,7 +83,7 @@ export async function verifyPlan(
   output: string,
   rawIncident: unknown,
   rawPlan?: unknown,
-  options: { concurrency?: number } = {},
+  options: VerificationOptions = {},
 ): Promise<{ result: JudgeResult; matrix?: ExecutionMatrix }> {
   const started = performance.now();
   const concurrency = parseConcurrency(String(options.concurrency ?? 3));
@@ -83,7 +97,15 @@ export async function verifyPlan(
     finishOffsetMs: number;
   }[] = [];
   const incident = IncidentSchema.parse(redact(rawIncident));
+  options.signal?.throwIfAborted();
+  await options.onProgress?.({
+    phase: 'PLANNING',
+    completedExecutions: 0,
+    totalExecutions: 17,
+    preliminary: false,
+  });
   const plan = rawPlan ? ReplayPlanSchema.parse(rawPlan) : await planInSandbox(root, incident);
+  options.signal?.throwIfAborted();
   if (plan.sourceHash !== sha256(JSON.stringify(incident)))
     throw new Error('Plan provenance does not match incident');
   await writeFile(path.join(output, 'incident.json'), json(incident));
@@ -114,9 +136,17 @@ export async function verifyPlan(
           hostNode: process.version,
           hostPlatform: process.platform,
           lockfileHash: sha256(await readFile(path.join(root, 'pnpm-lock.yaml'), 'utf8')),
+          provenance: await collectProvenance(root, manifest, concurrency),
         }),
       );
       const counts = { buggy: 0, reference: 0, alternate: 0, decoy: 0 };
+      let preliminary = false;
+      await options.onProgress?.({
+        phase: 'VERIFYING',
+        completedExecutions: 0,
+        totalExecutions: 17,
+        preliminary,
+      });
       const candidateSource = plan.testSource!;
       const execute = async (variant: Variant) => {
         counts[variant] += 1;
@@ -129,6 +159,20 @@ export async function verifyPlan(
             manifest,
           });
           rows.push({ variant, evidence });
+          preliminary ||=
+            variant === 'buggy' &&
+            evidence.executionStatus === 'COMPLETED' &&
+            evidence.exitCode === 1 &&
+            (evidence.charges ?? 0) > 1 &&
+            evidence.requests >= 2 &&
+            evidence.failure?.type === incident.exception.type &&
+            evidence.failure.topApplicationFrame === incident.exception.topApplicationFrame;
+          await options.onProgress?.({
+            phase: 'VERIFYING',
+            completedExecutions: rows.length,
+            totalExecutions: 17,
+            preliminary,
+          });
           executionTimeline.push({
             variant,
             runId: evidence.runId,
@@ -154,10 +198,12 @@ export async function verifyPlan(
           concurrency,
           execute,
           ({ evidence }) => evidence.executionStatus === 'ERROR',
+          options.signal,
         );
       } finally {
         matrixWallMs = performance.now() - matrixStarted;
       }
+      options.signal?.throwIfAborted();
       const skipped = (): ExecutionEvidence => ({
         runId: randomUUID(),
         variantHash: '0'.repeat(64),
@@ -186,15 +232,20 @@ export async function verifyPlan(
       result = evaluateEvidence(incident, plan, matrix);
       await writeFile(path.join(output, 'matrix.json'), json(matrix));
     } catch (error) {
-      result = unavailable(incident, plan, 'ERROR', ['SANDBOX_UNAVAILABLE']);
+      result = unavailable(incident, plan, 'ERROR', [
+        options.signal?.aborted ? 'CANCELLED' : 'SANDBOX_UNAVAILABLE',
+      ]);
       result.metadata.error = error instanceof Error ? error.message : String(error);
     }
   }
   result.runId = path.basename(output);
-  result.metadata.verificationWallMs = performance.now() - started;
+  const verificationWallMs = performance.now() - started;
+  result.metadata.verificationWallMs = verificationWallMs;
   result.metadata.matrixWallMs = matrixWallMs;
   result.metadata.concurrency = concurrency;
   result.metadata.maxActiveExecutions = maxActiveExecutions;
+  result.executionTimeSumMs = result.durationMs;
+  result.durationMs = Math.round(verificationWallMs);
   await writeFile(
     path.join(output, 'pipeline.json'),
     json({

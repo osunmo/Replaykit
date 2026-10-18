@@ -77,11 +77,70 @@ Captured fixtures identify an exact application image and are local generated fi
 
 The cooperative scheduler has finite named checkpoints, cancellation and deadlock diagnostics. It is currently tested independently; R1 uses sequential retries, and real scheduled database-race scenarios remain future work.
 
+## Shared Runtime, Job Management, and Sentry Import
+
+ReplayKit provides an asynchronous runtime (`packages/runtime`) and CLI commands for managing reproduction jobs without blocking:
+
+```sh
+# Start an asynchronous reproduction job
+pnpm replaykit job start --fixture benchmark/incidents/R1/visible/incident.json
+
+# Check list and status of reproduction jobs
+pnpm replaykit job list
+pnpm replaykit job status --run <run-id>
+
+# View the generated regression test and independent verification report
+pnpm replaykit job open-test --run <run-id>
+pnpm replaykit job report --run <run-id>
+
+# Cancel an active job safely
+pnpm replaykit job cancel --run <run-id>
+
+# Import an incident from Sentry via SSRF-hardened transport
+pnpm replaykit incident import --event-id <sentry-event-id> --token <sentry-auth-token>
+```
+
+## Model Context Protocol (MCP) Server
+
+ReplayKit includes a standard MCP server (`packages/mcp`) implementing the Model Context Protocol over stdio for Cursor, Claude Desktop, and other MCP clients.
+
+### Available MCP Tools:
+
+- `replaykit_reproduce`: Starts an asynchronous reproduction job from an incident fixture path. Returns the assigned run ID promptly without blocking.
+- `replaykit_status`: Retrieves the current phase, completed execution count, and verdict for a run ID.
+- `replaykit_report`: Retrieves the complete Markdown verification report for a run ID.
+- `replaykit_open_test`: Reads the generated `repro.test.ts` from the managed run directory.
+- `replaykit_cancel`: Cancels an active reproduction run.
+- `replaykit_import_sentry_issue`: Fetches and normalizes an incident from Sentry.
+
+### Cursor Configuration (`.cursor/mcp.json`)
+
+You can configure the MCP server in Cursor automatically via the ReplayKit extension command (`replaykit.configureMcp`) or manually by adding to `.cursor/mcp.json`:
+
+```json
+{
+  "mcpServers": {
+    "replaykit": {
+      "command": "node",
+      "args": ["--import", "tsx", "packages/mcp/src/index.ts"]
+    }
+  }
+}
+```
+
+## VS Code & Cursor Extension
+
+The ReplayKit extension (`apps/vscode-extension`) provides an Activity Bar panel in VS Code or Cursor:
+
+- **Runs View**: Lists recent runs, tracks live execution progress (honest preliminary reporting; never reports premature `VERIFIED`), and displays failing gates.
+- **Actions**: Start reproduction, open generated tests, open verification reports, cancel running jobs, configure MCP, and navigate directly to offending source code (`payments.ts`).
+- **Secure Credentials**: Sentry API tokens are stored securely in VS Code `SecretStorage` and never leak into workspace files or reports.
+
 ## Current scope
 
-Implemented: PostgreSQL payment endpoint, four R1 source variants, real OTel spans and Sentry-shaped capture, typed/redacted incident ingestion, evidence-based deterministic planner, isolated execution, strict judge, CLI and JSON/CSV/Markdown artifacts.
+Implemented: PostgreSQL payment endpoint, four R1 source variants, real OTel spans and Sentry-shaped capture, typed/redacted incident ingestion, evidence-based deterministic planner, isolated execution, strict judge, cryptographic execution provenance hashing, asynchronous shared runtime with crash safety and exclusive leases, MCP stdio server, VS Code / Cursor extension, secure Sentry importer, CLI and JSON/CSV/Markdown artifacts.
 
-Not implemented: full order/inventory/webhook API, the remaining incident corpus, the 12/8 development/held-out split, three-trial model baselines, LLM provider adapter, arbitrary candidate patch verification, Cursor/MCP integration, dashboard or release publishing. Smoke counts are not a 20-case benchmark score. GitHub Actions is supplied but remote CI has not run in this local workspace.
+Not implemented: full order/inventory/webhook API, the remaining incident corpus, the 12/8 development/held-out split, three-trial model baselines, LLM provider adapter, arbitrary candidate patch verification, release publishing. Smoke counts are not a 20-case benchmark score. GitHub Actions is supplied but remote CI has not run in this local workspace.
 
 See [progress](docs/PROGRESS.md), [architecture](docs/ARCHITECTURE.md), [threat model](docs/THREAT_MODEL.md), [evaluation](docs/EVALUATION.md), and [limitations](docs/LIMITATIONS.md).
 
@@ -91,15 +150,19 @@ Raw runs, Docker inspections, logs, generated incident fixtures and local `.env`
 
 ```text
 apps/checkout-api/       PostgreSQL service and real telemetry
-packages/contracts/     Zod boundary schemas
-packages/telemetry/     Redaction and Sentry-shaped normalization
-packages/replay-engine/ Cooperative checkpoint scheduler
-packages/planner/       Visible-evidence rule planner
-packages/judge/         Sandbox, broker validation and strict gates
-packages/cli/           Capture, replay, smoke and reports
-benchmark/private/R1/  Judge-only source variants
-docker/                 Candidate fixture SDK
-scripts/                Allowlisted runtime image builder and SDK tests
+apps/vscode-extension/   VS Code & Cursor Activity Bar extension
+packages/contracts/      Zod boundary schemas
+packages/telemetry/      Redaction and Sentry-shaped normalization
+packages/sentry/         SSRF-safe Sentry client, DNS pinning, and normalizer
+packages/replay-engine/  Cooperative checkpoint scheduler
+packages/planner/        Visible-evidence rule planner
+packages/judge/          Sandbox, broker validation, and strict gates
+packages/runtime/        Asynchronous job lifecycle, storage, and lease
+packages/mcp/            Model Context Protocol (MCP) stdio server
+packages/cli/            Capture, replay, smoke, jobs, and Sentry imports
+benchmark/private/R1/    Judge-only source variants
+docker/                  Candidate fixture SDK
+scripts/                 Allowlisted runtime image builder and SDK tests
 ```
 
 MIT licensed. All included incident data is synthetic.

@@ -172,6 +172,9 @@ export async function buildSandbox(
     join(appContext, 'dist/apps/checkout-api/src'),
   );
   const appSourceHash = await hashTree(appContext);
+  const buildLockfileHash = createHash('sha256')
+    .update(await readFile(join(appContext, 'pnpm-lock.yaml')))
+    .digest('hex');
   const sourceHashes = {} as Record<Variant, string>;
   for (const variant of VARIANTS) {
     const context = join(contexts, variant);
@@ -383,6 +386,10 @@ export async function buildSandbox(
     plannerImage,
     appImages,
     sourceHashes,
+    applicationSourceHash: appSourceHash,
+    buildLockfileHash,
+    sdkSourceHash: sdkHash,
+    plannerSourceHash: plannerHash,
     postgresRuntime: {
       mode: options.postgresMode,
       baseImage: postgresBaseImage,
@@ -396,7 +403,7 @@ export async function buildSandbox(
   await writeFile(temporaryManifest, `${JSON.stringify(manifest, null, 2)}\n`);
   await rename(temporaryManifest, join(directory, 'manifest.json'));
   console.log(
-    'Saved immutable sandbox image IDs and variant source hashes to work/sandbox/manifest.json.',
+    'Saved immutable image IDs, full application inputs and component hashes to work/sandbox/manifest.json.',
   );
 }
 

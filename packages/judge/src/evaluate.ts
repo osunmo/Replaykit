@@ -149,6 +149,7 @@ export function evaluateEvidence(
     reasonCodes: [...new Set(reasonCodes)],
     testArtifact: plan.testSource ? 'repro.test.ts' : null,
     durationMs: all.reduce((sum, e) => sum + e.durationMs, 0),
+    executionTimeSumMs: all.reduce((sum, e) => sum + e.durationMs, 0),
     tokens: null,
     metadata: {
       evaluator: 'r1-strict-v2',

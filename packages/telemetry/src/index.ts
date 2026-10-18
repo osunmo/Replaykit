@@ -10,21 +10,30 @@ import {
 
 const sensitiveKey =
   /authorization|cookie|password|secret|token|email|phone|address|card|cvv|ssn|iban/i;
-export function redact(value: unknown, depth = 0): unknown {
+export function redact(value: unknown, depth = 0, exactSecret?: string): unknown {
   if (depth > 20) return '[TRUNCATED]';
-  if (typeof value === 'string')
-    return value
+  if (typeof value === 'string') {
+    const str =
+      exactSecret && exactSecret.length > 0 ? value.split(exactSecret).join('[REDACTED]') : value;
+    return str
       .replace(/Bearer\s+[^\s,;"']+/gi, 'Bearer [REDACTED]')
+      .replace(
+        /\b(?:sntrys_|sntryu_|sntryi_|sntryo_|sntrya_|sntry[a-z0-9_]*_)[a-zA-Z0-9_.-]+/gi,
+        '[REDACTED]',
+      )
+      .replace(/\b(?:sk_|ghp_|github_pat_)[a-zA-Z0-9_.-]+/gi, '[REDACTED]')
       .replace(/[\w.+-]+@[\w.-]+\.[a-z]{2,}/gi, '[REDACTED]')
       .replace(/\b(?:\d[ -]*?){13,19}\b/g, '[REDACTED]');
-  if (Array.isArray(value)) return value.slice(0, 1000).map((item) => redact(item, depth + 1));
+  }
+  if (Array.isArray(value))
+    return value.slice(0, 1000).map((item) => redact(item, depth + 1, exactSecret));
   if (value && typeof value === 'object')
     return Object.fromEntries(
       Object.entries(value)
         .slice(0, 1000)
         .map(([key, item]) => [
           key,
-          sensitiveKey.test(key) ? '[REDACTED]' : redact(item, depth + 1),
+          sensitiveKey.test(key) ? '[REDACTED]' : redact(item, depth + 1, exactSecret),
         ]),
     );
   return value;

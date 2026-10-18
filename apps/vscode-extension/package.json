@@ -1,0 +1,117 @@
+{
+  "name": "replaykit-vscode",
+  "displayName": "ReplayKit",
+  "description": "Production incident reproduction tool and independent benchmark judge for VS Code and Cursor",
+  "version": "0.1.0",
+  "publisher": "replaykit",
+  "license": "MIT",
+  "engines": {
+    "vscode": "^1.90.0"
+  },
+  "categories": [
+    "Testing",
+    "Debugging"
+  ],
+  "main": "./dist/extension.js",
+  "contributes": {
+    "viewsContainers": {
+      "activitybar": [
+        {
+          "id": "replaykit-sidebar",
+          "title": "ReplayKit",
+          "icon": "resources/icon.svg"
+        }
+      ]
+    },
+    "views": {
+      "replaykit-sidebar": [
+        {
+          "id": "replaykit.runsView",
+          "name": "Incident Runs"
+        }
+      ]
+    },
+    "commands": [
+      {
+        "command": "replaykit.startReproduction",
+        "title": "Start Reproduction",
+        "category": "ReplayKit",
+        "icon": "$(play)"
+      },
+      {
+        "command": "replaykit.importSentryIssue",
+        "title": "Import Sentry Issue URL",
+        "category": "ReplayKit",
+        "icon": "$(cloud-download)"
+      },
+      {
+        "command": "replaykit.refreshRuns",
+        "title": "Refresh Incident Runs",
+        "category": "ReplayKit",
+        "icon": "$(refresh)"
+      },
+      {
+        "command": "replaykit.openTest",
+        "title": "Open Generated Regression Test",
+        "category": "ReplayKit"
+      },
+      {
+        "command": "replaykit.openReport",
+        "title": "Open Verification Report",
+        "category": "ReplayKit"
+      },
+      {
+        "command": "replaykit.cancelJob",
+        "title": "Cancel Reproduction Job",
+        "category": "ReplayKit",
+        "icon": "$(stop-circle)"
+      },
+      {
+        "command": "replaykit.setSentryToken",
+        "title": "Set Sentry Auth Token",
+        "category": "ReplayKit"
+      },
+      {
+        "command": "replaykit.configureMcp",
+        "title": "Configure Cursor / VS Code MCP Server",
+        "category": "ReplayKit"
+      }
+    ],
+    "menus": {
+      "view/title": [
+        {
+          "command": "replaykit.refreshRuns",
+          "when": "view == replaykit.runsView",
+          "group": "navigation@1"
+        },
+        {
+          "command": "replaykit.startReproduction",
+          "when": "view == replaykit.runsView",
+          "group": "navigation@2"
+        },
+        {
+          "command": "replaykit.importSentryIssue",
+          "when": "view == replaykit.runsView",
+          "group": "navigation@3"
+        }
+      ],
+      "view/item/context": [
+        {
+          "command": "replaykit.openTest",
+          "when": "view == replaykit.runsView && viewItem == completedRun",
+          "group": "inline@1"
+        },
+        {
+          "command": "replaykit.openReport",
+          "when": "view == replaykit.runsView && viewItem == completedRun",
+          "group": "inline@2"
+        },
+        {
+          "command": "replaykit.cancelJob",
+          "when": "view == replaykit.runsView && viewItem == activeRun",
+          "group": "inline@3"
+        }
+      ]
+    }
+  }
+}

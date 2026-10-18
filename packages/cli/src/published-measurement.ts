@@ -1,3 +1,5 @@
+import { RunProvenanceSchema } from './provenance.js';
+
 const variants = ['buggy', 'reference', 'alternate', 'decoy'] as const;
 const stageNames = [
   'preparation',
@@ -107,6 +109,9 @@ export function publishMeasurement(measurement: unknown, result: unknown, pipeli
     startedAt: timestamp(measured.startedAt),
     wallMs: number(measured.wallMs),
     concurrencyRequested: count(measured.concurrencyRequested),
+    ...(manifest.provenance === undefined
+      ? {}
+      : { provenance: RunProvenanceSchema.parse(manifest.provenance) }),
     sources: {
       measurement: `runs/${runId}/measurement.json`,
       result: `runs/${runId}/result.json`,

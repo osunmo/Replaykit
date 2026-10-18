@@ -7,6 +7,7 @@ import { captureIncident, newOutput, smoke, verifyPlan } from './workflow.js';
 import { readJson, safeRunId } from './report.js';
 import { parseConcurrency } from './concurrency.js';
 import { relativeArtifactPath } from './publication.js';
+import { integrationCommand } from './integration-command.js';
 
 const help = `ReplayKit — first R1 vertical slice
 
@@ -26,6 +27,12 @@ async function main() {
   const args = process.argv.slice(2).filter((arg) => arg !== '--');
   if (!args.length || args.includes('--help')) {
     process.stdout.write(help);
+    return;
+  }
+  const integration = await integrationCommand(root, args, process.env);
+  if (integration !== null) {
+    process.stdout.write(JSON.stringify(integration.data, null, 2) + '\n');
+    process.exitCode = integration.exitCode;
     return;
   }
   const option = (name: string) => {

@@ -18,7 +18,7 @@ describe('measurement command options', () => {
         'sequential-off',
       ]),
     ).toEqual({ label: 'sequential-off', concurrency: 1, sampling: 'off' });
-    expect(parseMeasurementOptions(['--sampling', 'on', '--concurrency', '6']).sampling).toBe('on');
+    expect(parseMeasurementOptions(['--sampling', 'on', '--concurrency', '3']).sampling).toBe('on');
   });
 
   it('rejects invalid, missing, ambiguous, and unknown options before a run can start', () => {

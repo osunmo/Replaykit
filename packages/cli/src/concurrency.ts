@@ -1,8 +1,8 @@
 export function parseConcurrency(value: string = '3'): number {
-  if (!/^\d+$/.test(value)) throw new Error('Concurrency must be an integer from 1 to 10');
+  if (!/^\d+$/.test(value)) throw new Error('Concurrency must be an integer from 1 to 3');
   const concurrency = Number(value);
-  if (!Number.isSafeInteger(concurrency) || concurrency < 1 || concurrency > 10)
-    throw new Error('Concurrency must be an integer from 1 to 10');
+  if (!Number.isSafeInteger(concurrency) || concurrency < 1 || concurrency > 3)
+    throw new Error('Concurrency must be an integer from 1 to 3');
   return concurrency;
 }
 
@@ -12,6 +12,7 @@ export async function runBounded<T, R>(
   concurrency: number,
   execute: (item: T, index: number) => Promise<R>,
   shouldStop: (result: R) => boolean = () => false,
+  signal?: AbortSignal,
 ): Promise<R[]> {
   parseConcurrency(String(concurrency));
   let cursor = 0;
@@ -20,7 +21,7 @@ export async function runBounded<T, R>(
   let failed = false;
   const results = new Map<number, R>();
   const worker = async () => {
-    while (!stopped && cursor < items.length) {
+    while (!stopped && !signal?.aborted && cursor < items.length) {
       const index = cursor++;
       try {
         const result = await execute(items[index]!, index);

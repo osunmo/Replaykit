@@ -1,4 +1,4 @@
-import { mkdir, mkdtemp, rm, writeFile } from 'node:fs/promises';
+import { mkdir, mkdtemp, readFile, rm, writeFile } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import path from 'node:path';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
@@ -43,6 +43,25 @@ async function saveManifest(postgresRuntime?: {
 }
 
 describe('sandbox manifest PostgreSQL runtime settings', () => {
+  it('retains validated future build hashes and rejects malformed identities', async () => {
+    await saveManifest({ mode: 'initdb', fsync: 'on' });
+    const file = path.join(root, 'work/sandbox/manifest.json');
+    const base = JSON.parse(await readFile(file, 'utf8')) as Record<string, unknown>;
+    const fields = {
+      applicationSourceHash: hash,
+      buildLockfileHash: hash,
+      sdkSourceHash: hash,
+      plannerSourceHash: hash,
+    };
+    await writeFile(file, JSON.stringify({ ...base, ...fields }));
+    expect(await loadManifest(root)).toMatchObject(fields);
+    await writeFile(
+      file,
+      JSON.stringify({ ...base, ...fields, applicationSourceHash: 'partial-or-invalid' }),
+    );
+    await expect(loadManifest(root)).rejects.toThrow();
+  });
+
   it('rejects fsync off for the stock image instead of recording an ignored setting', async () => {
     await saveManifest({ mode: 'initdb', fsync: 'off' });
     await expect(loadManifest(root)).rejects.toThrow(/fsync/);

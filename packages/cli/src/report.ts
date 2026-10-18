@@ -16,6 +16,7 @@ interface ReportResult {
   reasonCodes: string[];
   checks: Record<string, unknown>;
   durationMs: number;
+  executionTimeSumMs?: number;
   metadata?: Record<string, unknown>;
 }
 const escape = (value: unknown) => String(value).replace(/[|<>\r\n]/g, ' ');
@@ -45,10 +46,10 @@ export function reportMarkdown(
         `| ${escape(variant)} | ${e.executionStatus} | ${e.exitCode ?? 'unavailable'} | ${e.charges ?? 'unavailable'} | ${e.failure ? escape(`${e.failure.type} @ ${e.failure.topApplicationFrame}`) : 'none'} | ${e.durationMs} | [JSON](executions/${e.runId}/evidence.json) |`,
     ),
     '',
-    `Summed execution duration: ${result.durationMs} ms (overlaps during parallel work; this is not elapsed wall time). Model tokens: N/A (deterministic planner).`,
+    `Verification wall time (durationMs): ${result.durationMs} ms. Summed execution duration (executionTimeSumMs): ${result.executionTimeSumMs ?? result.durationMs} ms (overlaps during parallel work; this is not elapsed wall time). Model tokens: N/A (deterministic planner).`,
     ...(typeof result.metadata?.verificationWallMs === 'number'
       ? [
-          `Verification wall time: ${result.metadata.verificationWallMs} ms. Matrix wall time: ${result.metadata.matrixWallMs} ms. Concurrency limit: ${result.metadata.concurrency}.`,
+          `Matrix wall time: ${result.metadata.matrixWallMs} ms. Concurrency limit: ${result.metadata.concurrency}.`,
           `Reference fixes: ${result.metadata.referenceFixSuccesses ?? 0}/${result.metadata.referenceFixAttempts ?? 0}; alternate fixes: ${result.metadata.alternateFixSuccesses ?? 0}/${result.metadata.alternateFixAttempts ?? 0}.`,
           'Execution overlap: [pipeline](pipeline.json). Each execution contains profile.json; full smoke runs also write smoke-profile.json.',
         ]

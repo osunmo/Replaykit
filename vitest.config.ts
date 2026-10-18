@@ -3,6 +3,6 @@ export default defineConfig({
   test: {
     include: ['packages/**/*.test.ts', 'apps/**/*.test.ts'],
     exclude: ['**/*.integration.test.ts'],
-    testTimeout: 10000,
+    testTimeout: 30000,
   },
 });

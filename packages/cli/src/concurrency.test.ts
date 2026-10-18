@@ -15,9 +15,20 @@ function tasks() {
 it('defaults to three and rejects unbounded or malformed concurrency', () => {
   expect(parseConcurrency()).toBe(3);
   expect(parseConcurrency('1')).toBe(1);
-  expect(parseConcurrency('10')).toBe(10);
-  for (const invalid of ['0', '-1', '11', '3x', '1.5', 'Infinity', ''])
+  expect(parseConcurrency('3')).toBe(3);
+  for (const invalid of ['0', '-1', '4', '10', '11', '3x', '1.5', 'Infinity', ''])
     expect(() => parseConcurrency(invalid)).toThrow();
+});
+
+it('cancellation stops dispatch and drains active tasks', async () => {
+  const abort = new AbortController();
+  const { releases, started, execute } = tasks();
+  const pending = runBounded([0, 1, 2, 3], 2, execute, undefined, abort.signal);
+  abort.abort();
+  releases.get(0)!('zero');
+  releases.get(1)!('one');
+  expect(await pending).toEqual(['zero', 'one']);
+  expect(started).toEqual([0, 1]);
 });
 
 it('refills a freed slot without waiting for the rest of a batch and preserves order', async () => {

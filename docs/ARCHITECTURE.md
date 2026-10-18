@@ -25,12 +25,16 @@ The candidate has no network connection to the app or database. The app and Post
 | Location                   | Responsibility                                                                                                                                       |
 | -------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `apps/checkout-api`        | Payment API, PostgreSQL schema, synthetic provider ledger, domain exception, bounded incident logging and OpenTelemetry spans.                       |
+| `apps/vscode-extension`    | VS Code / Cursor extension with Activity Bar view, honest progress reporting, test/report viewers, source navigation, and SecretStorage token store. |
 | `packages/contracts`       | Versioned incident, request, plan, execution evidence and verdict schemas.                                                                           |
 | `packages/telemetry`       | Sentry-shaped normalization, field/content redaction, frame normalization and telemetry-tier filtering.                                              |
+| `packages/sentry`          | SSRF-safe Sentry client, DNS pinning, CIDR/metadata IP protection, frame normalization, and issue importer.                                          |
 | `packages/planner`         | Pure deterministic function from visible incident evidence to a test or an explicit abstention; the CLI invokes it inside a dedicated planner image. |
 | `packages/replay-engine`   | Cooperative checkpoint scheduler with ordered release, cancellation, timeouts and logical event records; currently unit-tested independently.        |
 | `packages/judge`           | Candidate policy inspection, Docker runner, broker request validation, trusted observation collection and strict evaluation.                         |
-| `packages/cli`             | Capture, incident run, stored-plan verification, smoke orchestration and report persistence.                                                         |
+| `packages/runtime`         | Asynchronous job lifecycle, crash/interruption recovery, atomic file state storage, and repository exclusive leasing.                                |
+| `packages/mcp`             | Model Context Protocol (MCP) server over stdio for Cursor, Claude Desktop, and agent integration.                                                    |
+| `packages/cli`             | Capture, incident run, stored-plan verification, smoke orchestration, background jobs, and report persistence.                                       |
 | `scripts/build-sandbox.ts` | Allowlisted image contexts, four app policy snapshots, candidate SDK image and immutable-image manifest.                                             |
 | `benchmark/private/R1`     | Independently stored buggy, reference, alternate and decoy policy source artifacts.                                                                  |
 
@@ -65,3 +69,32 @@ Image building requires network access to obtain base images and packages. The a
 Monotonic execution profiles record setup, readiness, candidate work, trusted evidence and cleanup separately. Pipeline wall clocks and a separate bounded Docker observer measure latency and sampled resource use without contributing judge evidence. Raw artifacts and local `.env` credentials are ignored. A fixed-field publisher emits portable summaries under `docs/measurements`; it does not copy raw Docker inspection objects or candidate sources.
 
 The host controller remains trusted and can read the development repository, including private policies. Planner-container separation does not turn this development checkout into a complete held-out evaluation or defend against a modified host controller. See [THREAT_MODEL.md](THREAT_MODEL.md) and [LIMITATIONS.md](LIMITATIONS.md) before interpreting isolation claims.
+
+## Runtime, MCP, and Editor Extension Architecture
+
+### Asynchronous Runtime Lifecycle
+
+`packages/runtime` orchestrates reproduction jobs asynchronously:
+
+- **Exclusive Repository Lease**: A local loopback socket lease (`lease.ts`) enforces single-flight reproduction within the workspace, preventing concurrent matrix executions from exhausting host Docker resources or clobbering states.
+- **Detached Worker Process**: The worker (`worker.ts`) runs as an independent child process, decoupling long-running executions from CLI, MCP, or VS Code lifecycles.
+- **Atomic State Transitions**: Job metadata (`state.json`) updates use atomic `.tmp` file writes followed by renames.
+- **Heartbeat & Crash Recovery**: If a worker is interrupted or aborted by an editor reload, the runtime detects the missing heartbeat/process and marks the state `ERROR` with an interruption reason. It never promotes a half-finished job or premature failure to a `VERIFIED` verdict. Only the independent judge issues verdicts.
+
+### Model Context Protocol (MCP) Server
+
+`packages/mcp` provides a standard MCP interface over stdio:
+
+- Exposes typed tools (`replaykit_reproduce`, `replaykit_status`, `replaykit_report`, `replaykit_open_test`, `replaykit_cancel`, `replaykit_import_sentry_issue`).
+- Returns prompt job IDs on reproduction requests, allowing agent clients to poll status or cancel as needed.
+- Enforces strict input validation and restrains artifact reads to managed `runs/<run-id>` directories.
+- Communicates JSON-RPC strictly on `stdout`, directing all diagnostics and error traces exclusively to `stderr`.
+
+### VS Code & Cursor Extension
+
+`apps/vscode-extension` provides editor UX for backend developers and coding agents:
+
+- Visualizes run states in the Activity Bar with honest progress reporting (never presents early buggy failure as verified).
+- Enables test inspection, markdown report browsing, cancellation, and direct navigation to code failure sites in `payments.ts`.
+- Manages Sentry API credentials securely using VS Code's `SecretStorage` API.
+- Generates Cursor MCP client configuration in `.cursor/mcp.json`.

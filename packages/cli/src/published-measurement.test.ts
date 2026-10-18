@@ -70,6 +70,60 @@ const result = {
 };
 
 describe('portable published measurement projection', () => {
+  it('publishes validated future provenance without backfilling historical measurements', () => {
+    const provenance = {
+      schemaVersion: 1,
+      capturedAt: '2026-10-17T00:00:00.000Z',
+      hashAlgorithm: 'sha256',
+      applicationSourceHash: hash,
+      controllerSourceHash: hash,
+      judgeSourceHash: hash,
+      sdkSourceHash: hash,
+      plannerSourceHash: hash,
+      lockfileHash: hash,
+      git: { status: 'AVAILABLE', commit: 'b'.repeat(40), dirty: true },
+      runtime: { postgresMode: 'initdb', fsync: 'on', concurrency: 3 },
+      images: {
+        nodeImage: image,
+        postgresImage: image,
+        candidateImage: image,
+        plannerImage: image,
+        appImages: { buggy: image, reference: image, alternate: image, decoy: image },
+      },
+    };
+    expect(
+      publishMeasurement(
+        { ...measurement, manifest: { ...measurement.manifest, provenance } },
+        result,
+      ).provenance,
+    ).toEqual(provenance);
+    expect(publishMeasurement(measurement, result)).not.toHaveProperty('provenance');
+    expect(() =>
+      publishMeasurement(
+        {
+          ...measurement,
+          manifest: {
+            ...measurement.manifest,
+            provenance: { ...provenance, token: 'secret-canary' },
+          },
+        },
+        result,
+      ),
+    ).toThrow();
+    expect(() =>
+      publishMeasurement(
+        {
+          ...measurement,
+          manifest: {
+            ...measurement.manifest,
+            provenance: { ...provenance, controllerSourceHash: '/private/file' },
+          },
+        },
+        result,
+      ),
+    ).toThrow();
+  });
+
   it('preserves sanitized PostgreSQL runtime provenance and leaves absent or invalid fields unknown', () => {
     const runtime = {
       mode: 'template-copy',

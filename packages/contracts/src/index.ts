@@ -141,6 +141,7 @@ export const JudgeResultSchema = z.strictObject({
   reasonCodes: z.array(shortText),
   testArtifact: z.string().nullable(),
   durationMs: z.number().nonnegative(),
+  executionTimeSumMs: z.number().nonnegative().optional(),
   tokens: z.number().nonnegative().nullable(),
   metadata: z.record(z.string(), z.unknown()),
 });

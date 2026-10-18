@@ -49,6 +49,21 @@ describe('telemetry boundary', () => {
     expect(JSON.stringify(result)).not.toContain('a@b.com');
     expect(result).toMatchObject({ nested: { clientKey: 'key-1', password: '[REDACTED]' } });
   });
+  it('redacts sntryu_ user tokens and exact token secrets cleanly', () => {
+    const canary = 'sntryu_deadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeef';
+    const customSecret = 'my-custom-unprefixed-secret-987';
+    const result = redact(
+      {
+        note: `Found token ${canary} and secret ${customSecret}`,
+        data: { token: canary },
+      },
+      0,
+      customSecret,
+    );
+    expect(JSON.stringify(result)).not.toContain(canary);
+    expect(JSON.stringify(result)).not.toContain(customSecret);
+    expect(JSON.stringify(result)).toContain('[REDACTED]');
+  });
   it('removes request, spans and breadcrumbs from minimal inputs', () => {
     const result = normalizeIncident(event, 'minimal');
     expect(result.request).toBeUndefined();

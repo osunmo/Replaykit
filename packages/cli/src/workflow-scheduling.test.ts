@@ -8,6 +8,10 @@ import { planIncident } from '../../planner/src/index.js';
 import { runSandbox } from '../../judge/src/sandbox.js';
 import { verifyPlan } from './workflow.js';
 
+vi.mock('./provenance.js', () => ({
+  collectProvenance: vi.fn(async () => ({ schemaVersion: 1 })),
+}));
+
 vi.mock('../../judge/src/sandbox.js', () => ({
   loadManifest: async () => ({ appImages: { buggy: `sha256:${'a'.repeat(64)}` } }),
   planInSandbox: vi.fn(),
