@@ -10,11 +10,17 @@ import {
 
 const sensitiveKey =
   /authorization|cookie|password|secret|token|email|phone|address|card|cvv|ssn|iban/i;
-export function redact(value: unknown, depth = 0, exactSecret?: string): unknown {
+export function redact(
+  value: unknown,
+  depthOrSecret: number | string = 0,
+  exactSecretArg?: string,
+): unknown {
+  const depth = typeof depthOrSecret === 'number' ? depthOrSecret : 0;
+  const exactSecret = typeof depthOrSecret === 'string' ? depthOrSecret : exactSecretArg;
   if (depth > 20) return '[TRUNCATED]';
   if (typeof value === 'string') {
     const str =
-      exactSecret && exactSecret.length > 0 ? value.split(exactSecret).join('[REDACTED]') : value;
+      exactSecret && exactSecret.length >= 8 ? value.split(exactSecret).join('[REDACTED]') : value;
     return str
       .replace(/Bearer\s+[^\s,;"']+/gi, 'Bearer [REDACTED]')
       .replace(

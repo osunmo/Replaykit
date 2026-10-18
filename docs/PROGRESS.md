@@ -371,6 +371,7 @@ The R1 performance-hardening milestone is complete. The user's latest direction 
 ## Upstream Investigation: Medusa.js (Issue #15593) — October 17, 2026
 
 **Status: Bug confirmed with the upstream project's own test on pinned commits. No ReplayKit verification exists for Medusa.**
+
 - Target: [medusajs/medusa](https://github.com/medusajs/medusa) (MIT License)
 - Original Issue: [#15593](https://github.com/medusajs/medusa/issues/15593) (`Account holder with provider_id: ... already exists` on retry)
 - Merged Upstream PR: [#15618](https://github.com/medusajs/medusa/pull/15618) (`fix(core-flows): keep customer account-holder link on a failed payment-session init`)
@@ -378,6 +379,7 @@ The R1 performance-hardening milestone is complete. The user's latest direction 
 - Complete Technical Report: [`docs/UPSTREAM_MEDUSA.md`](file:///docs/UPSTREAM_MEDUSA.md)
 
 ### Findings
+
 1. **Empirical Reproduction via Upstream Test**: The bug was confirmed directly on the real Medusa.js 2.0 codebase backed by PostgreSQL 17 using Medusa's official integration test (`integration-tests/http/__tests__/payment-collection/store/account-holder.spec.ts`):
    - On buggy commit `1eb56d1111c10cbd33da578e2c45da8b21cb93d7`, the upstream test fails deterministically with `Expected length: 1, Received length: 0` followed by `MedusaError: Account holder with provider_id: pp_account-holder_test, external_id: cus_..., already exists`.
    - On fixed commit `5296f51121d4796b1757b65852c48e97e0e1e197` (with `noCompensation: true` added to `createRemoteLinkStep`), the upstream test passes cleanly.

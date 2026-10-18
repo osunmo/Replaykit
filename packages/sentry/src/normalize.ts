@@ -38,7 +38,7 @@ function annotations(value: unknown, depth = 0): boolean {
   return true;
 }
 export function redactSentryText(value: string, token?: string): string {
-  let result = token ? value.split(token).join('[REDACTED]') : value;
+  let result = token && token.length >= 8 ? value.split(token).join('[REDACTED]') : value;
   result = result
     .replace(/Bearer\s+[^\s,;"']+/gi, 'Bearer [REDACTED]')
     .replace(

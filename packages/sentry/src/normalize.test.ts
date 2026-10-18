@@ -144,6 +144,11 @@ describe('Sentry API normalization (synthetic unit shapes, not live fixtures)', 
     expect(text).not.toContain(exactSecret);
     expect(text).toBe('Auth user: [REDACTED], org: [REDACTED], raw: [REDACTED]');
   });
+  it('exact-value redaction in redactSentryText ignores empty or short secret returning text unchanged', () => {
+    const text = 'standard message without tokens';
+    expect(redactSentryText(text, '')).toBe(text);
+    expect(redactSentryText(text, 'short')).toBe(text);
+  });
   it('does not use filtered breadcrumb identifiers as evidence', () => {
     const raw = eventFixture();
     const entries = raw.entries as Array<{

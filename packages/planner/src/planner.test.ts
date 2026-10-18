@@ -78,4 +78,3 @@ describe('evidence-driven rule planner', () => {
     expect(plan.status).toBe('READY');
   });
 });
-
