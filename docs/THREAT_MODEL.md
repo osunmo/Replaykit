@@ -13,6 +13,17 @@ collected by that supervisor. No external runner or real external verdict is
 established by the contract's unit fixtures; real Stage A validation remains pending.
 R1 retains its original ledger/request gates and rejects external invariant fields.
 
+External executions must bind both the full base commit and the full official
+test-file content hash to trusted configuration. The new single-added-test helper
+preserves all other file bytes except insertion-boundary whitespace, original
+control statement parsing and directive prologues. It is a narrow source-data
+guard, not proof of JavaScript safety. The unchanged static policy still applies
+to the complete extracted test. Patch path/type guards are preliminary; actual
+Git apply/check and filesystem-type inspection inside a fresh container remain
+unbuilt. No external runtime attestation or verified matrix is claimed. Actual
+preflight isolation, failed startup and missing failure identity are documented in
+[EXTERNAL_VALIDATION.md](EXTERNAL_VALIDATION.md).
+
 | Surface                                           | Trust and access                                                                                                                        |
 | ------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------- |
 | Incident JSON                                     | Untrusted, schema-validated and redacted before planning; its text is evidence, not instructions.                                       |

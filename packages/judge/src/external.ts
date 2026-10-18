@@ -157,11 +157,13 @@ export function evaluateExternalEvidence(
     );
   const bound = (e: ExternalExecution, patchHash: string) =>
     e.instanceId === config.instanceId &&
+    e.baseCommit === config.baseCommit &&
     e.image === config.image &&
     e.patchHash === patchHash &&
     e.testPatchHash === config.testPatchHash &&
     e.candidateHash === config.candidateHash &&
     e.candidateHash === hash(source) &&
+    e.sourceHashes[config.testFile] === config.testFileHash &&
     config.sourceFiles.every((name) => !!e.sourceHashes[name]) &&
     Object.keys(e.sourceHashes).every((name) => config.sourceFiles.includes(name));
   const realBug = (e: ExternalExecution, patchHash: string) =>

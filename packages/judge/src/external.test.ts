@@ -8,10 +8,12 @@ const source = "import assert from 'node:assert/strict';\nassert.equal(1 + 1, 2)
 const config = {
   contract: 'external-official-suite-v1',
   instanceId: 'unit-fixture',
+  baseCommit: 'b'.repeat(40),
   image: 'registry.invalid/fixture@sha256:' + hash('image'),
   testPatchHash: hash('official test patch'),
   candidateHash: hash(source),
-  sourceFiles: ['src/application.js'],
+  testFileHash: hash(source),
+  sourceFiles: ['src/application.js', 'test/repro.js'],
   failToPass: ['regression'],
   passToPass: ['control'],
   expectedFailure: { type: 'AssertionError', topApplicationFrame: 'src/application.js:10' },
@@ -30,12 +32,16 @@ function evidence(runId: string, patchHash: string, tests: object[], exitCode: n
   return {
     contract: 'external-official-suite-v1',
     instanceId: config.instanceId,
+    baseCommit: config.baseCommit,
     runId,
     image: config.image,
     patchHash,
     testPatchHash: config.testPatchHash,
     candidateHash: config.candidateHash,
-    sourceHashes: { 'src/application.js': hash('observed source bytes') },
+    sourceHashes: {
+      'src/application.js': hash('observed source bytes'),
+      'test/repro.js': hash(source),
+    },
     executionStatus: 'COMPLETED',
     exitCode,
     reportJson,
@@ -79,6 +85,27 @@ function bindSource(m: ReturnType<typeof matrix>, candidate: string) {
   return { ...config, candidateHash: hash(candidate) };
 }
 describe('separate external official-suite evaluator', () => {
+  it('requires an explicit base revision on every execution', () => {
+    const m = matrix();
+    Reflect.deleteProperty(m.buggy[0]!, 'baseCommit');
+    expect(evaluateExternalEvidence(config, source, m).status).toBe('ERROR');
+  });
+  it('requires a pinned full official test-file hash', () => {
+    const manifest = { ...config };
+    Reflect.deleteProperty(manifest, 'testFileHash');
+    expect(evaluateExternalEvidence(manifest, source, matrix()).status).toBe('ERROR');
+  });
+  it.each(['base-revision', 'official-test-file'])(
+    'rejects substituted %s bytes despite a matching candidate fragment',
+    (mode) => {
+      const m = matrix();
+      if (mode === 'base-revision') Object.assign(m.buggy[0]!, { baseCommit: 'a'.repeat(40) });
+      else Object.assign(m.buggy[0]!.sourceHashes, { 'test/repro.js': hash('tampered controls') });
+      const result = evaluateExternalEvidence(config, source, m);
+      expect(result.checks.buggyFails).toBe(false);
+      expect(result.status).not.toBe('VERIFIED');
+    },
+  );
   it('requires an explicit inspected mount list', () => {
     const m = matrix();
     Reflect.deleteProperty(m.buggy[0]!.isolation, 'mounts');

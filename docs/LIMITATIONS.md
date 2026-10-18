@@ -4,6 +4,14 @@ This delivery implements the first R1 payment retry slice. A successful R1 smoke
 
 ## Product and benchmark scope
 
+- Phase 1 external work is blocked and incomplete. A separate official-suite
+  schema/evaluator and source-data guards exist, but no production external runner,
+  reporter normalizer, CLI or 17-run matrix exists. Six offline preflights yielded
+  five infrastructure errors and one actual official failure without a production
+  application frame. Docusaurus image acquisition stopped for low disk space.
+  No external VERIFIED claim, fix/decoy validation, sensitivity run, Stage C study
+  or LLM planner call exists. See [EXTERNAL_VALIDATION.md](EXTERNAL_VALIDATION.md).
+
 - Checkout supports payments, charge-count reads and health. Full orders, inventory, webhooks and a real payment-provider integration are not implemented.
 - R1 is the only implemented benchmark case. The remaining nineteen cases, complete twenty-case corpus, versioned truth files, fixed twelve-development/eight-held-out split and multi-trial evaluation remain unfinished.
 - Smoke includes a same-exception/different-frame rejection and a missing-request-body abstention. These checks are not implementations of the full N1–N5 negative-control corpus.

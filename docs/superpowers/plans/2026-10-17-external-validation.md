@@ -10,6 +10,14 @@
 
 **Spec:** docs/specs/external-evidence-contract.md and the user's ordered Phase 1 instructions.
 
+**Execution checkpoint:** Tasks 1–2 completed and committed (1aa8cc9, 8176cbc).
+Task 3 is blocked after six real preflights and canceled third-image acquisition.
+Only source-data mapping/path guards were added; the production runner, command,
+normalizer, fixes, matrix and sensitivities are unbuilt/unrun. Task 4's required
+study is incomplete; all attempts and blockers are reported in
+docs/EXTERNAL_VALIDATION.md and the chat's outputs/phase1 report. Phases 2–4 have
+not started. Task checkboxes below describe acceptance, not simulated evidence.
+
 ## Global Constraints
 
 No simulation or outcome selection by labels. No candidate execution on the host. No judge-gate weakening. No credential literals; token scan before every commit. Phase 1 only. Raw command output and exit codes in the report. Stop and report real blockers.

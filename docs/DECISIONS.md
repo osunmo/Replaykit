@@ -1,5 +1,27 @@
 # Decisions
 
+## 2026-10-17 — Bind official evidence and preserve blocked outcomes
+
+- Bind every external role to a full base commit and actual official test-file
+  content hash; require that file in the source inventory. A merely well-formed
+  hash is insufficient. R1's schema and evaluator stay byte-identical to 94fc971.
+- The narrow single-added-test profile reviews the complete extracted statement,
+  while the pinned full file is executed and hash-bound. Reject changes to
+  imports, hooks, helpers or controls. Preserve original control parsing and
+  directive prologues; a text-only insertion can otherwise rename a control or
+  change automatic semicolon insertion/strict mode.
+- Path/type inspection is a preliminary guard, not Git patch validation. A future
+  runner must still check/apply inside its fresh container and inspect actual
+  filesystem types. Symlink/gitlink index modes are rejected now.
+- Do not weaken failure identity for assertion-only official tests. Immutable's
+  real test failure lacks an application frame; it is insufficient evidence,
+  never a fabricated identity or a VERIFIED result.
+- Keep CPU/memory/PID limits unchanged after Preact Chrome startup failures.
+  Stop image acquisition at the observed low-storage constraint; do not prune
+  unrelated user resources. Preflights do not substitute for Stage A or Stage C.
+- Record all failed attempts, null model/cost fields, public-data contamination,
+  the missing sensitivities and the unbuilt production runner explicitly.
+
 ## 2026-10-17 — Approved separate official-suite evidence contract
 
 - The user approved replacing the unreviewed null-charge fallback. Restore the

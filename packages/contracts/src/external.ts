@@ -19,10 +19,12 @@ export const ExternalManifestSchema = z
   .strictObject({
     contract: z.literal('external-official-suite-v1'),
     instanceId: text,
+    baseCommit: z.string().regex(/^[a-f0-9]{40}$/),
     image,
     testPatchHash: HashSchema,
     candidateHash: HashSchema,
     testFile: file.default('test/repro.js'),
+    testFileHash: HashSchema,
     sourceFiles: z.array(file).min(1),
     failToPass: z.array(text).min(1),
     passToPass: z.array(text).min(1),
@@ -37,6 +39,8 @@ export const ExternalManifestSchema = z
     readonlyRootException: z.string().min(20).max(4096).optional(),
   })
   .superRefine((value, ctx) => {
+    if (!value.sourceFiles.includes(value.testFile))
+      ctx.addIssue({ code: 'custom', message: 'Official test file must be in source inventory' });
     if (new Set(Object.values(value.patchHashes)).size !== 4)
       ctx.addIssue({ code: 'custom', message: 'Patch variants must have distinct content hashes' });
     for (const list of [value.sourceFiles, [...value.failToPass, ...value.passToPass]]) {
@@ -61,6 +65,7 @@ export const OfficialReportSchema = z.strictObject({
 export const ExternalExecutionSchema = z.strictObject({
   contract: z.literal('external-official-suite-v1'),
   instanceId: text,
+  baseCommit: z.string().regex(/^[a-f0-9]{40}$/),
   runId: text,
   image,
   patchHash: HashSchema,

@@ -1,5 +1,38 @@
 # Progress
 
+## 2026-10-17 — Phase 1 preflights blocked; no external verification
+
+Gate 0 remains green at its recorded checkpoint. The separate external contract
+now binds each execution to the pinned base revision and full official test-file
+hash. Source-data guards extract only a complete new test without changing
+controls, their parse or directive prologue; patch guards reject unsafe paths and
+nonregular index modes. Review regressions were observed failing before fixes.
+These helpers and the external evaluator are implemented; the production runner,
+CLI, reporter normalizer and matrix integration remain unbuilt.
+
+Final local checks: scanner clean on 49,833 files; 42 files / 461 unit tests
+passed; TypeScript, lint and format exited 0. The final R1 smoke did not pass:
+an initial provenance mismatch was corrected by removing an unused empty
+workspace declaration and restoring the unchanged lockfile, then three buggy
+preparations timed out during PostgreSQL readiness. Latest run
+`cf6ae2b2-e044-4726-b638-9053f031ca85` is ERROR; no candidate/fix matrix
+completed. No owned containers remain. The earlier Gate 0 pass is historical
+evidence, not a replacement for this failed final validation.
+
+Pinned Multilingual data and licenses were verified. All six real offline
+preflights are reported in [EXTERNAL_VALIDATION.md](EXTERNAL_VALIDATION.md):
+Immutable 2006 had two build errors, then 22 controls passed and one official
+regression failed, but no application failure frame existed; Preact 3010 had
+three Chrome startup timeouts within the unchanged 64-PID limit. Docusaurus 10130
+image acquisition was canceled for low C: storage before any execution. No
+external matrix, valid-fix/decoy runs or sensitivities ran. No external VERIFIED
+claim exists. This is exploratory feasibility work, not the required Stage C
+study. No LLM provider call was made; model/tokens/cost are null.
+
+Stopped external work under the user's blocker rule. Final quality/R1 checks and
+raw logs are recorded in the end-of-phase report in the current chat's
+outputs/phase1. Phase 1 acceptance is incomplete; Phases 2–4 remain unstarted.
+
 ## 2026-10-17 — Approved contract implementation and Gate 0 green
 
 The user approved the separate external official-suite contract. The legacy R1
