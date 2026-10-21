@@ -1,0 +1,75 @@
+{
+  "schemaVersion": "incident-context-v1",
+  "incidentId": "000f4807-61b8-4826-88ab-c215d2a93170",
+  "createdAt": "2026-10-20T12:00:00Z",
+  "sourceRevision": {
+    "gitSha": "61b86760019c85afbef6cc0f175c75870381ed04",
+    "repository": "https://github.com/fastify/fastify.git",
+    "branch": "main"
+  },
+  "error": {
+    "type": "TypeError",
+    "value": "Cannot read properties of undefined (reading 'config')",
+    "topApplicationFrame": "at Request.get (/case/lib/request.js:204:55)",
+    "frames": [
+      {
+        "filename": "/case/lib/request.js",
+        "function": "Request.get routeConfig",
+        "lineno": 204,
+        "colno": 55,
+        "inApp": true,
+        "contextLine": "      return this[kRouteContext][kPublicRouteContext].config"
+      },
+      {
+        "filename": "/case/fastify.js",
+        "function": "onBadUrl",
+        "lineno": 699,
+        "colno": 14,
+        "inApp": true
+      }
+    ],
+    "handled": false
+  },
+  "request": {
+    "method": "GET",
+    "url": "http://localhost/test/%world",
+    "path": "/test/%world",
+    "headers": {
+      "accept": "text/plain"
+    },
+    "bodySanitized": null
+  },
+  "breadcrumbs": [
+    {
+      "timestamp": "2026-10-20T11:59:58Z",
+      "category": "http",
+      "level": "error",
+      "message": "Triggering input: GET /test/%world sent with malformed URI component, triggering frameworkErrors handler where req.routeConfig is accessed before routing completes"
+    }
+  ],
+  "runtime": {
+    "nodeVersion": "v22.23.3",
+    "os": "linux",
+    "arch": "x64",
+    "containerImageDigest": "node:22-bookworm-slim@sha256:c3de60bf2f9dd0ac6370e6117950ff62d6e339527e7472301c9c78a017978392",
+    "environmentVariables": {
+      "NODE_ENV": {
+        "valueRedacted": "production",
+        "isSecret": false
+      }
+    }
+  },
+  "oracle": {
+    "sourceType": "upstream_issue_spec",
+    "confidence": "definitive",
+    "expectedOutcome": {
+      "shouldThrow": false
+    },
+    "specification": "Upstream API Specification: When a request fails early due to an invalid URL or framework error before routing completes, req.routeConfig, req.routerPath, and req.routerMethod must return undefined rather than throwing an unhandled TypeError. A custom frameworkErrors handler must be able to inspect req.routeConfig (which evaluates strictly to undefined) and safely return an HTTP error response."
+  },
+  "sufficiency": {
+    "status": "SUFFICIENT",
+    "missingFields": [],
+    "blockingReason": null
+  }
+}

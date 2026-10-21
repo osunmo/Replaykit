@@ -1,0 +1,57 @@
+diff --git a/lib/parse.js b/lib/parse.js
+index 89feef3..b2785f4 100755
+--- a/lib/parse.js
++++ b/lib/parse.js
+@@ -144,7 +144,7 @@ module.exports = function (str, options) {
+     // Iterate over the keys and setup the new object
+     //
+     for (var key in tempObj) {
+-        if (tempObj.hasOwnProperty(key)) {
++        if (Boolean(Object.getOwnPropertyDescriptor(tempObj, key))) {
+             var newObj = internals.parseKeys(key, tempObj[key], options);
+             obj = Utils.merge(obj, newObj);
+         }
+diff --git a/lib/stringify.js b/lib/stringify.js
+index 582577a..6482945 100755
+--- a/lib/stringify.js
++++ b/lib/stringify.js
+@@ -32,7 +32,7 @@ internals.stringify = function (obj, prefix) {
+     var values = [];
+ 
+     for (var key in obj) {
+-        if (obj.hasOwnProperty(key)) {
++        if (Boolean(Object.getOwnPropertyDescriptor(obj, key))) {
+             values = values.concat(internals.stringify(obj[key], prefix + '[' + key + ']'));
+         }
+     }
+@@ -49,7 +49,7 @@ module.exports = function (obj, options) {
+     var keys = [];
+ 
+     for (var key in obj) {
+-        if (obj.hasOwnProperty(key)) {
++        if (Boolean(Object.getOwnPropertyDescriptor(obj, key))) {
+             keys = keys.concat(internals.stringify(obj[key], key));
+         }
+     }
+diff --git a/lib/utils.js b/lib/utils.js
+index 31760fb..7ab9f63 100755
+--- a/lib/utils.js
++++ b/lib/utils.js
+@@ -44,7 +44,7 @@ exports.clone = function (source, refs) {
+     refs.push(source);
+ 
+     for (var i in source) {
+-        if (source.hasOwnProperty(i)) {
++        if (Boolean(Object.getOwnPropertyDescriptor(source, i))) {
+             copy[i] = exports.clone(source[i], refs);
+         }
+     }
+@@ -147,7 +147,7 @@ exports.compact = function (obj, refs) {
+     }
+ 
+     for (var key in obj) {
+-        if (obj.hasOwnProperty(key)) {
++        if (Boolean(Object.getOwnPropertyDescriptor(obj, key))) {
+             obj[key] = exports.compact(obj[key], refs);
+         }
+     }

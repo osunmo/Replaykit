@@ -1,0 +1,56 @@
+{
+  "instanceId": "fastify__issue-4807",
+  "repository": "https://github.com/fastify/fastify.git",
+  "baseCommit": "61b86760019c85afbef6cc0f175c75870381ed04",
+  "fixedCommit": "c2b89732d583a0e0d8e0a666b2eb9b62610edf34",
+  "image": "node:22-bookworm-slim@sha256:c3de60bf2f9dd0ac6370e6117950ff62d6e339527e7472301c9c78a017978392",
+  "runtime": "node:22",
+  "testRunner": "node:test",
+  "testFile": "test/repro.test.js",
+  "testCommand": [
+    "node",
+    "test/repro.test.js"
+  ],
+  "suiteCommand": [
+    "node",
+    "test/baseline-sanity.js"
+  ],
+  "sourceFiles": [
+    "package.json",
+    "lib/request.js",
+    "fastify.js",
+    "test/baseline-sanity.js",
+    "test/repro.test.js"
+  ],
+  "patchAllowlist": [
+    "lib/request.js"
+  ],
+  "failToPass": [
+    "generic regression test"
+  ],
+  "passToPass": [
+    "baseline routing passed"
+  ],
+  "expectedFailure": {
+    "type": "TypeError",
+    "message": "Cannot read properties of undefined (reading 'config')",
+    "topApplicationFrame": "at Request.get (/case/lib/request.js:204:55)"
+  },
+  "patchHashes": {
+    "buggy": "0000000000000000000000000000000000000000000000000000000000000000",
+    "reference": "da9cbf56526132f4039af5fd2c5e1e9793c78910cb5c5e5441ead1becf826c39",
+    "alternate": "e8cb28e30434c3d4ce774a866e2533a620be6291f9b59fa70711190dc89d6997",
+    "decoy": "f9a1a4ceb7571fea2d7230c720da423c1f37f72bca49819470261c5aed4bb78d"
+  },
+  "securityPolicy": {
+    "readonlyRoot": true,
+    "maxMemoryBytes": 268435456,
+    "maxCpus": 1,
+    "timeoutSeconds": 30,
+    "networkMode": "none"
+  },
+  "incidentFile": "fixtures/fastify-issue-4807/incident.json",
+  "workspaceDir": "fixtures/fastify-issue-4807/workspace",
+  "patchesDir": "fixtures/fastify-issue-4807/patches",
+  "modulesDir": "fixtures/fastify-issue-4807/modules"
+}

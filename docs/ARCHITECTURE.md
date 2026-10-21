@@ -98,3 +98,33 @@ The host controller remains trusted and can read the development repository, inc
 - Enables test inspection, markdown report browsing, cancellation, and direct navigation to code failure sites in `payments.ts`.
 - Manages Sentry API credentials securely using VS Code's `SecretStorage` API.
 - Generates Cursor MCP client configuration in `.cursor/mcp.json`.
+
+---
+
+## Developer CLI & Generic Adaptation Architecture
+
+Phase 5 introduced a generalized evaluation architecture supporting arbitrary backend frameworks (demonstrated with Fastify and Qs):
+
+```mermaid
+flowchart TD
+  CLI[pnpm replaykit] -->|generate| AIGen[Local Ollama Synthesizer]
+  AIGen -->|AST & Safety Validation| TestSource[repro.test.js]
+  CLI -->|verify| Super[Generic Container Supervisor]
+  Super -->|stage| Staging[Isolated Staging Directory]
+  Staging -->|docker cp| Container[/case/supervisor-runner.js]
+  Container -->|offline run| Target[Target Node Environment]
+  Target -->|stream artifacts| Collector[Artifact Collector]
+  Collector -->|JSON / TAP / stderr| Evaluator[4-Target Matrix Evaluator]
+  Evaluator -->|VERIFIED / REJECTED| Verdict[evaluation-verdict.json]
+```
+
+### Trust Boundary & Evaluator Independence
+
+The developer CLI evaluator does not simply assert boolean flags. It evaluates positive cryptographic and behavioral evidence:
+1. **Candidate Hash Attributability**: SHA-256 of the test source is enforced to match across all evaluated targets.
+2. **Failure Identity Matching**: The buggy execution must fail with the exact expected error type and top application frame.
+3. **Semantic Decoy Rejection**: The decoy patch must be rejected specifically due to an `AssertionError` (or semantic assertion failure), not an unrelated syntax error or process crash.
+4. **Non-Regression Verification**: The baseline test suite must pass across all targets.
+5. **Isolation & Resource Enforcement**: Evaluates `--network none`, `readonlyRoot: true`, `capDropAll: true`, and non-root execution (`1000:1000`).
+6. **Docker Resource Lifecycle**: Every execution guarantees ephemeral container and volume removal (`cleaned: true`).
+

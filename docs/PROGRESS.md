@@ -1,5 +1,238 @@
 # Progress
 
+## 2026-10-20 — Docker Cleanup Hardening & Phase 5 Developer CLI Completed
+
+ReplayKit completed the Docker resource cleanup audit and the Phase 5 developer-facing CLI implementation:
+- **Docker Resource Cleanup Hardened (`packages/runtime/src/docker-cleanup.ts`):**
+  - **Ownership Policy:** Strictly cleans up resources labeled `replaykit.run` or prefixed `rk-` / `rk-ext-` / `rk-net-`. Strictly forbids removing Docker Compose project resources (`com.docker.compose.*`) or developer database volumes (`replaykit-dev-data`, `replaykit_default`).
+  - **Detachment Backoff Retry:** Implemented `removeVolumeWithRetry` with exponential backoff (3 attempts) eliminating container-volume detachment races.
+  - **Process Signal Teardown:** Implemented `InFlightResourceTracker` tracking in-flight containers/volumes with `SIGINT`/`SIGTERM` handlers for emergency cleanup on aborted executions.
+  - **Supervisor Integration:** Fully wired into `runExternalContainer` with registration on allocation and unregistration in `finally`.
+  - **Live Daemon Sweep:** Identified and pruned 3 historical orphaned containers (`rk-...-test`) and 3 orphaned networks (`rk-...-net`) from earlier R1 runs (2 days ago), restoring daemon to pristine 0-orphan state.
+  - **Unit Tests:** 14/14 automated tests in `packages/runtime/src/docker-cleanup.test.ts` passing.
+  - **Audit Documentation:** Recorded in [`docs/phase4/DOCKER_CLEANUP_AUDIT.md`](file:///C:/Users/sunmo/Documents/Codex/2026-10-16/files-mentioned-by-the-user-agents/outputs/replaykit/docs/phase4/DOCKER_CLEANUP_AUDIT.md).
+- **Phase 5 Developer-Facing CLI (`packages/cli/src/developer-command.ts`, `packages/cli/src/index.ts`):**
+  - **`replaykit clean`:** Sweeps orphaned containers, networks, and volumes with `--dry-run` and `--run-id` filtering.
+  - **`replaykit doctor`:** Live diagnostics of container runtime and Ollama connection with `qwen2.5-coder:3b` model verification.
+  - **`replaykit generate`:** Configuration-driven AI regression-test synthesis with AST validation and epistemic `--ambiguous-oracle` negative control.
+  - **`replaykit run`:** Standalone test execution inside isolated container sandbox (`--network none`, read-only rootfs, 256 MiB RAM, 1 CPU, 29s watchdog).
+  - **`replaykit verify`:** Four-target differential verification (buggy, reference, alternate, decoy) reporting formal evaluator verdicts.
+  - **CLI Unit Tests:** 13/13 automated unit tests in `packages/cli/test/developer-command.test.ts` passing.
+  - **Design Documentation:** Recorded in [`docs/phase4/PHASE5_CLI_DESIGN.md`](file:///C:/Users/sunmo/Documents/Codex/2026-10-16/files-mentioned-by-the-user-agents/outputs/replaykit/docs/phase4/PHASE5_CLI_DESIGN.md).
+- **Cryptographic Evidence Registry:**
+  - Phase 3: 57/57 artifact digests verified unchanged (0 errors).
+  - Phase 4 Original: 2,079/2,079 artifact digests verified unchanged (0 errors).
+  - Phase 4 Hardened: 31/31 artifact digests verified unchanged (0 errors).
+  - Protected R1 files (`packages/judge/src/evaluate.ts` and `packages/contracts/src/index.ts`) verified 100% byte-for-byte untouched (`git diff --exit-code`).
+  - `pnpm typecheck`: Exit code 0 (zero errors).
+
+
+ReplayKit strengthened and hardened the Fastify #4807 regression test and safety validation pipeline:
+- **Strengthened Regression Test:** Engineered [`packages/runtime/src/fixtures/fastify4807/hardened-repro.test.js`](file:///C:/Users/sunmo/Documents/Codex/2026-10-16/files-mentioned-by-the-user-agents/outputs/replaykit/packages/runtime/src/fixtures/fastify4807/hardened-repro.test.js) (SHA-256: `24a9275acba30f053fb175ee873a6772204c24bcc38daf0ccd50aba6c537208d`), versioned into `work/phase4/hardened-runs/hardened-repro.test.js`. Labeled as **HARDENED REGRESSION TEST**.
+  - Tracks execution count of `frameworkErrors` (asserts `=== 1`).
+  - Verifies normal route handler bypass (asserts `=== 0`).
+  - Verifies historical framework error code `FST_ERR_BAD_URL`.
+  - Exception-safe getter inspection inside handler with re-throw in `main()`, ensuring Fastify request settlement without hanging.
+  - Strict equality check (`assert.strictEqual(observedRouteConfig, undefined)`) rejecting `{}` decoy.
+  - Bounded 5000ms `Promise.race` timeout with unref timer.
+  - Deterministic `await fastify.close()` in `finally`.
+  - Guaranteed nonzero exit code on assertion failure via `main().catch((err) => { console.error(err); process.exit(1); })`.
+- **Live Four-Target Differential Container Evaluation:**
+  - Target 1 (Buggy Base): Exit code 1, reproduced native `TypeError: Cannot read properties of undefined (reading 'config')` at `/case/lib/request.js:204:55` (duration: 3,232ms).
+  - Target 2 (Reference Fix): Exit code 0, `HARDENED_TEST_PASSED`, `req.routeConfig === undefined` (duration: 2,624ms).
+  - Target 3 (Alternate Fix): Exit code 0, `HARDENED_TEST_PASSED`, `req.routeConfig === undefined` (duration: 1,964ms).
+  - Target 4 (Decoy Fix): Exit code 1, rejected by hardened test with `AssertionError [ERR_ASSERTION]: Expected req.routeConfig to be strictly undefined, but got: {}` (duration: 1,183ms).
+  - Non-Regression Baseline: `test/baseline-sanity.js` passed with exit code 0 across all 4 targets.
+  - Security & Isolation: 100% enforced across all targets (`--network none`, UID `1000:1000`, `--read-only`, `--cap-drop ALL`, `no-new-privileges`, 256 MiB memory, deterministic cleanup).
+  - Evidence & Registry: Staged in `work/phase4/hardened-runs/` with 31 artifacts hashed in `work/phase4/hardened-runs/artifact-sha256.json`.
+- **AI Test Validator Hardened:**
+  - Static AST checks in `packages/runtime/src/ai-generator.ts`: Detects and rejects swallowed promise rejections in `.catch(...)`, tests without assertions, swallowed assertions in `try/catch`, dangling unawaited async operations, and `process.exit(0)` bypasses.
+  - Runtime normalizer in `packages/runtime/src/adapters/generic-adapter.ts`: Rejects swallowed assertion errors in output (`Test failed: AssertionError...`), unhandled promise rejections, and timeouts even if process exit code was 0.
+  - Unit tests: 18/18 tests in `generic-adapter.test.ts` and 18/18 tests in `blind-synthesis.test.ts` passing (36/36 total).
+- **Historical Evidence Preservation:**
+  - Original Phase 4 artifacts (2,079 files in `work/phase4/`) verified 100% byte-for-byte untouched.
+  - Original Phase 3 artifacts (57 files in `work/phase3/`) verified 100% byte-for-byte untouched.
+  - Protected contracts (`packages/judge/src/evaluate.ts` and `packages/contracts/src/index.ts`) verified 100% byte-for-byte untouched (`git diff --exit-code`).
+- **Documentation Deliverable:** Recorded in [`docs/phase4/FASTIFY_TEST_HARDENING.md`](file:///C:/Users/sunmo/Documents/Codex/2026-10-16/files-mentioned-by-the-user-agents/outputs/replaykit/docs/phase4/FASTIFY_TEST_HARDENING.md). Status: **PASS / VERIFIED**.
+
+ReplayKit completed the Phase 4 generalization milestone, decoupling from utility-level fixtures to real-world HTTP backend error handling in `fastify/fastify`:
+- **Independent Phase 3 Audit Closed:** Verified all 57/57 SHA-256 artifact digests in `work/phase3/artifact-sha256.json`, confirmed epistemic honesty on deterministic `INSUFFICIENT_ORACLE` negative control, and documented prompt skeleton steering disclosures in `docs/phase3/INDEPENDENT_SYNTHESIS_AUDIT.md`.
+- **Config-Driven Generic Adapter:** Implemented `packages/runtime/src/adapters/generic-adapter.ts` (`GenericAdapterConfigSchema`, `validateCommandArguments`, `stageGenericPayload`, `normalizeGenericTestOutput`, `createGenericManifest`, `createFastifyPreset`). Decoupled from hardcoded `qs33-adapter.ts`. Verified with 15/15 automated unit tests including command validation, exit code normalization, prepended hunk offsets, and multi-file unified diff application.
+- **Second Authentic Case Selected & Staged:** Pinned authentic Fastify Issue #4807 / PR #4826 (`61b86760019c85afbef6cc0f175c75870381ed04`). Staged 282 clean source files in `work/phase4/sanitized-buggy-workspace` with zero leak tokens detected in blinding audit.
+- **Novel Test Synthesis:** Ollama model `qwen2.5-coder:3b` synthesized a novel standalone regression test file (`test/repro.test.js`, SHA-256: `2ef58646bf3f84f3ade7889199c744128c209ef9c33b2d1b6461c28918c6b998`) in 60.8s. Epistemic negative control under ambiguous behavioral contract returned `status: "INSUFFICIENT_ORACLE"`.
+- **Differential Container Evaluation under `--network none`:**
+  - Target 1 (Buggy Base): Exit code 1, reproduced native `TypeError: Cannot read properties of undefined (reading 'config')` at `/case/lib/request.js:204:55` (duration: 3,106ms).
+  - Target 2 (Reference Fix): Exit code 0, `req.routeConfig === undefined` (duration: 2,196ms).
+  - Target 3 (Alternate Fix): Exit code 0, `req.routeConfig === undefined` with syntactically independent ternary check (duration: 1,623ms).
+  - Target 4 (Decoy Fix): Exit code 1, correctly rejected with `AssertionError [ERR_ASSERTION]: Expected values to be strictly equal: {} !== undefined` at `/case/test/repro.test.js:6:12` (duration: 1,879ms).
+  - Baseline Non-Regression: Core HTTP routing baseline test (`test/baseline-sanity.js`) passed with exit code 0 across all 4 targets.
+  - Security & Isolation: 100% enforced across all targets (`--network none`, UID `1000:1000`, `--read-only`, `--cap-drop ALL`, `no-new-privileges`, 256 MiB memory, deterministic cleanup).
+- **Reusable Benchmark Metrics:** Established reusable evaluation record across Phase 3 and Phase 4 (`work/phase4/benchmark-metrics.json`, `docs/phase4/BENCHMARK_METRICS.md`) tracking all 14 specified metrics (2 incidents attempted, 2 sufficient oracles + 2 negative controls, 100% generation success, 100% buggy reproduction, 100% correct-fix acceptance, 100% decoy rejection, 0% false positives, 0 regressions, ~96% integration code reduction).
+- **Cryptographic Registry:** All 2,079 artifacts in `work/phase4/` hashed and verified in `work/phase4/artifact-sha256.json`.
+- **Protected File Immutability:** `packages/judge/src/evaluate.ts` and `packages/contracts/src/index.ts` verified 100% byte-for-byte untouched (`git diff --exit-code`). Historical Phase 2 and Phase 3 runs preserved untouched.
+- **Decision Document:** Recorded in `docs/phase4/GENERALIZATION_DECISION.md`. Gate status: **PASS**.
+
+## 2026-10-20 — Phase 3 first blind AI regression-test generation verified & passed
+
+ReplayKit crossed the boundary from test execution to novel test synthesis under strict, cryptographically verified blinding:
+- Authentic `ljharb/qs` issue #33 buggy base revision (`360e2b0b48548b9bfdb71f8c82a68c4f34ec0725`) staged into a sanitized workspace (`work/phase3/sanitized-buggy-workspace`).
+- Independent blinding audit scanned 20 files: historical test #40 scrubbed from `test/parse.js` (reducing tests from 40 to 39), all candidate patches, probes, and git history containing solutions completely removed. 0 leak tokens detected.
+- Synthesis execution: `qwen2.5-coder:3b` via local Ollama API synthesized a novel standalone regression test file (`test/repro.test.js`, SHA-256: `6a174eabccf0651b18f893967a068495f88a4a1fb6dc01aed56ed9307ee5b774`) in 38s. AST validation verified syntax, no banned APIs, unauthorized require blocking, and Levenshtein distance 403 to historical test #40.
+- Four-target differential container evaluation under `--network none`:
+  - Target 1 (Buggy): Exit code 1, reproduced native `TypeError: source.hasOwnProperty is not a function` at `/case/lib/utils.js:47:20`.
+  - Target 2 (Reference Fix): Exit code 0, all 56 tests passed.
+  - Target 3 (Alternate Fix): Exit code 0, all 56 tests passed.
+  - Target 4 (Decoy Fix): Exit code 1, semantic `AssertionError: expected { a: {} } to deeply equal { a: { b: 'c' } }`. All 55 baseline tests passed; only the generated test rejected the decoy.
+- Epistemic honesty: Negative control without explicit behavioral specification correctly yielded `status: "INSUFFICIENT_ORACLE"` without guessing or fabricating assertions.
+- Artifact integrity: All 57 artifacts in `work/phase3/` cryptographically registered in `artifact-sha256.json` (57/57 verified).
+- Protected R1 files (`packages/judge/src/evaluate.ts` and `packages/contracts/src/index.ts`) verified 100% byte-for-byte untouched (`git diff --exit-code`).
+- Decision recorded in `docs/phase3/BLIND_SYNTHESIS_DECISION.md`. Gate status: **PASS**.
+
+## 2026-10-20 — Gate C4 full 17-run matrix execution verified; status promoted to VERIFIED
+
+The full 17-run execution matrix (10 authentic buggy, 3 reference fix, 3 alternate fix, 1 decoy fix) was executed live and sequentially via the reusable TypeScript external runner:
+- Full matrix execution completed in 408s total wall-clock time with zero host binds, isolated network (`--network none`), read-only root, UID 1000:1000, 1 CPU / 256 MiB / 64 PIDs, 29s PID-1 watchdog, and verified container/volume cleanup.
+- Buggy (10/10): 10 deterministic failure reproductions, exit code 1, 55/56 passed, only test 40 failed with `TypeError: source.hasOwnProperty is not a function` at `/case/lib/utils.js:47:20`. Buggy probe reproduced native failure across all 10 runs.
+- Reference fix (3/3): 56/56 tests passed, exit code 0, probe passed with serialized output `{"a":{"b":"c"}}`.
+- Alternate fix (3/3): 56/56 tests passed, exit code 0, probe passed with serialized output `{"a":{"b":"c"}}`.
+- Decoy fix (1/1): 55/56 tests passed, exit code 1, test 40 failed with `AssertionError`, probe failed with `AssertionError: expected { a: {} } to deeply equal { a: { b: 'c' } }`.
+- Evaluator verdict: `evaluateExternalEvidence()` in `packages/judge/src/external.ts` returned `status: 'VERIFIED'`, `deterministicRuns: 10`, `deterministicFailures: 10`, and 0 reason codes. External status is officially promoted to **`VERIFIED`**.
+- 153 raw evidence artifacts hashed (SHA-256) and verified in `work/phase2/gate-c-runs/qs33-c4-live-01/artifact-sha256.json`.
+- Automated test suite: 42/42 tests in `packages/runtime/src/external-runner.test.ts` passed; `pnpm typecheck` passed (exit code 0); `git diff --exit-code -- packages/judge/src/evaluate.ts packages/contracts/src/index.ts` verified protected files 100% untouched.
+- Scoped decision recorded in `docs/phase2/GATE_C4_DECISION.md`; frozen execution manifest in `docs/phase2/GATE_C4_MANIFEST.json`; complete 17-run index in `work/phase2/gate-c-runs/qs33-c4-live-01/evidence-index.json`.
+- Next product milestone prepared: Blind AI Regression-Test Synthesis (`docs/phase2/BLIND_AI_SYNTHESIS_PLAN.md`) and Production Incident Context Contract (`docs/phase2/INCIDENT_CONTEXT_CONTRACT.md`).
+- qs-specific infrastructure development is now frozen.
+
+## 2026-10-19 — Stage C3 candidate patch validation & counterfactual execution verified
+
+All three candidate patches (authentic reference fix, independent alternate fix, and plausible decoy fix) were applied and evaluated under identical isolated container conditions:
+- Reference fix (`reference.patch`, SHA-256 `fc1d3f9205a621617ca4f86432411dfddf6422432dfcb6d80f936af920cafe8e`): 56/56 tests passed, probe passed with exact output `{"a":{"b":"c"}}`, stderr 0 bytes.
+- Alternate fix (`alternate.patch`, SHA-256 `760d2dbd744d610b81426da10c412fc8db40b930e15ce895296157eaeb24ff28`): 56/56 tests passed, probe passed with exact output `{"a":{"b":"c"}}`, stderr 0 bytes.
+- Decoy fix (`decoy.patch`, SHA-256 `318a5449a218b2d5d882fc6993086de1f53300559f1dfd2ed0d30696c87f6e81`): 55 passed / 1 failed (Test 40), probe failed with `AssertionError: expected { a: {} } to deeply equal { a: { b: 'c' } }`, exit code 1.
+- Pure TypeScript patch applier (`patch-applier.ts`): Enforces base commit `360e2b0b48548b9bfdb71f8c82a68c4f34ec0725` with symbolic ref resolution, expected patch SHA-256, path allowlist `['lib/parse.js', 'lib/stringify.js', 'lib/utils.js']`, path traversal/absolute path rejection, symlink rejection, newline style preservation, and hunk context matching with zero shell or external git/patch invocations.
+- Automated suite: 34/34 tests in `packages/runtime/src/external-runner.test.ts` passed; `pnpm typecheck` passed (exit code 0); `pnpm token:scan` passed (0 violations).
+- Evidence & review: Scoped decision recorded in `docs/phase2/GATE_C3_DECISION.md`; newly captured raw artifacts (all 27 files across reference, alternate, and decoy) saved in `work/phase2/gate-c-runs/qs33-c3-live-01` and verified against `artifact-sha256.json`. Gate B and Gate C2 evidence preserved untouched. Protected R1 files (`evaluate.ts` and `contracts/src/index.ts`) remain 100% untouched. External status remains `PARTIAL`; external `VERIFIED` is not claimed until Stage C4.
+
+## 2026-10-19 — Stage C2 live buggy & fixed execution verified through external runner
+
+Both authentic pinned `ljharb/qs` issue #33 revisions were executed sequentially through the reusable TypeScript external runner (`external-runner.ts`, `external-supervisor.ts`, `adapters/qs33-adapter.ts`):
+- Pinned revisions: Buggy (`360e2b0b48548b9bfdb71f8c82a68c4f34ec0725`, Run ID: `c2-live-buggy-1792465411633`) and Fixed (`6a97ad1d71d8a9069f5d6002cab3130752519ccb`, Run ID: `c2-live-fixed-1792465442253`).
+- Official TAP buggy: Exactly 56 test identities, 55 passed, only test 40 (`parse parses plain objects correctly`) failed with native `TypeError: source.hasOwnProperty is not a function` at `/case/lib/utils.js:47:20`. Buggy probe exited 1 with identical error and stack frame.
+- Official TAP fixed: Exactly 56 test identities matching buggy identities, all 56 passed, 0 failed, 0 skipped, 0 TODOs. Fixed probe exited 0 without error and serialized exact output `{"a":{"b":"c"}}`.
+- Runner decoupling: Supervisor is completely repository-agnostic; all qs-specific commands, Lab compatibility adaptations, TAP parsing, and probe analysis are confined to `adapters/qs33-adapter.ts`.
+- Security & isolation: Both runs executed under `--network none`, read-only root, UID 1000:1000, 1 CPU / 256 MiB / 64 PIDs, 29s PID-1 watchdog, and verified cleanup.
+- Targeted negative controls: All 9 controls passed, rejecting buggy passes, fixed failures, missing/altered test identities, malformed reports, incorrect failure identities/frames, corrupted hashes, cross-role substitutions, and incomplete cleanup.
+- Automated suite: 19/19 tests in `packages/runtime/src/external-runner.test.ts` passed; `pnpm typecheck` passed (exit code 0); `pnpm token:scan` passed (53,692 files, 0 violations).
+- Evidence & review: Scoped decision recorded in `docs/phase2/GATE_C2_DECISION.md`; newly captured raw artifacts (all 18 files, including fixed `probe.stderr`) saved in `work/phase2/gate-c-runs/qs33-c2-live-01` and verified against `artifact-sha256.json`. Test suite decoupled to stage evidence in temporary directories, leaving canonical evidence unmutated. Gate B evidence untouched. Protected R1 files (`evaluate.ts` and `contracts/src/index.ts`) remain 100% untouched.
+
+
+## 2026-10-19 — Stage C1 external-runner vertical slice passed
+
+A reusable trusted supervisor (`external-supervisor.ts`) and target adapter
+(`adapters/qs33-adapter.ts`) were implemented and verified through the automated
+test suite `packages/runtime/src/external-runner.test.ts` (8/8 tests passing).
+
+A live execution of the pinned buggy `ljharb/qs` issue #33 revision completed
+inside an isolated Docker container:
+- Environment: pinned image `node:22-bookworm-slim@sha256:c3de60bf...`, `--network none`,
+  read-only rootfs, nonroot user 1000:1000, 1 CPU / 256 MiB / 64 PIDs, no host binds,
+  `/usr/bin/timeout` 29s PID 1 watchdog.
+- Verified outcome: `executionStatus === 'COMPLETED'`, `exitCode === 1`.
+- Raw TAP normalized into `OfficialReportSchema` (`official-suite-normalized-v1`):
+  exactly 56 tests, 55 passed, 1 failed (Test ID 40: `parse parses plain objects correctly`).
+- Failure identity captured native `TypeError: source.hasOwnProperty is not a function`
+  at `/case/lib/utils.js:47:20`. Passing tests recorded `failure === null`.
+- Evaluator integration: partial matrix evaluated via `evaluateExternalEvidence()`,
+  strictly returning `status !== 'VERIFIED'` without false positive promotion.
+- Deterministic cleanup: container and private staging volume verified deleted.
+- Protected R1 files (`evaluate.ts` and contracts `index.ts`) remain 100% untouched.
+
+## 2026-10-19 — Gate B local-07 passed independent review; Gate C assigned
+
+The second sequential collection `qs33-gateb-local-07` completed under identical
+pinned conditions (Node 22, exact 8 globals allowed in Lab 3.0.0, probe JSON
+`{"a":{"b":"c"}}`, and 29s PID-1 watchdog). Official TAP reproduced 55/1 passes on
+buggy (only test 40 failing with `TypeError: source.hasOwnProperty is not a function`
+at `/case/lib/utils.js:47:20`) and 56/0 on fixed. Independent review confirmed all
+370 artifact hashes, pinned source HEADs/trees, container isolation, and cleanup.
+[The scoped Gate B local-07 decision](phase2/GATE_B_LOCAL07_DECISION.md) is recorded as
+PASS for the authentic pair only; both Gate B collections remain untouched.
+
+Gate C architecture, security, and independent evaluation specifications are
+formally established in `docs/phase2/agents/`:
+- Architecture (`gate-c-architecture.md`): Decoupled trusted supervisor and qs #33 adapter feeding `evaluateExternalEvidence()` without routing through R1.
+- Security (`gate-c-security.md`): Strict `--network none`, read-only root, cap-drop ALL, no-new-privileges, <=1 CPU / 256 MiB / 64 PIDs, no host binds, 29s PID-1 watchdog.
+- Evaluation (`gate-c-evaluation.md`): `qs #33` manifest definition, 10/3/3/1 validation rules, and failure identity binding.
+- QA (`gate-c-qa.md`): Audit criteria and baseline test tracking. R1 judge and contracts remain 100% unchanged.
+
+## 2026-10-19 — Gate B paired qs reproduction passed independent review
+
+The predeclared local-06 Node 22 adaptation suppressed only eight unchanged
+built-in globals in Lab 3.0.0 and kept unrelated/changed leak detection active;
+it was applied equally to both upstream revisions. The structural probe no
+longer compares prototypes. The ordinary PowerShell collector exited 0 and
+wrote/printed its `GATE_B_SUMMARY.md`, including raw buggy probe stdout and
+stderr. Buggy official/probe children exited 1/1 with the native qs TypeError
+and top production frame; its official TAP had exactly one failure at test 40
+among 56. Fixed official/probe children exited 0/0, with all 56 official tests
+passing and exact probe JSON `{"a":{"b":"c"}}`. Both roles reported zero
+remaining Lab leaks.
+
+An independent reviewer reparsed the raw per-test results and checked source
+heads, payload inventories, Docker limits/watchdog/cleanup, and all 370 artifact
+hashes. Its read-only checks exited 0. [The scoped Gate B decision](phase2/GATE_B_DECISION.md)
+is PASS for the authentic buggy/fixed pair only. The collector's saved PARTIAL
+status denotes pre-review state. External runner, evaluator, matrix and
+determinism evidence remain outstanding; no R1 VERIFIED claim is made.
+
+## 2026-10-19 — Gate B inventory repair; buggy qs observed, fixed qs pending
+
+The preserved `qs33-gateb-local-04` attempt ran pinned buggy qs. The official
+suite and reproduction probe each exited 1 with the native
+`TypeError: source.hasOwnProperty is not a function` at
+`/case/lib/utils.js:47:20`; the official suite reported 1 of 56 failures.
+The container exited 0 after collecting child results, which does not mean
+the suite passed. The run became PARTIAL before fixed-revision execution.
+Its three 356-file manifests have identical paths, lengths, and SHA-256 values.
+Replay of the saved original `Same-Inventory` reproduced the false positive:
+Windows PowerShell 5.1 wrapped the observed JSON array as one nested array.
+The repaired comparator normalizes that wrapper, rejects duplicates, and
+compares ordinal, case-sensitive paths, bytes, and hashes. The regression
+passes on PowerShell 5.1 and 7 against the saved manifests and all required
+negative fixtures. Independent QA approved script SHA-256
+`797f149c9f55fb1f9d828a344aeb5cfe6b5f08c36acc15522f21b0eee211957f`
+for fresh collection only; details are in
+`docs/phase2/agents/gate-b-inventory-qa.md`. Run `qs33-gateb-local-05` from
+normal PowerShell to collect both roles. Gate B and external-runner work remain
+blocked until genuine fixed output and independent review.
+
+## 2026-10-19 — Gate B Docker bind-count repair; qs execution still pending
+
+The preserved `qs33-gateb-local-03` run reached the buggy container's pre-start
+Docker inspection and then stopped BLOCKED with zero qs role executions.
+`HostConfig.Binds` was null, but PowerShell counted `@($null)` as one bind.
+The repaired assertion ignores only null/empty bind entries and still rejects
+nonempty binds. Pre-copy checks now also require the exact configured named
+`/case` volume with `NoCopy`, the volume token and role labels, and only the
+approved `/tmp` tmpfs. The local regression passes under PowerShell 5.1 and 7;
+the prior assertion failed its null case. An independent review is recorded in
+`docs/phase2/agents/gate-b-bind-qa.md`. Gate B and external runner work remain
+blocked until `qs33-gateb-local-04` produces real, independently reviewed buggy
+and fixed upstream execution outputs. Prior evidence and R1 are unchanged.
+
+## 2026-10-19 — Gate B lockfile parser repair; qs execution still pending
+
+The preserved `qs33-gateb-local-02` run passed exact upstream source preparation
+and npm dependency acquisition but stopped before Docker qs execution. Its npm
+lockfile contains `packages[""]`, which Windows PowerShell 5.1 cannot convert to
+a PSCustomObject. A fixed Node validator now checks that lockfile, its root,
+the exact Lab pin and metadata integrity, and every dependency integrity/origin.
+It emits a deterministic summary without lockfile values. Local regression and
+saved-lock validation exit 0; PowerShell 5.1/7 AST checks exit 0. An independent
+QA review is recorded under `docs/phase2/agents/`. Gate B remains blocked until
+the fresh local-03 run yields real, independently reviewed buggy and fixed
+upstream outputs. R1 and the external runner remain unchanged.
+
 ## 2026-10-17 — Phase 1 preflights blocked; no external verification
 
 Gate 0 remains green at its recorded checkpoint. The separate external contract
@@ -474,6 +707,63 @@ Node 22.23.3, pnpm 10.20.0, TypeScript 5.9.3, PostgreSQL 17.11, Docker Engine 29
 
 The complete 20-case benchmark, fixed 12/8 split, three-trial model comparisons, LLM adapter, Cursor/MCP integration, arbitrary patch verification and dashboard remain incomplete. No remote repository, CI run or release publication was created.
 
+---
+
+## 2026-10-19 — local Gate B runbook handoff
+
+Gate A remains accepted for the permitted qs issue-33 provenance. The first
+delegated Gate B attempt remains blocked before execution because Codex could
+not access Docker or acquire GitHub data through its restricted sandbox; its raw
+failure artifacts remain under `work/phase2/reproduction/`.
+
+Two fresh subagent passes completed the local runbook. The script
+`scripts/phase2/run-gate-b.ps1` now fetches and verifies the pinned upstream
+commits, freezes the official regression and dependency bytes, stages each role
+in an exact private Docker volume with a read-only root and no host bind, and
+uses an independent PID-1 native watchdog plus raw evidence capture. Its
+reviewed SHA-256 is
+`516645b9ec08ca0c153baac605dc3aa90b4fb337bd35f1cde614abff784d6320`.
+
+The independent reviewer first found two HIGH source defects. The author fixed
+read-only `/case` staging and the client-only deadline, then the reviewer
+approved the revised file for static handoff. PowerShell 5.1/7 parsing,
+embedded probe/supervisor `node --check`, and whitespace checks all exited 0.
+No Docker, upstream, dependency, or application execution was performed by
+Codex, and no external runner was implemented.
+
+Exact next command from a normal Windows PowerShell terminal:
+
+```powershell
+powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\phase2\run-gate-b.ps1 -RunId qs33-gateb-local-01
+```
+
+The command's resulting raw artifacts must be independently reviewed before any
+Gate B acceptance, external-runner implementation, or full matrix work.
+
+## 2026-10-19 — Gate B Git checkout repair
+
+The first local run `qs33-gateb-local-01` stopped at checkout because the bare
+repository had the fetched commit/tree objects only through `FETCH_HEAD` and no
+persistent refs. The preserved clone stderr warned that the repository was
+empty; checkout then exited 128 with `reference is not a tree`.
+
+The runbook now creates and verifies `refs/heads/gateb-buggy` and
+`refs/heads/gateb-fixed`, checks commit and tree objects in the bare repository,
+uses independent `git clone --no-hardlinks --no-checkout` clones, verifies clone
+object access before checkout, and asserts detached `rev-parse HEAD` equality.
+The local regression is `scripts/phase2/test-git-fetch-bare.ps1` and preserves
+the expected pre-fix and post-fix assertions. Its Codex-sandbox attempt reached
+the first synthetic fetch but exited 128 because Git/MSYS could not create a
+`BaseNamedObjects` object; this is preserved as a validation blocker, not a
+passing repair result.
+
+Independent review approved the repaired runbook for static handoff. Current
+runbook SHA-256:
+`dd284da2a2d38195da1ed4d0734159304212ed7bd10b7e46e42d14fca4961b74`.
+No Docker, qs, Lab, or Gate B execution occurred in Codex. The next user run
+must use fresh RunId `qs33-gateb-local-02` and remain subject to raw-evidence
+review before Gate B acceptance.
+
 ### Superseded next-task proposal
 
 The R1 performance-hardening milestone is complete. The user's latest direction resumes D2/N5 and saved-test patch verification; see the current proposed design at the top of this progress record. Cursor/MCP transport, a dashboard and the remaining benchmark corpus stay outside that proposed core/CLI milestone.
@@ -496,3 +786,27 @@ The R1 performance-hardening milestone is complete. The user's latest direction 
    - On buggy commit `1eb56d1111c10cbd33da578e2c45da8b21cb93d7`, the upstream test fails deterministically with `Expected length: 1, Received length: 0` followed by `MedusaError: Account holder with provider_id: pp_account-holder_test, external_id: cus_..., already exists`.
    - On fixed commit `5296f51121d4796b1757b65852c48e97e0e1e197` (with `noCompensation: true` added to `createRemoteLinkStep`), the upstream test passes cleanly.
 2. **No ReplayKit Verification**: ReplayKit's verification matrix and judge were not used. The synthetic simulation (`packages/external-runner` and mock driver) was removed. ReplayKit's R1 baseline and judge gate integrity remain unchanged.
+
+---
+
+## 2026-10-20 — Phase 3: First Blind AI Regression-Test Generation (PASS)
+
+**Status: PASS — Authentic AI Test Generation, Epistemic Negative Controls, and Four-Target Semantic Discrimination Verified.**
+
+- Milestone: Phase 3 Blind AI Regression-Test Synthesis
+- Target: `ljharb/qs` Issue #33 (`360e2b0b48548b9bfdb71f8c82a68c4f34ec0725` buggy base)
+- Model: `qwen2.5-coder:3b` via Ollama local API (`http://127.0.0.1:11434`)
+- Generated Test Digest: `6a174eabccf0651b18f893967a068495f88a4a1fb6dc01aed56ed9307ee5b774`
+- Complete Technical Decision: [`docs/phase3/BLIND_SYNTHESIS_DECISION.md`](file:///docs/phase3/BLIND_SYNTHESIS_DECISION.md)
+
+### Verification Summary:
+1. **Workspace Blinding**: Upstream test 40 scrubbed from `test/parse.js` (39 tests remaining); 0 leaks of patches, commit `6a97ad1d`, test 40, or probes detected across all 20 workspace files.
+2. **Epistemic Honesty Control**: Insufficient-oracle control yielded `status: "INSUFFICIENT_ORACLE"` without fabricating tests.
+3. **Four-Target Live Container Results**:
+   - Target 1 (Buggy): Exits 1 with native `TypeError: source.hasOwnProperty is not a function` at `/case/lib/utils.js:47:20`.
+   - Target 2 (Reference Fix): Exits 0, passes.
+   - Target 3 (Alternate Fix): Exits 0, passes.
+   - Target 4 (Decoy Fix): Exits 1 with `AssertionError`, catching semantic data loss (`{ a: {} }` dropped `{ b: 'c' }`).
+4. **Non-Regression & Independence**: The 55 baseline tests passed on all 4 targets; the generated test was the sole detector of the decoy.
+5. **Protected Invariants**: `packages/judge/src/evaluate.ts` and `packages/contracts/src/index.ts` remain byte-for-byte untouched (`git diff --exit-code`).
+

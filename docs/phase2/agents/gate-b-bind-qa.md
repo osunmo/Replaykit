@@ -1,0 +1,36 @@
+# Gate B Docker bind repair — independent QA
+
+Verdict: **approved for a fresh local Gate B collection attempt**. The reported `HostConfig.Binds = null` false positive is repaired without accepting a nonempty bind. Gate B remains **BLOCKED** until genuine buggy and fixed upstream outputs are collected and independently reviewed. This review did not run Docker or qs.
+
+| Reviewed file                          | SHA-256                                                            |
+| -------------------------------------- | ------------------------------------------------------------------ |
+| `scripts/phase2/run-gate-b.ps1`        | `2c36a290a57c4af614a66926a9dbe72d919b910ca1a50124c8ca7bf38734dbd5` |
+| `scripts/phase2/test-docker-binds.ps1` | `4c21f24d1ec2ed71218c43cd31b23928053bf6c3e3aa9cae8d40bbd076894c0d` |
+
+## Saved failure and reviewed change
+
+The original `work/phase2/gate-b-runs/qs33-gateb-local-03/report.json` records `BLOCKED`, `gateBAccepted: false`, zero role executions, and `Unexpected container bind mount`. Raw `commands/069-buggy-inspect-before.stdout` has `HostConfig.Binds: null`, one configured named volume at `/case` with `VolumeOptions.NoCopy: true`, and one resolved writable `local` volume at `/case`. Raw `commands/067-buggy-volume-inspect-created.stdout` has the exact volume name, token and `buggy` role labels, and local driver/scope. The raw inspect command record reports exit code 0. The saved report and its raw commands were read only.
+
+`@($null).Count` equals 1 in Windows PowerShell 5.1. The repaired assertion filters only null and the empty string before counting; a whitespace string or a nonempty bind remains unauthorized. Relative to the script copied into local-03 provenance (SHA-256 `4ffdf282267640f208cfff6201166039204d3ff76bee767343659fb30855933e`), the final source diff changes only the bind assertion and adds three narrow pre-execution checks: exact configured `/case` named volume with `NoCopy`, sole configured `/tmp` tmpfs, and exact inspected volume role label. Existing resolved-mount, token/name, nonroot, offline, read-only, resource, privilege and PID 1 watchdog assertions remain in place.
+
+## Local review evidence
+
+Commands were run from the ReplayKit repository root. `git diff --no-index` returns 1 because it found the intentional source changes. No Docker or network command was invoked.
+
+| Command/check                                                                                                                             | Exit code | Actual result                                                                                                                                                                                          |
+| ----------------------------------------------------------------------------------------------------------------------------------------- | --------: | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\phase2\test-docker-binds.ps1`                                          |         0 | PASS: null, empty array/string, and null-plus-empty Binds accepted; nonempty, mixed and whitespace binds rejected. Extra configured mount, `NoCopy=false`, extra tmpfs and wrong volume role rejected. |
+| `pwsh -NoProfile -File .\scripts\phase2\test-docker-binds.ps1`                                                                            |         0 | Same PASS result under PowerShell 7.                                                                                                                                                                   |
+| PowerShell 5.1 AST parse of `run-gate-b.ps1` and `test-docker-binds.ps1`                                                                  |         0 | Zero parser errors.                                                                                                                                                                                    |
+| PowerShell 7 AST parse of the same two files                                                                                              |         0 | Zero parser errors.                                                                                                                                                                                    |
+| PowerShell 5.1 invocation of the repaired source assertions (lines 200 and 595–603) against saved local-03 Docker inspect and volume JSON |         0 | `Saved local-03 inspect and volume pass repaired isolation assertions`.                                                                                                                                |
+| `git diff --exit-code -- packages/judge/src/evaluate.ts packages/contracts/src/index.ts`                                                  |         0 | Protected R1 files unchanged.                                                                                                                                                                          |
+| `Get-FileHash -Algorithm SHA256 scripts/phase2/run-gate-b.ps1,scripts/phase2/test-docker-binds.ps1`                                       |         0 | Exact hashes in the table above.                                                                                                                                                                       |
+
+The regression test extracts the actual production source assertions into script blocks. It cannot pass merely because a duplicate test-only implementation accepts the fixtures. Its source checks cover `HostConfig.Binds`, exact `HostConfig.Mounts` and `NoCopy`, sole `HostConfig.Tmpfs['/tmp']`, and the inspected volume role label. The saved local-03 JSON confirms that the new guards do not reject the approved Docker configuration.
+
+## Null/count audit and retained controls
+
+The other isolation count checks fail closed on null: missing configured `/case` mount cannot satisfy type/source/target/`NoCopy`; missing resolved `/case` mount cannot satisfy the exact-one and identity checks; missing tmpfs cannot satisfy the sole `/tmp` name/value checks; and a null entrypoint cannot satisfy `/usr/bin/timeout` plus exact argv. An extra resolved mount is rejected by the existing exclusion count. `CapDrop` and `SecurityOpt` membership/text checks also reject missing values. The unrelated upstream dependency count expects zero runtime dependencies; the event and command counts either require an exact event or record cleanup/transport data. No second Docker isolation false positive from `@($null).Count` was found.
+
+The source still requires the pinned image ID, `NetworkMode=none`, read-only root, user `1000:1000`, one CPU, 256 MiB memory, 64 PIDs, capability drop, `no-new-privileges`, only the approved volume and `/tmp` tmpfs, and `/usr/bin/timeout --verbose --signal=KILL 29s node /case/gate-b-supervisor.cjs` as the entrypoint command. Later runtime evidence must observe the watchdog as PID 1 and enforce the measured 30-second lifetime. This static/local review does not substitute for that actual execution evidence.

@@ -25,6 +25,9 @@ jobs:
       - run: pnpm typecheck
       - run: pnpm lint
       - run: pnpm format:check
+      - run: pnpm replaykit --help
+      - run: pnpm replaykit doctor
+      - run: pnpm replaykit clean --dry-run
       - run: pnpm test
       - run: pnpm test:sdk
       - run: pnpm db:up

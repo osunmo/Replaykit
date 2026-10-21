@@ -1,0 +1,17 @@
+diff --git a/lib/request.js b/lib/request.js
+--- a/lib/request.js
++++ b/lib/request.js
+@@ -201,11 +201,11 @@
+   },
+   routeConfig: {
+     get () {
+-      return this[kRouteContext][kPublicRouteContext].config
++      return this[kRouteContext][kPublicRouteContext]?.config
+     }
+   },
+   routeSchema: {
+     get () {
+-      return this[kRouteContext][kPublicRouteContext].schema
++      return this[kRouteContext][kPublicRouteContext]?.schema
+     }
+   },

@@ -29,6 +29,119 @@ import {
 export { RuntimeError, JobSchema, RunIdSchema, StartRequestSchema } from './contracts.js';
 export type { JobStatus, ManagedArtifact, StartRequest } from './contracts.js';
 export { managedDirectory, readManagedFile } from './storage.js';
+export { runExternalContainer } from './external-supervisor.js';
+export type {
+  SupervisorOptions,
+  SupervisorExecutionResult,
+  SupervisorIsolationState,
+} from './external-supervisor.js';
+export {
+  parseDockerLabels,
+  isReplayKitResource,
+  removeVolumeWithRetry,
+  pruneReplayKitResources,
+  InFlightResourceTracker,
+} from './docker-cleanup.js';
+export type {
+  PruneOptions,
+  PrunedResourceInfo,
+  PruneResult,
+} from './docker-cleanup.js';
+export {
+  QS33_INSTANCE_ID,
+  QS33_BASE_COMMIT,
+  QS33_FIXED_COMMIT,
+  QS33_IMAGE,
+  QS33_TEST_FILE,
+  QS33_TEST_FILE_HASH,
+  QS33_TEST_PATCH_HASH,
+  QS33_FAIL_TO_PASS,
+  QS33_PASS_TO_PASS,
+  QS33_SOURCE_FILES,
+  QS33_EXPECTED_FAILURE,
+  QS33_CANDIDATE_TEST,
+  createQs33Manifest,
+  parseQs33TapReport,
+  parseQs33ProbeReport,
+  verifyQs33C2Expectations,
+  verifyQs33C3Expectations,
+  verifyQs33C4Expectations,
+  stageQs33Payload,
+  buildQs33ExecutionRecord,
+} from './adapters/qs33-adapter.js';
+export type {
+  Qs33ProbeReport,
+  C2VerificationReport,
+  C3VerificationReport,
+  C4VerificationReport,
+  C4MatrixResults,
+} from './adapters/qs33-adapter.js';
+export {
+  GenericAdapterConfigSchema,
+  ALLOWED_EXECUTABLES,
+  validateCommandArguments,
+  stageGenericPayload,
+  normalizeGenericTestOutput,
+  buildGenericExecutionRecord,
+  createGenericManifest,
+  createFastifyPreset,
+} from './adapters/generic-adapter.js';
+export type { GenericAdapterConfig, GenericStagingInfo } from './adapters/generic-adapter.js';
+export {
+  REFERENCE_PATCH,
+  ALTERNATE_PATCH,
+  DECOY_PATCH,
+  REFERENCE_PATCH_HASH,
+  ALTERNATE_PATCH_HASH,
+  DECOY_PATCH_HASH,
+  CANDIDATE_PATCH_HASHES,
+  CANDIDATE_PATCHES,
+} from './candidate-patches.js';
+export type { CandidateRole, CandidatePatchDefinition } from './candidate-patches.js';
+export {
+  ALLOWED_PATCH_PATHS,
+  applyCandidatePatch,
+  parseUnifiedDiff,
+  validatePatchPath,
+  applyHunksToContent,
+} from './patch-applier.js';
+export type {
+  AllowedPatchPath,
+  ApplyPatchOptions,
+  PatchApplicationResult,
+  FilePatch,
+  Hunk,
+} from './patch-applier.js';
+export { runExternalExecution } from './external-runner.js';
+export type { ExternalRunOptions, ExternalRunResult } from './external-runner.js';
+export {
+  FORBIDDEN_LEAK_PATTERNS,
+  scrubTest40FromParseJs,
+  createSanitizedWorkspace,
+  auditWorkspaceBlinding,
+} from './sanitizer.js';
+export type { BlindingAuditRecord, WorkspaceManifest } from './sanitizer.js';
+export {
+  UPSTREAM_TEST_40_CANONICAL,
+  ALLOWED_REQUIRE_MODULES,
+  levenshteinDistance,
+  validateTestAst,
+  extractJavaScriptCode,
+  generateRegressionTest,
+} from './ai-generator.js';
+export type { GeneratorOptions, TestValidationOptions } from './ai-generator.js';
+export {
+  parseTapOutput,
+  stageBlindTarget,
+  executeBlindTarget,
+  evaluateFourTargets,
+} from './blind-evaluator.js';
+export type {
+  ParsedTapTest,
+  ParsedTapSummary,
+  TargetExecutionResult,
+  FourTargetEvaluationVerdict,
+} from './blind-evaluator.js';
 export const HEARTBEAT_TIMEOUT_MS = 60_000;
 const publicStatus = (job: StoredJob): JobStatus => {
   const { ownerToken: _owner, heartbeatAt: _heartbeat, ...status } = job;

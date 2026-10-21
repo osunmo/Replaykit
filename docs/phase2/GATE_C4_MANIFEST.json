@@ -1,0 +1,246 @@
+{
+  "manifestVersion": "1.0.0",
+  "contract": "external-official-suite-v1",
+  "gate": "Gate C4",
+  "instanceId": "qs__issue-33",
+  "title": "Authentic ljharb/qs Issue #33 Full 17-Run Matrix Execution Manifest",
+  "frozenAt": "2026-10-20T00:00:00.000Z",
+  "target": {
+    "repository": "ljharb/qs",
+    "issue": 33,
+    "buggyCommit": "360e2b0b48548b9bfdb71f8c82a68c4f34ec0725",
+    "upstreamFixCommit": "6a97ad1d71d8a9069f5d6002cab3130752519ccb",
+    "baseCommit": "360e2b0b48548b9bfdb71f8c82a68c4f34ec0725",
+    "sourceTreeFilesCount": 17,
+    "sourceFiles": [
+      ".gitignore",
+      ".jshintignore",
+      ".jshintrc",
+      ".travis.yml",
+      "CHANGELOG.md",
+      "CONTRIBUTING.md",
+      "index.js",
+      "lib/index.js",
+      "lib/parse.js",
+      "lib/stringify.js",
+      "lib/utils.js",
+      "LICENSE",
+      "Makefile",
+      "package.json",
+      "README.md",
+      "test/parse.js",
+      "test/stringify.js"
+    ],
+    "testFile": "test/parse.js",
+    "testFileHash": "be7137407c865b889674d1bb7a9a8317e8f605ff4ae189ef2a751feb0b9451a5",
+    "testPatchHash": "76cd9fa01ecaf309f2c8bd4ea0f9e40ecb8ddba8a81189668eb1bc2973f11c27"
+  },
+  "candidatePatches": {
+    "buggy": {
+      "role": "buggy",
+      "sha256": "0000000000000000000000000000000000000000000000000000000000000000",
+      "description": "Unmodified authentic buggy repository tree at commit 360e2b0b48548b9bfdb71f8c82a68c4f34ec0725"
+    },
+    "reference": {
+      "role": "reference",
+      "file": "packages/runtime/src/patches/reference.patch",
+      "sha256": "fc1d3f9205a621617ca4f86432411dfddf6422432dfcb6d80f936af920cafe8e",
+      "description": "Authentic upstream repair (commit 6a97ad1d71d8a9069f5d6002cab3130752519ccb) using Object.prototype.hasOwnProperty.call across lib/parse.js, lib/stringify.js, lib/utils.js"
+    },
+    "alternate": {
+      "role": "alternate",
+      "file": "packages/runtime/src/patches/alternate.patch",
+      "sha256": "760d2dbd744d610b81426da10c412fc8db40b930e15ce895296157eaeb24ff28",
+      "description": "Synthesized independent semantically equivalent fix using Boolean(Object.getOwnPropertyDescriptor(source, i))"
+    },
+    "decoy": {
+      "role": "decoy",
+      "file": "packages/runtime/src/patches/decoy.patch",
+      "sha256": "318a5449a218b2d5d882fc6993086de1f53300559f1dfd2ed0d30696c87f6e81",
+      "description": "Plausible decoy fix adding guards (source.hasOwnProperty && source.hasOwnProperty(i)) and copy = Array.isArray(source) ? [] : {}; silently drops null-prototype properties"
+    }
+  },
+  "environment": {
+    "image": "node:22-bookworm-slim@sha256:c3de60bf2f9dd0ac6370e6117950ff62d6e339527e7472301c9c78a017978392",
+    "testRunner": "Lab 3.0.0",
+    "reporter": "tap",
+    "adaptation": {
+      "script": "/case/gate-b-lab-adaptation.cjs",
+      "declaredGlobals": [
+        "ArrayBuffer",
+        "DataView",
+        "Float32Array",
+        "Float64Array",
+        "Int16Array",
+        "Int32Array",
+        "Int8Array",
+        "Uint8ClampedArray"
+      ],
+      "leakDetection": "strict (unmodified)"
+    }
+  },
+  "matrix": {
+    "buggyCount": 10,
+    "referenceCount": 3,
+    "alternateCount": 3,
+    "decoyCount": 1,
+    "totalExecutions": 17,
+    "executionMode": "sequential"
+  },
+  "expectedBehaviors": {
+    "officialSuite": {
+      "totalTests": 56,
+      "failToPass": [
+        "parse parses plain objects correctly"
+      ],
+      "passToPassCount": 55,
+      "passToPass": [
+        "parse parses a simple string",
+        "parse parses a single nested string",
+        "parse parses a double nested string",
+        "parse defaults to a depth of 5",
+        "parse only parses one level when depth = 1",
+        "parse parses a simple array",
+        "parse parses an explicit array",
+        "parse parses a nested array",
+        "parse allows to specify array indices",
+        "parse limits specific array indices to 20",
+        "parse supports encoded = signs",
+        "parse is ok with url encoded strings",
+        "parse allows brackets in the value",
+        "parse allows empty values",
+        "parse transforms arrays to objects",
+        "parse correctly prunes undefined values when converting an array to an object",
+        "parse supports malformed uri characters",
+        "parse doesn't produce empty keys",
+        "parse cannot override prototypes",
+        "parse cannot access Object prototype",
+        "parse parses arrays of objects",
+        "parse allows for empty strings in arrays",
+        "parse compacts sparse arrays",
+        "parse parses semi-parsed strings",
+        "parse parses buffers to strings",
+        "parse continues parsing when no parent is found",
+        "parse does not error when parsing a very long array",
+        "parse should not throw when a native prototype has an enumerable property",
+        "parse parses a string with an alternative string delimiter",
+        "parse parses a string with an alternative RegExp delimiter",
+        "parse does not use non-splittable objects as delimiters",
+        "parse allows overriding parameter limit",
+        "parse allows setting the parameter limit to Infinity",
+        "parse allows overriding array limit",
+        "parse parses an object",
+        "parse parses an object and not child values",
+        "parse does not blow up when Buffer global is missing",
+        "parse does not crash when using invalid dot notation",
+        "parse does not crash when parsing circular references",
+        "stringify stringifies a querystring object",
+        "stringify stringifies a nested object",
+        "stringify stringifies an array value",
+        "stringify stringifies a nested array value",
+        "stringify stringifies an object inside an array",
+        "stringify stringifies a complicated object",
+        "stringify stringifies an empty value",
+        "stringify drops keys with a value of undefined",
+        "stringify url encodes values",
+        "stringify stringifies a date",
+        "stringify stringifies the weird object from qs",
+        "stringify skips properties that are part of the object prototype",
+        "stringify stringifies boolean values",
+        "stringify stringifies buffer values",
+        "stringify stringifies an object using an alternative delimiter",
+        "stringify doesn't blow up when Buffer global is missing"
+      ]
+    },
+    "failureIdentity": {
+      "type": "TypeError",
+      "topApplicationFrame": "at exports.clone (/case/lib/utils.js:47:20)",
+      "message": "source.hasOwnProperty is not a function"
+    },
+    "probe": {
+      "command": "node gate-b-probe.cjs",
+      "buggy": {
+        "exitCode": 1,
+        "throws": true,
+        "errorType": "TypeError",
+        "topApplicationFrame": "at exports.clone (/case/lib/utils.js:47:20)"
+      },
+      "reference": {
+        "exitCode": 0,
+        "throws": false,
+        "serializedOutput": "{\"a\":{\"b\":\"c\"}}"
+      },
+      "alternate": {
+        "exitCode": 0,
+        "throws": false,
+        "serializedOutput": "{\"a\":{\"b\":\"c\"}}"
+      },
+      "decoy": {
+        "exitCode": 1,
+        "throws": true,
+        "errorType": "AssertionError",
+        "serializedOutput": "{\"a\":{}}"
+      }
+    }
+  },
+  "securityAndIsolation": {
+    "networkMode": "none",
+    "readonlyRoot": true,
+    "user": "1000:1000",
+    "capDrop": "ALL",
+    "securityOpts": ["no-new-privileges"],
+    "resources": {
+      "maxCpus": 1,
+      "maxMemoryBytes": 268435456,
+      "maxPids": 64
+    },
+    "watchdog": {
+      "pid1TimeoutSeconds": 29,
+      "supervisorTimeoutSeconds": 30
+    },
+    "hostBindsForbidden": true,
+    "cleanupVerification": true
+  },
+  "evidenceIntegrity": {
+    "artifactRegistry": "artifact-sha256.json",
+    "totalArtifactsExpected": 153,
+    "artifactsPerExecution": 9,
+    "requiredArtifactFiles": [
+      "execution.json",
+      "official.json",
+      "official.stderr",
+      "official.stdout",
+      "probe-report.json",
+      "probe.json",
+      "probe.stderr",
+      "probe.stdout",
+      "report.json"
+    ],
+    "uniqueRunIdRequirement": true,
+    "freshWorkspaceRequirement": true,
+    "prohibitHistoricalEvidenceReuse": true,
+    "preserveZeroByteStreams": true,
+    "evidenceIndex": "evidence-index.json",
+    "summaryFile": "c4-summary.json"
+  },
+  "acceptanceCriteria": {
+    "evaluator": "evaluateExternalEvidence() in packages/judge/src/external.ts",
+    "contract": "external-official-suite-v1",
+    "requiredStatus": "VERIFIED",
+    "requiredChecks": [
+      "buggyFails (10/10)",
+      "sameFailureIdentity (10/10)",
+      "referenceFixPasses (3/3)",
+      "alternateFixPasses (3/3)",
+      "decoyFixStillFails (1/1)",
+      "deterministicRuns === 10",
+      "deterministicFailures === 10",
+      "offlineExecution (17/17)",
+      "isolatedExecution (17/17)",
+      "freshState (17/17)",
+      "noSleepBasedTiming",
+      "reviewableTest",
+      "sameCandidate"
+    ]
+  }
+}

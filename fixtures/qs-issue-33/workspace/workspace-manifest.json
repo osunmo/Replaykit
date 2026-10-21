@@ -1,0 +1,83 @@
+{
+  "schemaVersion": "sanitized-workspace-v1",
+  "baseCommit": "360e2b0b48548b9bfdb71f8c82a68c4f34ec0725",
+  "createdAt": "2026-10-20T08:03:02.883Z",
+  "files": {
+    ".gitignore": {
+      "size": 191,
+      "sha256": "cad92a1adfbbfd3a3e9b76063b14472e6574b8577e1cb5a009dd14f741d65bc9"
+    },
+    ".jshintignore": {
+      "size": 13,
+      "sha256": "16d30e4462189fb14dd611bdb708c510630c576a1f35b9383e89a4352da36c97"
+    },
+    ".jshintrc": {
+      "size": 131,
+      "sha256": "e76e6f69535573db94f03b4af6fe508db327be02561df5759f98a1abb8a23eac"
+    },
+    ".travis.yml": {
+      "size": 36,
+      "sha256": "0ea0cd2a7eaceb07ce2bd95cd213c83065b344600bac2e34a2d8ac2467604876"
+    },
+    "API_DOCUMENTATION.md": {
+      "size": 1245,
+      "sha256": "e8aacf9377cce7ea6c16c18381916d9243caf359b714cc6a0251a9425132f8ae"
+    },
+    "CHANGELOG.md": {
+      "size": 3060,
+      "sha256": "0395dec0e7790b2cbfa2db4788ec412cacbe3bab430607cf7c28a4479edea8c5"
+    },
+    "CONTRIBUTING.md": {
+      "size": 105,
+      "sha256": "4ddbaee835b58117a9740b1e24992e9338a0f370adc24d6d1cf91c67549c574b"
+    },
+    "incident.json": {
+      "size": 2765,
+      "sha256": "0677b9ec58f1e0200ba8fd7448862a413024240a86952a9ad11fbec4260fef04"
+    },
+    "index.js": {
+      "size": 35,
+      "sha256": "4fe91c6ebb2d58fc683ec224b6f569190bcb3cdfffb7e44415f179ec9ea1baf9"
+    },
+    "lib/index.js": {
+      "size": 200,
+      "sha256": "234a0ac59c4d5f5f333bd756c3d7939fa5637a20fd5246848aa0d31bc26fbfbe"
+    },
+    "lib/parse.js": {
+      "size": 3821,
+      "sha256": "dced0e6b6e024373e704d82b0f7933ec54ef22990d4296030cc8469ea6d1b807"
+    },
+    "lib/stringify.js": {
+      "size": 1157,
+      "sha256": "f324564946583468f469ee2f2f1ac13c074e414ed7a40f6b08c6c8eb05a430e0"
+    },
+    "lib/utils.js": {
+      "size": 3249,
+      "sha256": "b1a90f58e528d3b363028a81dc1f4f8992e79a3fea031767a853816869a5fbce"
+    },
+    "LICENSE": {
+      "size": 1654,
+      "sha256": "d2f9d2835eb09ccf673e118e4fdc372075437c1787e66c2202912fbe3e5ee9e1"
+    },
+    "Makefile": {
+      "size": 195,
+      "sha256": "561f1e818ad2e2f372f9394cb1811aa16ecaffc3678aa3e2866f562bae7dc022"
+    },
+    "package.json": {
+      "size": 628,
+      "sha256": "bdc98f72801d1b0b84a2000e2ab9215c5ec1d0754975ae972923dacdb1aeb5ec"
+    },
+    "README.md": {
+      "size": 4751,
+      "sha256": "b447957752a543e82278a0fda516c6626529db5925611eba3ae542fd7ab2ec36"
+    },
+    "test/parse.js": {
+      "size": 11521,
+      "sha256": "7669d4cad76e440e041eeaf212a133b85f4bd55aba6206a9d58df026d560d795"
+    },
+    "test/stringify.js": {
+      "size": 4197,
+      "sha256": "e2ec2c79e6788dcf7a5ed2ce1b3e82e78d80a3ebfff313a7bee3ba2892f1d2d5"
+    }
+  }
+}

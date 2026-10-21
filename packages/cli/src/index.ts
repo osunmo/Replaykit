@@ -8,18 +8,26 @@ import { readJson, safeRunId } from './report.js';
 import { parseConcurrency } from './concurrency.js';
 import { relativeArtifactPath } from './publication.js';
 import { integrationCommand } from './integration-command.js';
+import { developerCommand } from './developer-command.js';
 
-const help = `ReplayKit — first R1 vertical slice
+const help = `ReplayKit — Developer CLI & Verification Engine
 
-pnpm sandbox:build
-pnpm benchmark smoke [--concurrency 3]
-pnpm replaykit incident capture --output benchmark/incidents/R1/visible/incident.json
-pnpm replaykit incident run --fixture <incident.json> [--tier full|partial|minimal] [--concurrency 3]
-pnpm replaykit replay verify --run <run-id> [--concurrency 3]
-pnpm benchmark report --input <runs/run-id>
+Developer commands:
+  pnpm replaykit clean [--dry-run] [--run-id <run-id>]
+  pnpm replaykit doctor
+  pnpm replaykit generate --config <config.json> [--output <test.js>] [--model <model>] [--ambiguous-oracle]
+  pnpm replaykit run --config <config.json> [--test <test.js>] [--role <buggy|reference|alternate|decoy>] [--patch <patch>]
+  pnpm replaykit verify --config <config.json> --test <test.js> [--patches-dir <dir>]
 
-Exit codes: 0 success/VERIFIED; 2 non-verified; 1 infrastructure/input error.
-Full 20-case benchmark and model comparisons are not implemented yet.
+Benchmark & Incident commands:
+  pnpm sandbox:build
+  pnpm benchmark smoke [--concurrency 3]
+  pnpm replaykit incident capture --output benchmark/incidents/R1/visible/incident.json
+  pnpm replaykit incident run --fixture <incident.json> [--tier full|partial|minimal] [--concurrency 3]
+  pnpm replaykit replay verify --run <run-id> [--concurrency 3]
+  pnpm benchmark report --input <runs/run-id>
+
+Exit codes: 0 success/VERIFIED; 2 non-verified/rejected; 1 infrastructure/input error.
 `;
 
 async function main() {
@@ -27,6 +35,12 @@ async function main() {
   const args = process.argv.slice(2).filter((arg) => arg !== '--');
   if (!args.length || args.includes('--help')) {
     process.stdout.write(help);
+    return;
+  }
+  const devCmd = await developerCommand(root, args, process.env);
+  if (devCmd !== null) {
+    process.stdout.write(JSON.stringify(devCmd.data, null, 2) + '\n');
+    process.exitCode = devCmd.exitCode;
     return;
   }
   const integration = await integrationCommand(root, args, process.env);

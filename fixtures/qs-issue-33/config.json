@@ -1,0 +1,70 @@
+{
+  "instanceId": "qs__issue-33",
+  "repository": "https://github.com/hapijs/qs.git",
+  "baseCommit": "360e2b0b48548b9bfdb71f8c82a68c4f34ec0725",
+  "fixedCommit": "6a97ad1d71d8a9069f5d6002cab3130752519ccb",
+  "image": "node:22-bookworm-slim@sha256:c3de60bf2f9dd0ac6370e6117950ff62d6e339527e7472301c9c78a017978392",
+  "runtime": "node:22",
+  "testRunner": "tap",
+  "testFile": "test/repro.test.js",
+  "testCommand": [
+    "node",
+    "--require",
+    "/case/gate-b-lab-adaptation.cjs",
+    "node_modules/lab/bin/lab",
+    "test/repro.test.js",
+    "-r",
+    "tap"
+  ],
+  "suiteCommand": [
+    "node",
+    "--require",
+    "/case/gate-b-lab-adaptation.cjs",
+    "node_modules/lab/bin/lab",
+    "-r",
+    "tap"
+  ],
+  "sourceFiles": [
+    "package.json",
+    "lib/index.js",
+    "lib/parse.js",
+    "lib/stringify.js",
+    "lib/utils.js",
+    "test/parse.js",
+    "test/stringify.js",
+    "gate-b-lab-adaptation.cjs"
+  ],
+  "patchAllowlist": [
+    "lib/parse.js",
+    "lib/stringify.js",
+    "lib/utils.js"
+  ],
+  "failToPass": [
+    "parse parses plain objects correctly"
+  ],
+  "passToPass": [
+    "parse parses a simple string"
+  ],
+  "expectedFailure": {
+    "type": "TypeError",
+    "message": "source.hasOwnProperty is not a function",
+    "topApplicationFrame": "at exports.clone (/case/lib/utils.js:47:20)"
+  },
+  "patchHashes": {
+    "buggy": "0000000000000000000000000000000000000000000000000000000000000000",
+    "reference": "fc1d3f9205a621617ca4f86432411dfddf6422432dfcb6d80f936af920cafe8e",
+    "alternate": "760d2dbd744d610b81426da10c412fc8db40b930e15ce895296157eaeb24ff28",
+    "decoy": "318a5449a218b2d5d882fc6993086de1f53300559f1dfd2ed0d30696c87f6e81"
+  },
+  "securityPolicy": {
+    "readonlyRoot": true,
+    "maxMemoryBytes": 268435456,
+    "maxCpus": 1,
+    "timeoutSeconds": 30,
+    "networkMode": "none"
+  },
+  "incidentFile": "incident.json",
+  "workspaceDir": "workspace",
+  "patchesDir": "patches",
+  "modulesDir": "modules"
+}

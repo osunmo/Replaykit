@@ -1,0 +1,91 @@
+{
+  "schemaVersion": "incident-context-v1",
+  "incidentId": "04a60f9e-3d12-4f76-88ab-c215d2a93170",
+  "createdAt": "2026-10-20T07:00:00Z",
+  "sourceRevision": {
+    "gitSha": "360e2b0b48548b9bfdb71f8c82a68c4f34ec0725",
+    "repository": "https://github.com/hapijs/qs.git",
+    "branch": "master"
+  },
+  "error": {
+    "type": "TypeError",
+    "value": "source.hasOwnProperty is not a function",
+    "topApplicationFrame": "at exports.clone (/case/lib/utils.js:47:20)",
+    "frames": [
+      {
+        "filename": "/case/lib/utils.js",
+        "function": "exports.clone",
+        "lineno": 47,
+        "colno": 20,
+        "inApp": true,
+        "contextLine": "        if (source.hasOwnProperty(i)) {"
+      },
+      {
+        "filename": "/case/lib/utils.js",
+        "function": "exports.clone",
+        "lineno": 48,
+        "colno": 31,
+        "inApp": true
+      },
+      {
+        "filename": "/case/lib/parse.js",
+        "function": "module.exports [as parse]",
+        "lineno": 141,
+        "colno": 89,
+        "inApp": true
+      }
+    ],
+    "handled": false
+  },
+  "request": {
+    "method": "GET",
+    "url": "http://localhost/parse",
+    "path": "/parse",
+    "headers": {
+      "accept": "application/json"
+    },
+    "bodySanitized": {
+      "a": {
+        "b": "c"
+      }
+    }
+  },
+  "breadcrumbs": [
+    {
+      "timestamp": "2026-10-20T06:59:58Z",
+      "category": "custom",
+      "level": "info",
+      "message": "Triggering input: Object containing Object.create(null) dictionary passed to Qs.parse: var dict = Object.create(null); dict.b = \"c\"; var input = { a: dict };"
+    }
+  ],
+  "runtime": {
+    "nodeVersion": "v22.23.3",
+    "os": "linux",
+    "arch": "x64",
+    "containerImageDigest": "node:22-bookworm-slim@sha256:c3de60bf2f9dd0ac6370e6117950ff62d6e339527e7472301c9c78a017978392",
+    "environmentVariables": {
+      "NODE_ENV": {
+        "valueRedacted": "production",
+        "isSecret": false
+      }
+    }
+  },
+  "oracle": {
+    "sourceType": "upstream_issue_spec",
+    "confidence": "definitive",
+    "expectedOutcome": {
+      "shouldThrow": false,
+      "expectedReturnValue": {
+        "a": {
+          "b": "c"
+        }
+      }
+    },
+    "specification": "Upstream API Specification: Qs.parse(object) must recursively clone and parse nested object keys into a merged query object preserving all key-value entries regardless of prototype inheritance chain. Objects created via Object.create(null) represent plain key-value maps without prototype methods and must retain their properties during merging and cloning. Expected output for input { a: dict } where dict has b = \"c\" is { a: { b: \"c\" } }."
+  },
+  "sufficiency": {
+    "status": "SUFFICIENT",
+    "missingFields": [],
+    "blockingReason": null
+  }
+}
