@@ -10,3 +10,6 @@ coverage/
 *.log
 benchmark/results/
 benchmark/incidents/R1/visible/incident.json
+
+# Preserve compiled Handlebars files required by historical qs fixture
+!/fixtures/qs-issue-33/modules/handlebars/dist/
