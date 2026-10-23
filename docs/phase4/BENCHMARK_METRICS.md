@@ -40,7 +40,8 @@
 ### Incident 1: `ljharb/qs` Issue #33
 - **Domain:** Utility Data Structure Parser (query string serialization).
 - **Buggy Base Commit:** `360e2b0b48548b9bfdb71f8c82a68c4f34ec0725`
-- **Fixed Commit:** `49735d55e2e8e974e64f7b600ea2f65ee6c17849`
+- **Fixed Commit:** `6a97ad1d71d8a9069f5d6002cab3130752519ccb`
+- **Provenance note:** The pinned Phase 3 trial uses the fixed commit above (see `fixtures/qs-issue-33/config.json` and `work/phase3/blinding-audit.json`). Historical `work/phase4/benchmark-metrics.json:30` retains `49735d55e2e8e974e64f7b600ea2f65ee6c17849`; that attribution remains unverified, and the historical record is preserved unchanged.
 - **Error Signature:** `TypeError: source.hasOwnProperty is not a function` at `/case/lib/utils.js:47:20`.
 - **Negative Control Trial:** Returned `status: "INSUFFICIENT_ORACLE"` with zero hallucinated assertions via deterministic runtime contract prevalidation.
 - **Generated Test Hash:** `6a174eabccf0651b18f893967a068495f88a4a1fb6dc01aed56ed9307ee5b774`

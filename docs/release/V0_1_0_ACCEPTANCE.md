@@ -2,7 +2,7 @@
 
 **Release Target:** `replaykit` v0.1.0  
 **Date:** 2026-10-21  
-**Status:** **ACCEPTED — READY FOR STAGING**  
+**Status:** **PUBLIC DISTRIBUTION ON HOLD — NAMING/LEGAL DECISION REQUIRED**
 **Classification:** Core Developer CLI & Autonomous Verification Engine  
 
 ---
@@ -15,7 +15,7 @@ ReplayKit v0.1.0 represents the first production-ready release of the determinis
 1. **Developer CLI Suite**: Five core developer commands (`generate`, `run`, `verify`, `doctor`, `clean`) alongside benchmark operations.
 2. **Empirical Multi-Case Validation**: End-to-end autonomous synthesis and 4-target verification successfully validated across distinct paradigms:
    - **`qs` Issue #33**: Deep object prototype injection (`TypeError: source.hasOwnProperty is not a function`).
-   - **`fastify` Issue #4807**: Async HTTP server route content-type matching (`TypeError: Cannot read properties of undefined (reading 'error')`).
+   - **`fastify` Issue #4807**: Async HTTP server route content-type matching (`TypeError: Cannot read properties of undefined (reading 'config')`).
 3. **Rigorous Invariant Verification**: Full evaluator integration enforcing 10 core invariants, including failure identity matching, candidate SHA256 preservation, decoy rejection via `AssertionError`, offline sandbox isolation (`--network none`, rootless, `cap-drop all`), and strict container lifecycle cleanup.
 4. **Zero-Modification Protected Boundary**: Byte-for-byte immutability preserved for protected judge contracts (`packages/judge/src/evaluate.ts` and `packages/contracts/src/index.ts`).
 5. **No Lingering Resources**: 100% Docker resource cleanup across all verification runs.
@@ -31,7 +31,7 @@ ReplayKit v0.1.0 represents the first production-ready release of the determinis
 | **Task 3** | Fastify #4807 Demonstration | Fixture `fixtures/fastify-issue-4807/` | Async HTTP test generation, buggy repro (exit 2), 4-target discrimination (`VERIFIED`), decoy caught | **PASS** | Run `verify-1792565798158-00bd4c7b` |
 | **Task 4** | Rigorous Evaluator Integration | `developer-command.ts` | 10-invariant verification: failure identity, candidate hash, decoy rejection, non-regression, offline sandbox | **PASS** | Section 4 & Vitest unit tests |
 | **Task 5** | Release Documentation Suite | `docs/*`, `README.md`, `CONTRIBUTING.md` | Full architecture, CLI reference, installation, security threat model, supported environments | **PASS** | Section 5 |
-| **Task 6** | Apple Trademark Collision Analysis | Apple ReplayKit vs CLI tool | In-depth trademark legal analysis, risk mitigation strategy, name change roadmap for v0.2.0 | **PASS** | Section 6 |
+| **Task 6** | Naming Risk Review | Apple ReplayKit vs CLI tool | Verified primary-source facts; candidate availability and human naming/legal decision unresolved | **NEEDS_REVIEW** | Section 6 |
 | **Task 7** | Release QA & Invariant Audit | TypeScript, Vitest, Git Diff | Zero type errors, 100% test pass, 0 diff on `evaluate.ts` and `contracts/index.ts` | **PASS** | Section 7 |
 
 ---
@@ -112,7 +112,7 @@ Fastify #4807 represents an asynchronous HTTP router edge case where a route def
   ```
   - CLI Exit Code: `2` (reproduction confirmed).
   - Container Exit Code: `1`.
-  - Captured Error: `TypeError: Cannot read properties of undefined (reading 'error')` at `/case/lib/request.js:204:55`.
+  - Captured Error: `TypeError: Cannot read properties of undefined (reading 'config')` at `/case/lib/request.js:204:55`.
 - **Four-Target Verification Matrix**:
   ```bash
   pnpm replaykit verify --config fixtures/fastify-issue-4807/config.json --test work/demo/fastify-generated.test.js --evidence-dir work/demo/evidence/fastify-verify
@@ -169,62 +169,38 @@ All necessary release documentation has been authored, reviewed, and linked:
 
 ---
 
-## 6. Apple "ReplayKit" Trademark Collision Analysis & Strategic Roadmap
+## 6. Apple ReplayKit Naming Review & Unresolved Release Decision
 
-### 6.1 Background and Problem Identification
+### 6.1 Verified Facts and Limits
 
-Apple Inc. owns the registered trademark **"ReplayKit"** (first introduced at WWDC 2015 alongside iOS 9). In Apple's platform ecosystem:
-- **Scope of Apple ReplayKit**: A public framework (`ReplayKit.framework`) for iOS, iPadOS, macOS, and tvOS that allows apps to record screen video, microphone audio, and broadcast live streams to services.
-- **Trademark Registrations**: Apple holds registrations and applications in Class 9 (computer software) and Class 42 (computer services) in the US (USPTO Reg. No. 5,038,629 and related international filings).
+Checked 2026-10-22: Apple’s [trademark list](https://www.apple.com/legal/intellectual-property/trademark/appletmlist.html) lists ReplayKit with a registered-symbol designation and the generic description software framework. Apple’s [trademark guidelines](https://www.apple.com/legal/intellectual-property/guidelinesfor3rdparties.html) restrict use of its marks in company, product, or service names except as specified there. These are the owner’s published statements, not a legal determination about this project. No specific registration number, trademark classes, territorial portfolio, infringement conclusion, permission, or legal clearance has been verified.
 
-While this project is an open-source developer tool for automated software regression test generation and deterministic bug replay in Node.js / backend systems (a completely distinct technical purpose), retaining the name **"ReplayKit"** on public registries (specifically `npm`, GitHub, and VS Code Marketplace) introduces clear operational and legal risks:
-1. **Registry Confusion & Takedown Risk**: Trademark owners regularly issue DMCA/trademark takedown notices to package managers (npm, PyPI) or code hosts (GitHub) for tools sharing exact mark names in Class 9/42.
-2. **Developer Search Ambiguity**: Developers looking for iOS screen recording bindings in Node.js could stumble upon this CLI, while engineers looking for regression test synthesis may struggle to discover the tool.
-3. **Enterprise Adoption Resistance**: Enterprise legal and procurement departments frequently flag potential trademark infringements during OSS license reviews.
+The identical name creates plausible discoverability and affiliation-confusion concerns across software audiences. Complaints, distribution interruption, or migration costs are possible risks, not established events or predictions. The different technical purpose and a non-affiliation notice do not establish permission. Engineering QA cannot resolve this naming/legal decision. Public distribution remains on hold pending human review and a documented decision.
 
-### 6.2 Candidate Naming Evaluation
+### 6.2 Unverified Naming Examples
 
-To resolve this collision definitively, four alternative candidate names were evaluated against namespace availability, trademark distinctiveness, and brand clarity:
+Earlier candidate names are retained only as examples for possible investigation; none is selected, reserved, cleared, or guaranteed available.
 
-| Candidate Name | Distinctiveness | npm Availability | Domain / SEO Suitability | Developer Clarity | Recommendation |
-| :--- | :---: | :---: | :---: | :---: | :---: |
-| **`BugReplay`** (`@bugreplay/cli`) | High | Available | Excellent | High — instantly communicates bug reproduction | **Strong Contender** |
-| **`ReproKit`** (`@reprokit/cli`) | High | Available | Excellent | High — familiar developer terminology ("repro") | **Primary Recommendation** |
-| **`TraceReplay`** (`@tracereplay/cli`) | Moderate | Available | Good | Moderate — implies distributed tracing | Secondary |
-| **`DeterministicReplay`** (`@detreplay/cli`) | High | Available | Fair | Low — overly academic / verbose | Not Recommended |
+| Candidate example | Possible npm coordinate | Verification status |
+| :--- | :--- | :--- |
+| BugReplay | `@bugreplay/cli` | UNVERIFIED |
+| ReproKit | `@reprokit/cli` | UNVERIFIED |
+| TraceReplay | `@tracereplay/cli` | UNVERIFIED |
+| DeterministicReplay | `@detreplay/cli` | UNVERIFIED |
 
-### 6.3 Strategic Renaming Roadmap
+For every candidate, npm scope ownership and package publish rights require separate current checks; GitHub, marketplace, domain, and trademark availability also remain unverified. Registry availability alone is not legal clearance. This review authorizes no reservation, registration, rename, or publication.
 
-To ensure a smooth transition without breaking existing installations or benchmark evaluations, the following phased migration is adopted:
+### 6.3 Contingent Migration Considerations
 
-```
-+-----------------------------------------------------------------------------------+
-| Phase 1: v0.1.0 (Current Acceptance)                                              |
-| - Retain internal project name 'replaykit' for benchmark reproducibility.        |
-| - Include Trademark Disclaimer in README.md, docs, and CLI help synopsis.        |
-| - Document non-affiliation: 'Not affiliated with or endorsed by Apple Inc.'       |
-+-----------------------------------------------------------------------------------+
-                                         |
-                                         v
-+-----------------------------------------------------------------------------------+
-| Phase 2: v0.1.x Migration Staging (Prior to Public Registry Push)                  |
-| - Register npm scope '@reprokit' and reserve 'reprokit' / 'bugreplay'.            |
-| - Implement CLI binary symlinks: 'reprokit' as primary bin, 'replaykit' as alias. |
-| - Update documentation links and telemetry/report headers.                        |
-+-----------------------------------------------------------------------------------+
-                                         |
-                                         v
-+-----------------------------------------------------------------------------------+
-| Phase 3: v0.2.0 Public General Availability (GA)                                  |
-| - Formally rename package to '@reprokit/cli' (or 'reprokit').                     |
-| - Issue deprecation redirect notice on legacy 'replaykit' stub package.           |
-| - Zero residual trademark collision exposure.                                     |
-+-----------------------------------------------------------------------------------+
-```
+The current `pnpm replaykit` command is a repository script in root `package.json`. Both the root and `packages/cli/package.json` are `private: true`; the CLI manifest has no `bin` mapping. No published standalone executable or legacy stub is established here. [npm’s package.json documentation](https://docs.npmjs.com/cli/v11/configuring-npm/package-json/#private) states that `private: true` prevents npm publication; its [bin documentation](https://docs.npmjs.com/cli/v11/configuring-npm/package-json/#bin) explains command mappings and Windows command shims (checked 2026-10-22).
 
-#### v0.1.0 Trademark Disclaimer Notice
-The following notice is placed in `README.md` and documentation:
-> *Legal Notice: "ReplayKit" as used in this open-source developer project refers to an automated regression replay and test generation framework for Node.js applications. This project is independent, open-source software and is not affiliated with, sponsored by, or endorsed by Apple Inc. "ReplayKit" is a registered trademark of Apple Inc. in the United States and other countries.*
+A future migration requires a separately authorized choice of product identity and implementation plan. A scoped package name alone does not change the product brand or command. The plan must specify package/import coordinates, local scripts and any future `bin` mappings, help/examples/CI, MCP tools and client bindings, editor command/settings IDs, report/telemetry identifiers, and repository links. Compatibility aliases retain some old-name exposure and need an explicit tradeoff decision and tests; a legacy stub/deprecation notice would require verified ownership and separate publication authorization. No zero-risk outcome is promised.
+
+Historical benchmark names, raw evidence, hashes, and pinned fixtures must remain intact. Any future resource-label migration must retain safe recognition of explicitly owned legacy resources without broadening cleanup to name prefixes. No migration is implemented by this documentation correction.
+
+### 6.4 Current Non-Affiliation Notice
+
+This independent, open-source Node.js regression testing project is not affiliated with, sponsored by, or endorsed by Apple Inc. The [README notice](../../README.md#9-trademark-notice) records the verified source and unresolved decision; it does not establish permission or legal clearance.
 
 ---
 
@@ -322,10 +298,10 @@ pnpm replaykit clean
 
 ## 9. Release Readiness Statement
 
-ReplayKit v0.1.0 satisfies all architectural, empirical, security, and verification requirements. The codebase exhibits zero type regressions, clean sandboxing guarantees, 100% preservation of protected evaluator invariants, and deterministic reproducibility across real-world Node.js defects.
+The engineering results recorded above do not establish naming/legal clearance or authorization for public distribution. Task 6 remains NEEDS_REVIEW pending a human naming/legal decision. The codebase exhibits zero type regressions, clean sandboxing guarantees, 100% preservation of protected evaluator invariants, and deterministic reproducibility across real-world Node.js defects.
 
 **Per operational constraints:**
 - No remote Git push has been executed.
 - No Git release tags have been published.
 - No npm package has been published.
-- The release artifact bundle is fully assembled and staged in local working directory for final authorized sign-off.
+- The local release records do not authorize public distribution; the unresolved naming/legal decision remains a release hold.
