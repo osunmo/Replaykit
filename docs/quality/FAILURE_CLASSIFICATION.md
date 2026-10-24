@@ -96,7 +96,7 @@ This document formalizes the 11 standardized failure categories used by the Repl
 - **Definition**: Container execution configuration attempts to bypass hermetic security boundaries.
 - **Diagnostic Signals**:
   - Container spawned without `--network none`.
-  - Root UID/GID detected (`0:0` instead of `10001:10001`).
+  - Root UID/GID detected in an execution container (`0:0`; candidate/planner/application and external-test profiles use `1000:1000`, while the PostgreSQL service uses `70:70`).
   - Writable root filesystem or missing `--read-only` flag.
   - Capability set contains privileges outside empty set (`--cap-drop ALL` missing).
 - **Root Cause Examples**:

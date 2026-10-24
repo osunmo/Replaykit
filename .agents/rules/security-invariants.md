@@ -12,7 +12,7 @@ All container executions, cleanup operations, and repository scripts must enforc
 Untrusted repository source code, generated tests, and candidate patches must run inside strictly isolated Docker containers:
 - **Offline Network Isolation**: Every execution container must be started with `--network none`. Zero inbound or outbound network traffic is permitted.
 - **Read-Only Root Filesystem**: The container root filesystem must be mounted read-only (`--read-only`). Writable directories are restricted to memory-backed temporary mounts (`tmpfs` size capped at 32MB).
-- **Non-Root Execution**: Containers must run as an unprivileged user (UID/GID `10001:10001` or `1000:1000`), never as `root`.
+- **Non-Root Execution**: Candidate, planner, application, and external-test containers use UID/GID `1000:1000`. The external supervisor and candidate isolation policy require that exact value. The PostgreSQL service uses `70:70`. These execution roles must never run as root; an arbitrary non-root UID is not a substitute for the role's pinned configuration. Build-time setup and Docker control-plane file copying are distinct from untrusted payload execution.
 - **Capability Dropping**: Drop all Linux capabilities via `--cap-drop=ALL` and enforce `--security-opt no-new-privileges`.
 - **Resource Limits**: Enforce bounded memory (`--memory 256m`), CPU quotas (`--cpus 1.0`), and PID limits (`--pids-limit 128`).
 - **PID 1 Watchdog**: Every container entrypoint must be wrapped with `/usr/bin/timeout --signal=KILL` to guarantee process termination even if child processes hang.

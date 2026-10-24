@@ -149,7 +149,7 @@ The v0.1.0 developer CLI replaces naive status-code evaluation with an industria
 | 6 | **Semantic Decoy Rejection** | Decoy patch must fail the candidate test with `AssertionError` (preventing tautological tests) | **ENFORCED** |
 | 7 | **Baseline Non-Regression** | Upstream pre-existing test suite must pass 100% on all fixed targets | **ENFORCED** |
 | 8 | **Offline Enforcement** | Execution containers run strictly with `--network none`; zero external traffic allowed | **ENFORCED** |
-| 9 | **Rootless Sandbox Containment** | Root filesystem is mounted read-only (`--read-only`), capabilities dropped (`--cap-drop=ALL`), non-root execution (`--user 10001:10001`) | **ENFORCED** |
+| 9 | **Rootless Sandbox Containment** | Root filesystem is mounted read-only (`--read-only`), capabilities dropped (`--cap-drop=ALL`), non-root execution (`--user 1000:1000`) | **ENFORCED** |
 | 10 | **Deterministic Lifecycle Cleanup** | Ephemeral containers, temporary volumes, and test harnesses are destroyed in `finally` blocks | **ENFORCED** |
 
 ---

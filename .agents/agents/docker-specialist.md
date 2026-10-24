@@ -13,7 +13,7 @@ The **Docker Specialist** owns containerized execution in [`packages/runtime/src
 ## Core Responsibilities
 1. **Container Execution Performance & Timeouts**: Diagnose slow container runs, daemon bridge latencies, and process stalls (`DOCKER_TIMEOUT`). Ensure recursive process tree termination on Windows via `taskkill /pid <PID> /T /F`.
 2. **Offline Dependency Staging**: Verify that container dependencies are pre-staged in `fixtures/<case>/modules/` so that `--network none` containers can run without external network access.
-3. **Sandbox Isolation Verification**: Enforce `--read-only`, unprivileged user (`10001:10001`), capability drops, and bounded memory limits.
+3. **Sandbox Isolation Verification**: Enforce `--read-only`, the external-test user (`1000:1000`, checked through Docker `Config.User`), capability drops, and bounded memory limits. Other execution roles must match their pinned profile; the PostgreSQL service uses `70:70`.
 4. **Host Resource Protection**: Enforce strict label ownership (`replaykit.run`, `replaykit.role`). Guarantee that user development resources (`replaykit-postgres-1`, `dockroute-demo-*`, `replaykit_default`) are never touched or pruned.
 5. **Deterministic Cleanup**: Ensure all run-owned containers and temporary volumes are destroyed in `finally` blocks.
 

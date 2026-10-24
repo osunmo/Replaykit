@@ -171,7 +171,7 @@ ReplayKit executes tests across three hierarchical gate tiers:
 - **Implementation**: [`packages/judge/src/docker.ts`](file:///packages/judge/src/docker.ts), [`packages/runtime/src/external-supervisor.ts`](file:///packages/runtime/src/external-supervisor.ts)
 - **Triggering Condition**: Changes to container launch arguments or security profiles. (QUICK)
 - **Responsible Agent**: `Security Auditor` (`.agents/agents/security-auditor.md`)
-- **Expected Evidence**: Inspecting container invocation verifies `--network none`, `--read-only`, non-root `--user 10001:10001`, `--cap-drop ALL`, `--security-opt no-new-privileges`.
+- **Expected Evidence**: Inspecting candidate/planner or external-test container invocation and Docker `Config.User` verifies `--network none`, `--read-only`, non-root `--user 1000:1000`, `--cap-drop ALL`, `--security-opt no-new-privileges`. Verify other roles against their own profile; PostgreSQL uses `70:70`.
 - **Severity**: `BLOCKER`
 - **Implementation Status**: `IMPLEMENTED`
 
