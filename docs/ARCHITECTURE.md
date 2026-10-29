@@ -111,7 +111,7 @@ flowchart TD
   AIGen -->|AST & Safety Validation| TestSource[repro.test.js]
   CLI -->|verify| Super[Generic Container Supervisor]
   Super -->|stage| Staging[Isolated Staging Directory]
-  Staging -->|docker cp| Container[/case/supervisor-runner.js]
+  Staging -->|docker cp| Container["/case/supervisor-runner.js"]
   Container -->|offline run| Target[Target Node Environment]
   Target -->|stream artifacts| Collector[Artifact Collector]
   Collector -->|JSON / TAP / stderr| Evaluator[4-Target Matrix Evaluator]
