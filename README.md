@@ -142,8 +142,3 @@ pnpm replaykit replay verify --run <run-id>
 MIT License. Copyright (c) 2026 ReplayKit contributors.
 
 ---
-
-## 9. Trademark Notice
-
-This independent, open-source Node.js regression testing project is not affiliated with, sponsored by, or endorsed by Apple Inc. Apple’s [trademark list](https://www.apple.com/legal/intellectual-property/trademark/appletmlist.html) lists ReplayKit with a registered-symbol designation as a software framework, and its [trademark guidelines](https://www.apple.com/legal/intellectual-property/guidelinesfor3rdparties.html) restrict product-name use (checked 2026-10-22). Specific registration numbers, classes, territorial rights, and legal applicability to this project have not been verified. This non-affiliation notice does not establish permission or legal clearance. Public distribution remains on hold pending a human naming/legal decision; no replacement name or migration has been adopted. See the [naming review](docs/release/V0_1_0_ACCEPTANCE.md#6-apple-replaykit-naming-review--unresolved-release-decision).
-
